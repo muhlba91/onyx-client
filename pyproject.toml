@@ -1,0 +1,171 @@
+[build-system]
+requires = [
+    "poetry>=1.1.0",
+    "poetry-dynamic-versioning>=0.12.1"
+]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "onyx-client"
+version = "0.0.0"
+description = "HTTP Client for Hella's ONYX.CENTER API."
+license = "MIT"
+authors = [
+    "Daniel Muehlbachler-Pietrzykowski <daniel.muehlbachler@niftyside.io>"
+]
+readme = "README.md"
+repository = "https://github.com/muhlba91/onyx-client"
+keywords = [
+    "hella-info",
+    "onyx",
+    "onyx-center"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Home Automation"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aiohttp = "^3.7.3"
+cchardet = "^2.1.7"
+brotlipy = "^0.7.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.1"
+pytest-cov = "^2.10.1"
+flakehell = "^0.9.0"
+coverage = { extras = ["toml"], version = "^5.3.1" }
+black = "^20.8b1"
+pre-commit = "^2.9.3"
+pytest-asyncio = "^0.14.0"
+aioresponses = "^0.7.1"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+format-jinja = "{% if distance == 0 %}{{ base }}{% else %}{{ base }}.dev{{ distance }}{% endif %}"
+dirty = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--strict-markers --cov=onyx_client"
+testpaths = [
+    "tests",
+]
+norecursedirs = [
+    ".git",
+]
+
+[tool.coverage.run]
+source = [
+    "onyx_client",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplemented()",
+    "if __name__ == .__main__.:",
+    "main()",
+    "parser\\..",
+    "argparse\\..",
+]
+fail_under = 95
+show_missing = true
+
+[tool.flakehell]
+exclude = [
+    "README.md"
+]
+format = "colored"
+max_line_length = 88
+show_source = true
+whitelist = ".flake8.whitelist"
+
+[tool.flakehell.plugins]
+flake8-bandit = [
+    "+*",
+    "-S322"
+]
+flake8-bugbear = [
+    "+*"
+]
+flake8-builtins = [
+    "+*"
+]
+flake8-comprehensions = [
+    "+*"
+]
+flake8-darglint = [
+    "+*"
+]
+flake8-docstrings = [
+    "+*"
+]
+flake8-eradicate = [
+    "+*"
+]
+flake8-isort = [
+    "+*"
+]
+flake8-mutable = [
+    "+*"
+]
+flake8-pytest-style = [
+    "+*"
+]
+flake8-spellcheck = [
+    "+*"
+]
+mccabe = [
+    "+*"
+]
+pep8-naming = [
+    "+*"
+]
+pycodestyle = [
+    "+*",
+    "-E402",
+    "-E126",
+    "-W503",
+    "-E203"
+]
+pyflakes = [
+    "+*"
+]
+pylint = [
+    "+*",
+    "-C0330",
+    "-C0326"
+]
+
+[tool.black]
+line-length = 88
+target-version = [
+    "py38"
+]
+include = "\\.pyi?$"
+exclude = """
+(
+  /(
+      \\.eggs         # exclude a few common directories in the
+    | \\.git          # root of the project
+    | \\.hg
+    | \\.mypy_cache
+    | \\.tox
+    | \\.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+"""

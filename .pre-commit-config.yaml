@@ -1,0 +1,12 @@
+---
+repos:
+- repo: https://github.com/psf/black
+  rev: 20.8b1
+  hooks:
+    - id: black
+      language_version: python3
+- repo: https://github.com/life4/flakehell.git
+  rev: v.0.7.1
+  hooks:
+    - id: flakehell
+      language_version: python3
