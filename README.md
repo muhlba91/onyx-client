@@ -2,10 +2,12 @@
 
 [![](https://img.shields.io/github/license/muhlba91/onyx-client?style=for-the-badge)](LICENSE)
 [![](https://img.shields.io/github/workflow/status/muhlba91/onyx-client/Python%20package?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions)
+[![](https://img.shields.io/coveralls/github/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/)
 [![](https://img.shields.io/pypi/pyversions/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
 [![](https://img.shields.io/pypi/dm/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
+<a href="https://www.buymeacoffee.com/muhlba91" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="28" width="150"></a>
 
 This repository contains a **Python HTTP client** for [Hella](https://www.hella.info)'
 s [ONYX.CENTER API](https://github.com/hella-info/onyx_api).
@@ -121,9 +123,38 @@ $ python -m build
 
 Your distribution will be in the `dist` directory.
 
+### Commit Message
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/), and your commit message must also
+adhere to the additional rules outlined in `.conform.yaml`.
+
+---
+
+## Release
+
+To draft a release, use [standard-version](https://github.com/conventional-changelog/standard-version):
+
+```bash
+$ standard-version
+# alternatively
+$ npx standard-version
+```
+
+Finally, push with tags:
+
+```bash
+$ git push --follow-tags
+```
+
 ---
 
 ## Contributions
 
 Please feel free to contribute, be it with Issues or Pull Requests! Please read
 the [Contribution guidelines](CONTRIBUTING.md)
+
+## Supporting
+
+If you enjoy the application and want to support my efforts, please feel free to buy me a coffe. :)
+
+<a href="https://www.buymeacoffee.com/muhlba91" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="75" width="300"></a>

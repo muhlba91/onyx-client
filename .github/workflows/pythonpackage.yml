@@ -16,6 +16,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check Commit Message
+        uses: talos-systems/conform@v0.1.0-alpha.20
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -40,6 +45,12 @@ jobs:
       - name: Run tests
         run: |
           poetry run pytest
+
+      - name: Coveralls
+        run: |
+          poetry run coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
   publish:
     runs-on: ubuntu-latest
