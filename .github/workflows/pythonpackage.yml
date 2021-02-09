@@ -101,6 +101,7 @@ jobs:
         run: |
           git config --local user.email "${{ env.GITHUB_ACTION }}+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git fetch --tags
           npx standard-version -i release-CHANGELOG.md --skip.commit --skip.tag
           npx standard-version
 
