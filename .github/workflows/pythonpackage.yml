@@ -31,6 +31,18 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
+      - name: Cache Poetry
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-poetry
+        with:
+          path: .terraform
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -91,6 +103,18 @@ jobs:
           git config --local user.name "github-actions[bot]"
           npx standard-version -i release-CHANGELOG.md --skip.commit --skip.tag
           npx standard-version
+
+      - name: Cache Poetry
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-poetry
+        with:
+          path: .terraform
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: Build a binary wheel and a source tarball
         run: |
