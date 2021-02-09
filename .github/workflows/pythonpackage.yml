@@ -96,12 +96,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build
 
-      - name: Versioning and Changelog
-        if: github.ref == 'refs/heads/master'
+      - name: Setup Git
         run: |
           git config --local user.email "${{ env.GITHUB_ACTION }}+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git fetch --tags
+
+      - name: Versioning and Changelog
+        if: github.ref == 'refs/heads/master'
+        run: |
           npx standard-version -i release-CHANGELOG.md --skip.commit --skip.tag
           npx standard-version
 
