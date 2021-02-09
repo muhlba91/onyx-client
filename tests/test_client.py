@@ -20,7 +20,9 @@ from onyx_client.utils.const import API_HEADERS, API_URL, API_VERSION
 class TestOnyxClient:
     @pytest.fixture
     async def session(self) -> aiohttp.ClientSession:
-        yield aiohttp.ClientSession()
+        sess = aiohttp.ClientSession()
+        yield sess
+        await sess.close()
 
     @pytest.fixture
     def mock_response(self):

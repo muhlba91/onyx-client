@@ -203,7 +203,7 @@ class OnyxClient:
     async def _perform_post_request(self, path: str, data: dict) -> Optional[Any]:
         """Perform a POST request."""
         async with self.client_session.post(
-            self._url(path), data=data, headers=self._headers
+            self._url(path), json=data, headers=self._headers
         ) as response:
             if not self._check_response(response):
                 return None
