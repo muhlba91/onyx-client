@@ -63,6 +63,8 @@ config = exchange_code("code", client_session)
 client = create_client(config=config, client_session=client_session) if client_session is not None else None
 ```
 
+An **example** is shown in the **`examples` directory**.
+
 ---
 
 ## Development
