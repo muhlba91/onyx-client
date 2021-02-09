@@ -1,4 +1,6 @@
 {
   "releaseCommitMessageFormat": "chore(release): release {{currentTag}} [skip ci] [release]",
-  "tagPrefix": "v"
+  "tagPrefix": "v",
+  "bumpFiles": [],
+  "packageFiles": []
 }
