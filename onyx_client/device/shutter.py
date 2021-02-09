@@ -2,7 +2,6 @@
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
-from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
 
 
@@ -34,7 +33,7 @@ class Shutter(Device):
         name: str,
         device_type: DeviceType,
         device_mode: DeviceMode,
-        actions: list[Action],
+        actions: list,
         target_position: NumericValue = None,
         target_angle: NumericValue = None,
         actual_angle: NumericValue = None,
