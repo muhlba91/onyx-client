@@ -39,10 +39,16 @@ class TestOnyxClient:
         assert headers["Authorization"] == "Bearer token"
 
     def test_base_url(self, client):
-        assert client._base_url == f"{API_URL}/box/finger/api/{API_VERSION}"
+        assert client._base_url() == f"{API_URL}/box/finger/api/{API_VERSION}"
+
+    def test_base_url_without_version(self, client):
+        assert client._base_url(with_api=False) == f"{API_URL}/box/finger/api"
 
     def test_url(self, client):
         assert client._url("/path") == f"{API_URL}/box/finger/api/{API_VERSION}/path"
+
+    def test_url_without_version(self, client):
+        assert client._url("/path", with_api=False) == f"{API_URL}/box/finger/api/path"
 
     @patch("aiohttp.ClientResponse")
     def test_check_response(self, mock_response):
@@ -111,6 +117,8 @@ class TestOnyxClient:
                 },
                 "target_position": {"value": 10, "minimum": 10},
                 "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
+                "actual_position": {"value": 10, "minimum": 10},
+                "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
             },
             list(Action),
         )
@@ -199,7 +207,7 @@ class TestOnyxClient:
     @pytest.mark.asyncio
     async def test_verify(self, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/versions",
+            f"{API_URL}/box/finger/api/versions",
             status=200,
             payload={"versions": [API_VERSION, "v2"]},
         )
@@ -208,23 +216,21 @@ class TestOnyxClient:
     @pytest.mark.asyncio
     async def test_verify_unknown_api_version(self, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/versions",
+            f"{API_URL}/box/finger/api/versions",
             status=200,
-            payload={"versions": ["v2"]},
+            payload={"versions": ["v1"]},
         )
         assert not await client.verify()
 
     @pytest.mark.asyncio
     async def test_verify_error(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/versions", status=401
-        )
+        mock_response.get(f"{API_URL}/box/finger/api/versions", status=401)
         assert not await client.verify()
 
     @pytest.mark.asyncio
     async def test_supported_versions(self, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/versions",
+            f"{API_URL}/box/finger/api/versions",
             status=200,
             payload={"versions": [API_VERSION, "v2"]},
         )
@@ -235,9 +241,7 @@ class TestOnyxClient:
 
     @pytest.mark.asyncio
     async def test_supported_versions_error(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/versions", status=401
-        )
+        mock_response.get(f"{API_URL}/box/finger/api/versions", status=401)
         versions = await client.supported_versions()
         assert versions is None
 
@@ -334,6 +338,12 @@ class TestOnyxClient:
                         "type": "numeric",
                     },
                     "target_angle": {"maximum": 360, "type": "numeric", "value": 0},
+                    "actual_position": {
+                        "maximum": 100,
+                        "value": 100,
+                        "type": "numeric",
+                    },
+                    "actual_angle": {"maximum": 360, "type": "numeric", "value": 0},
                 },
                 "actions": ["stop"],
             },

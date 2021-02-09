@@ -55,14 +55,16 @@ class OnyxClient:
         """Get all common headers."""
         return {"Authorization": f"Bearer {self.config.access_token}", **API_HEADERS}
 
-    @property
-    def _base_url(self) -> str:
+    def _base_url(self, with_api: bool = True) -> str:
         """Get the API base URL for this ONYX.CENTER."""
-        return f"{API_URL}/box/{self.config.fingerprint}/api/{API_VERSION}"
+        api = f"{API_URL}/box/{self.config.fingerprint}/api"
+        if with_api:
+            api = f"{api}/{API_VERSION}"
+        return api
 
-    def _url(self, path: str = "") -> str:
+    def _url(self, path: str = "", with_api: bool = True) -> str:
         """Get the request URL."""
-        return f"{self._base_url}{path}"
+        return f"{self._base_url(with_api=with_api)}{path}"
 
     @staticmethod
     def _check_response(response: aiohttp.ClientResponse) -> bool:
@@ -110,6 +112,16 @@ class OnyxClient:
                 if properties is not None
                 else None
             )
+            actual_angle = (
+                NumericValue.create(properties["actual_angle"])
+                if properties is not None
+                else None
+            )
+            actual_position = (
+                NumericValue.create(properties["actual_position"])
+                if properties is not None
+                else None
+            )
             return Shutter(
                 identifier,
                 name,
@@ -118,6 +130,8 @@ class OnyxClient:
                 actions,
                 target_position,
                 target_angle,
+                actual_angle,
+                actual_position,
             )
         elif device_type == DeviceType.WEATHER:
             wind_peak = (
@@ -166,10 +180,12 @@ class OnyxClient:
         else:
             return Device(identifier, name, device_type, device_mode, actions)
 
-    async def _perform_get_request(self, path: str) -> Optional[Any]:
+    async def _perform_get_request(
+        self, path: str, with_api: bool = True
+    ) -> Optional[Any]:
         """Perform a GET request."""
         async with self.client_session.get(
-            self._url(path), headers=self._headers
+            self._url(path, with_api=with_api), headers=self._headers
         ) as response:
             if not self._check_response(response):
                 return None
@@ -195,7 +211,7 @@ class OnyxClient:
 
     async def supported_versions(self) -> Optional[SupportedVersions]:
         """Get all supported versions by the ONYX.CENTER."""
-        data = await self._perform_get_request("/versions")
+        data = await self._perform_get_request("/versions", with_api=False)
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /versions.",
