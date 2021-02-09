@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 aiohttp = "^3.7.3"
 cchardet = "^2.1.7"
 brotlipy = "^0.7.0"
