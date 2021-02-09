@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [2.1.0](https://github.com/muhlba91/onyx-client/compare/v2.0.2...v2.1.0) (2021-02-09)
+
+
+### Features
+
+* downgrade python to 3.8 ([e140367](https://github.com/muhlba91/onyx-client/commit/e140367bb6138c7ed33e0712d1fa9d233fbf9c1d))
+
+
+### Bug Fixes
+
+* downgrade to python 3.8 ([dec639b](https://github.com/muhlba91/onyx-client/commit/dec639bf42ccfd6ba06478d8179b5606c3544e34))
+
 ### [2.0.2](https://github.com/muhlba91/onyx-client/compare/v2.0.1...v2.0.2) (2021-02-09)
 
 
