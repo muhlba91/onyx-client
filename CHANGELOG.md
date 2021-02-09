@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/muhlba91/onyx-client/compare/v2.0.0...v2.0.1) (2021-02-09)
+
+
+### Bug Fixes
+
+* fix versioning ([5ef5810](https://github.com/muhlba91/onyx-client/commit/5ef581036f472bcf1874e33ba4e962c8d20c3b97))
+* remove package json from versioning ([49e6506](https://github.com/muhlba91/onyx-client/commit/49e6506c56909dff64dc1b632c096ee237a695b5))
+
 ## 2.0.0 (2021-02-09)
 
 
