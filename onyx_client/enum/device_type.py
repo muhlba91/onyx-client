@@ -10,6 +10,8 @@ class DeviceType(Enum):
     RAFFSTORE_90 = auto()
     RAFFSTORE_180 = auto()
     WEATHER = auto()
+    VENEER = auto()
+    BASIC_LIGHT = auto()
     UNKNOWN = auto()
 
     def string(self) -> str:

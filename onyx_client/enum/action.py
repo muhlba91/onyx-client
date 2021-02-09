@@ -5,9 +5,12 @@ from enum import Enum, auto
 class Action(Enum):
     """The actions supported by Onyx."""
 
-    STOP = auto()
     CLOSE = auto()
     OPEN = auto()
+    STOP = auto()
+    TILT_DOWN = auto()
+    TILT_UP = auto()
+    WINK = auto()
 
     def string(self) -> str:
         """Get the string representation for the Onyx API."""

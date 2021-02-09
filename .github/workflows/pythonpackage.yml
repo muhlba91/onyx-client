@@ -55,7 +55,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Build and Publish to TestPyPi and PyPi
-    if: startsWith(github.ref, 'refs/tags') || github.ref == 'refs/heads/master'
+    if: startsWith(github.ref, 'refs/tags') || github.ref == 'refs/heads/next'
     needs:
       - test
     strategy:
@@ -84,7 +84,7 @@ jobs:
           python -m build
 
       - name: Publish distribution to TestPyPi
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/next'
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
