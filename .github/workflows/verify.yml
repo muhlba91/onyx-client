@@ -36,7 +36,7 @@ jobs:
         env:
           cache-name: cache-poetry
         with:
-          path: .terraform
+          path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
