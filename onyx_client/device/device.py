@@ -1,6 +1,5 @@
 """Device class."""
 from onyx_client.data.device_mode import DeviceMode
-from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
 
 
@@ -13,7 +12,7 @@ class Device:
         name: str,
         device_type: DeviceType,
         device_mode: DeviceMode,
-        actions: list[Action],
+        actions: list,
     ):
         """Initialize the device."""
         self.identifier = identifier

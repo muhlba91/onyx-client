@@ -8,7 +8,7 @@ class DeviceCommand:
 
     def __init__(
         self,
-        properties: dict[str, int] = None,
+        properties: dict = None,
         action: Action = None,
         valid_from: int = None,
         best_before: int = None,

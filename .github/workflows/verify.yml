@@ -1,10 +1,10 @@
-name: Python package
+name: Verify
 
 on:
   push:
-    branches:
-      - '!master'
-      - '!next'
+    branches-ignore:
+      - master
+      - next
 
 jobs:
   test:

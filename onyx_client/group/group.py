@@ -8,7 +8,7 @@ class Group:
         self,
         identifier: str,
         name: str,
-        devices: list[str],
+        devices: list,
     ):
         """Initialize the group."""
         self.identifier = identifier

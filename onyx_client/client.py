@@ -51,7 +51,7 @@ class OnyxClient:
             return Configuration(data["fingerprint"], data["token"])
 
     @property
-    def _headers(self) -> dict[str]:
+    def _headers(self) -> dict:
         """Get all common headers."""
         return {"Authorization": f"Bearer {self.config.access_token}", **API_HEADERS}
 
@@ -87,7 +87,7 @@ class OnyxClient:
         name: str,
         device_type: DeviceType,
         properties: dict = None,
-        actions: list[Action] = None,
+        actions: list = None,
     ) -> Device:
         """Initialize the device correctly."""
         device_mode_value = (
@@ -241,7 +241,7 @@ class OnyxClient:
             float(data["time"]), data["zone"], int(data["zone_offset"])
         )
 
-    async def devices(self, include_details: bool = False) -> Optional[list[Device]]:
+    async def devices(self, include_details: bool = False) -> Optional[list]:
         """Get all devices controlled by the ONYX.CENTER."""
         data = await self._perform_get_request("/devices")
         if data is None:
@@ -311,7 +311,7 @@ class OnyxClient:
             )
         return data is not None
 
-    async def groups(self) -> Optional[list[Group]]:
+    async def groups(self) -> Optional[list]:
         """Get all groups controlled by the ONYX.CENTER."""
         data = await self._perform_get_request("/groups")
         if data is None:
