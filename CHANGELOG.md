@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.2.0](https://github.com/muhlba91/onyx-client/compare/v2.1.0...v2.2.0) (2021-02-10)
+
+
+### Features
+
+* add drivetime and rotationtime properties to shutters ([9ac7e95](https://github.com/muhlba91/onyx-client/commit/9ac7e9511caa0578684240c2e0d6890a375f13bc))
+
 ## [2.1.0](https://github.com/muhlba91/onyx-client/compare/v2.0.2...v2.1.0) (2021-02-09)
 
 
