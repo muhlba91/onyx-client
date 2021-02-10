@@ -121,6 +121,17 @@ class TestOnyxClient:
                 "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
                 "actual_position": {"value": 10, "minimum": 10},
                 "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
+                "drivetime_down": {
+                    "maximum": 3600000,
+                    "type": "numeric",
+                    "value": 34031,
+                },
+                "drivetime_up": {
+                    "maximum": 3600000,
+                    "value": 34031,
+                    "type": "numeric",
+                },
+                "rotationtime": {"maximum": 40000, "type": "numeric", "value": 5000},
             },
             list(Action),
         )
@@ -346,6 +357,21 @@ class TestOnyxClient:
                         "type": "numeric",
                     },
                     "actual_angle": {"maximum": 360, "type": "numeric", "value": 0},
+                    "drivetime_down": {
+                        "maximum": 3600000,
+                        "type": "numeric",
+                        "value": 34031,
+                    },
+                    "drivetime_up": {
+                        "maximum": 3600000,
+                        "value": 34031,
+                        "type": "numeric",
+                    },
+                    "rotationtime": {
+                        "maximum": 40000,
+                        "type": "numeric",
+                        "value": 5000,
+                    },
                 },
                 "actions": ["stop"],
             },

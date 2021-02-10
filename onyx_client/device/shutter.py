@@ -7,10 +7,7 @@ from onyx_client.enum.device_type import DeviceType
 
 # not mapped properties:
 # - auto_calibration
-# - drivetime_down
-# - drivetime_up
 # - heart_beat_enabled
-# - rotationtime
 # - sun_guard_lower_action
 # - sun_guard_lower_angle
 # - sun_guard_lower_position
@@ -38,6 +35,9 @@ class Shutter(Device):
         target_angle: NumericValue = None,
         actual_angle: NumericValue = None,
         actual_position: NumericValue = None,
+        drivetime_down: NumericValue = None,
+        drivetime_up: NumericValue = None,
+        rotationtime: NumericValue = None,
     ):
         """Initialize the shutter device."""
         super(Shutter, self).__init__(
@@ -47,3 +47,6 @@ class Shutter(Device):
         self.target_angle = target_angle
         self.actual_angle = actual_angle
         self.actual_position = actual_position
+        self.drivetime_down = drivetime_down
+        self.drivetime_up = drivetime_up
+        self.rotationtime = rotationtime

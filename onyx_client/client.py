@@ -122,6 +122,21 @@ class OnyxClient:
                 if properties is not None
                 else None
             )
+            drivetime_down = (
+                NumericValue.create(properties["drivetime_down"])
+                if properties is not None
+                else None
+            )
+            drivetime_up = (
+                NumericValue.create(properties["drivetime_up"])
+                if properties is not None
+                else None
+            )
+            rotationtime = (
+                NumericValue.create(properties["rotationtime"])
+                if properties is not None
+                else None
+            )
             return Shutter(
                 identifier,
                 name,
@@ -132,6 +147,9 @@ class OnyxClient:
                 target_angle,
                 actual_angle,
                 actual_position,
+                drivetime_down,
+                drivetime_up,
+                rotationtime,
             )
         elif device_type == DeviceType.WEATHER:
             wind_peak = (
