@@ -24,12 +24,22 @@ class TestShutter:
             list(Action),
             value1,
             value2,
+            value1,
+            value2,
+            value1,
+            value2,
+            value1,
         )
         assert shutter.identifier == "id"
         assert shutter.device_type == DeviceType.AWNING
         assert shutter.device_mode.mode == DeviceType.ROLLERSHUTTER
         assert shutter.target_position == value1
         assert shutter.target_angle == value2
+        assert shutter.actual_angle == value1
+        assert shutter.actual_position == value2
+        assert shutter.drivetime_down == value1
+        assert shutter.drivetime_up == value2
+        assert shutter.rotationtime == value1
 
     def test_init_no_additional_values(self, device_mode):
         shutter = Shutter("id", "name", DeviceType.AWNING, device_mode, [])
@@ -38,3 +48,8 @@ class TestShutter:
         assert shutter.device_mode.mode == DeviceType.ROLLERSHUTTER
         assert shutter.target_position is None
         assert shutter.target_angle is None
+        assert shutter.actual_angle is None
+        assert shutter.actual_position is None
+        assert shutter.drivetime_down is None
+        assert shutter.drivetime_up is None
+        assert shutter.rotationtime is None
