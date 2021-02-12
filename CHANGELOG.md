@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [2.3.1](https://github.com/muhlba91/onyx-client/compare/v2.3.0...v2.3.1) (2021-02-12)
+
+
+### Bug Fixes
+
+* fix parsing of boolean values ([1bb9717](https://github.com/muhlba91/onyx-client/commit/1bb9717a2f1da871e6562d006f6b69d319e5b75c))
+
 ## [2.3.0](https://github.com/muhlba91/onyx-client/compare/v2.2.0...v2.3.0) (2021-02-12)
 
 
