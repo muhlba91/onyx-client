@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.3.0](https://github.com/muhlba91/onyx-client/compare/v2.2.0...v2.3.0) (2021-02-12)
+
+
+### Features
+
+* add switch button and drive direction ([f378d96](https://github.com/muhlba91/onyx-client/commit/f378d9635cf0f26924242e860666793cef3b9a0c))
+
 ## [2.2.0](https://github.com/muhlba91/onyx-client/compare/v2.1.0...v2.2.0) (2021-02-10)
 
 
