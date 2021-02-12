@@ -13,8 +13,8 @@ class BooleanValue:
     def create(properties: dict):
         """Create a boolean value from properties."""
         return BooleanValue(
-            properties["value"],
-            properties.get("read_only", False),
+            properties.get("value", "false") == "true",
+            properties.get("read_only", "false") == "true",
         )
 
     def __eq__(self, other):
