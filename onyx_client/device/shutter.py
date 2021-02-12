@@ -1,4 +1,5 @@
 """Shutter class."""
+from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
@@ -16,8 +17,6 @@ from onyx_client.enum.device_type import DeviceType
 # - sun_guard_upper_angle
 # - sun_guard_upper_position
 # - sun_guard_upper_threshold
-# - switch_button_direction
-# - switch_drive_direction
 # - system_state
 # - wind_guard_enabled
 # - wind_peak_threshold
@@ -38,6 +37,8 @@ class Shutter(Device):
         drivetime_down: NumericValue = None,
         drivetime_up: NumericValue = None,
         rotationtime: NumericValue = None,
+        switch_button_direction: BooleanValue = None,
+        switch_drive_direction: BooleanValue = None,
     ):
         """Initialize the shutter device."""
         super(Shutter, self).__init__(
@@ -50,3 +51,5 @@ class Shutter(Device):
         self.drivetime_down = drivetime_down
         self.drivetime_up = drivetime_up
         self.rotationtime = rotationtime
+        self.switch_button_direction = switch_button_direction
+        self.switch_drive_direction = switch_drive_direction

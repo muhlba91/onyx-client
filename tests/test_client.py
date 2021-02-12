@@ -6,6 +6,7 @@ import pytest
 from aioresponses import aioresponses
 
 from onyx_client import Configuration, OnyxClient
+from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
@@ -119,7 +120,7 @@ class TestOnyxClient:
                 },
                 "target_position": {"value": 10, "minimum": 10},
                 "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
-                "actual_position": {"value": 10, "minimum": 10},
+                "actual_position": {"value": 10, "maximum": 10},
                 "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
                 "drivetime_down": {
                     "maximum": 3600000,
@@ -132,6 +133,8 @@ class TestOnyxClient:
                     "type": "numeric",
                 },
                 "rotationtime": {"maximum": 40000, "type": "numeric", "value": 5000},
+                "switch_button_direction": {"value": True},
+                "switch_drive_direction": {"value": False},
             },
             list(Action),
         )
@@ -141,6 +144,13 @@ class TestOnyxClient:
         assert len(device.device_mode.values) == 2
         assert device.target_position == NumericValue(10, 10, 100, False)
         assert device.target_angle == NumericValue(1, 1, 10, False)
+        assert device.actual_position == NumericValue(10, 0, 10, False)
+        assert device.actual_angle == NumericValue(1, 1, 10, False)
+        assert device.drivetime_down == NumericValue(34031, 0, 3600000, False)
+        assert device.drivetime_up == NumericValue(34031, 0, 3600000, False)
+        assert device.rotationtime == NumericValue(5000, 0, 40000, False)
+        assert device.switch_button_direction == BooleanValue(True, False)
+        assert device.switch_drive_direction == BooleanValue(False, False)
         assert device.actions == list(Action)
 
     def test_init_device_unknown(self):
@@ -372,6 +382,8 @@ class TestOnyxClient:
                         "type": "numeric",
                         "value": 5000,
                     },
+                    "switch_button_direction": {"value": True},
+                    "switch_drive_direction": {"value": False},
                 },
                 "actions": ["stop"],
             },
@@ -387,6 +399,13 @@ class TestOnyxClient:
         assert device.actions == [Action.STOP]
         assert device.target_position == NumericValue(100, 0, 100, False)
         assert device.target_angle == NumericValue(0, 0, 360, False)
+        assert device.actual_position == NumericValue(100, 0, 100, False)
+        assert device.actual_angle == NumericValue(0, 0, 360, False)
+        assert device.drivetime_down == NumericValue(34031, 0, 3600000, False)
+        assert device.drivetime_up == NumericValue(34031, 0, 3600000, False)
+        assert device.rotationtime == NumericValue(5000, 0, 40000, False)
+        assert device.switch_button_direction == BooleanValue(True, False)
+        assert device.switch_drive_direction == BooleanValue(False, False)
 
     @pytest.mark.asyncio
     async def test_device_weather(self, mock_response, client):

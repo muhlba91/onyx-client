@@ -5,6 +5,7 @@ from typing import Any, Optional
 import aiohttp
 
 from onyx_client.configuration.configuration import Configuration
+from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.date_information import DateInformation
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
@@ -137,6 +138,16 @@ class OnyxClient:
                 if properties is not None
                 else None
             )
+            switch_button_direction = (
+                BooleanValue.create(properties["switch_button_direction"])
+                if properties is not None
+                else None
+            )
+            switch_drive_direction = (
+                BooleanValue.create(properties["switch_drive_direction"])
+                if properties is not None
+                else None
+            )
             return Shutter(
                 identifier,
                 name,
@@ -150,6 +161,8 @@ class OnyxClient:
                 drivetime_down,
                 drivetime_up,
                 rotationtime,
+                switch_button_direction,
+                switch_drive_direction,
             )
         elif device_type == DeviceType.WEATHER:
             wind_peak = (
