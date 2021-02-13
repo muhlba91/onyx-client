@@ -53,3 +53,17 @@ class Shutter(Device):
         self.rotationtime = rotationtime
         self.switch_button_direction = switch_button_direction
         self.switch_drive_direction = switch_drive_direction
+
+    @staticmethod
+    def keys() -> list:
+        return [
+            "target_position",
+            "target_angle",
+            "actual_angle",
+            "actual_position",
+            "drivetime_down",
+            "drivetime_up",
+            "rotationtime",
+            "switch_button_direction",
+            "switch_drive_direction",
+        ]

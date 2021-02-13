@@ -71,6 +71,15 @@ async def perform(fingerprint: str, access_token: str):
     task.cancel()
     print()
 
+    # call the streaming API for 10 devices
+    index = 1
+    async for device in client.events():
+        print(device)
+        index += 1
+        if index == 10:
+            break
+    print()
+
     # cleanup
     await session.close()
 

@@ -70,6 +70,28 @@ class TestOnyxClient:
         assert device.device_mode.mode == DeviceType.WEATHER
         assert device.device_mode.values is None
 
+    def test__numeric_value(self):
+        assert OnyxClient._numeric_value("key", {"key": {"value": 1}}) == NumericValue(
+            value=1, minimum=0, maximum=100, read_only=False
+        )
+
+    def test__numeric_value_empty_properties(self):
+        assert OnyxClient._numeric_value("key", {}) is None
+
+    def test__numeric_value_no_properties(self):
+        assert OnyxClient._numeric_value("key", None) is None
+
+    def test__boolean_value(self):
+        assert OnyxClient._boolean_value(
+            "key", {"key": {"value": "true"}}
+        ) == BooleanValue(value=True, read_only=False)
+
+    def test__boolean_value_empty_properties(self):
+        assert OnyxClient._boolean_value("key", {}) is None
+
+    def test__boolean_value_no_properties(self):
+        assert OnyxClient._boolean_value("key", None) is None
+
     def test_init_device_weather_full(self):
         device = OnyxClient._init_device(
             "id",
@@ -588,3 +610,72 @@ class TestOnyxClient:
             f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command", status=401
         )
         assert not await client.cancel_group_command("group")
+
+    @pytest.mark.asyncio
+    async def test_events(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            payload={
+                "devices": {
+                    "device1": {
+                        "name": "device1",
+                        "type": "rollershutter",
+                    },
+                    "device2": {
+                        "name": "device2",
+                    },
+                    "device3": {
+                        "type": "rollershutter",
+                    },
+                }
+            },
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+
+    @patch("onyx_client.client.OnyxClient.device")
+    @pytest.mark.asyncio
+    async def test_events_details(self, mock_device, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            payload={
+                "devices": {
+                    "device": {
+                        "name": "device",
+                        "type": "rollershutter",
+                    },
+                }
+            },
+        )
+        mock_device.return_value = Device(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            DeviceMode(DeviceType.ROLLERSHUTTER),
+            list(Action),
+        )
+        async for device in client.events(True):
+            assert device.identifier == "id"
+        assert mock_device.called
+
+    @pytest.mark.asyncio
+    async def test_events_error(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=500,
+            payload={},
+        )
+        async for device in client.events():
+            assert device is None
+
+    def test__is_shutter(self):
+        assert OnyxClient._is_shutter(DeviceType.ROLLERSHUTTER, {})
+        assert not OnyxClient._is_shutter(DeviceType.WEATHER, {})
+        assert not OnyxClient._is_shutter(None, {})
+        assert not OnyxClient._is_shutter(None, None)
+        assert OnyxClient._is_shutter(None, {"drivetime_down": 10})
+        assert not OnyxClient._is_shutter(None, {"sun_brightness_sink": 10})

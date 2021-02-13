@@ -1,4 +1,5 @@
 """Onyx Client API class."""
+import json
 import logging
 from typing import Any, Optional
 
@@ -83,133 +84,84 @@ class OnyxClient:
             return False
 
     @staticmethod
+    def _numeric_value(key: str, properties: dict = None):
+        return (
+            NumericValue.create(properties[key])
+            if properties is not None and key in properties
+            else None
+        )
+
+    @staticmethod
+    def _boolean_value(key: str, properties: dict = None):
+        return (
+            BooleanValue.create(properties[key])
+            if properties is not None and key in properties
+            else None
+        )
+
+    @staticmethod
     def _init_device(
         identifier: str,
-        name: str,
-        device_type: DeviceType,
+        name: str = None,
+        device_type: DeviceType = None,
         properties: dict = None,
         actions: list = None,
     ) -> Device:
         """Initialize the device correctly."""
         device_mode_value = (
             DeviceType.convert(properties["device_type"]["type"])
-            if properties is not None
+            if properties is not None and "device_type" in properties
             else device_type
         )
         device_mode_values = (
             [DeviceType.convert(value) for value in properties["device_type"]["values"]]
-            if properties is not None
+            if properties is not None and "device_type" in properties
             else None
         )
         device_mode = DeviceMode(device_mode_value, device_mode_values)
-        if device_type.is_shutter():
-            target_position = (
-                NumericValue.create(properties["target_position"])
-                if properties is not None
-                else None
-            )
-            target_angle = (
-                NumericValue.create(properties["target_angle"])
-                if properties is not None
-                else None
-            )
-            actual_angle = (
-                NumericValue.create(properties["actual_angle"])
-                if properties is not None
-                else None
-            )
-            actual_position = (
-                NumericValue.create(properties["actual_position"])
-                if properties is not None
-                else None
-            )
-            drivetime_down = (
-                NumericValue.create(properties["drivetime_down"])
-                if properties is not None
-                else None
-            )
-            drivetime_up = (
-                NumericValue.create(properties["drivetime_up"])
-                if properties is not None
-                else None
-            )
-            rotationtime = (
-                NumericValue.create(properties["rotationtime"])
-                if properties is not None
-                else None
-            )
-            switch_button_direction = (
-                BooleanValue.create(properties["switch_button_direction"])
-                if properties is not None
-                else None
-            )
-            switch_drive_direction = (
-                BooleanValue.create(properties["switch_drive_direction"])
-                if properties is not None
-                else None
-            )
+        if OnyxClient._is_shutter(device_type, properties):
             return Shutter(
                 identifier,
                 name,
                 device_type,
                 device_mode,
                 actions,
-                target_position,
-                target_angle,
-                actual_angle,
-                actual_position,
-                drivetime_down,
-                drivetime_up,
-                rotationtime,
-                switch_button_direction,
-                switch_drive_direction,
+                OnyxClient._numeric_value("target_position", properties),
+                OnyxClient._numeric_value("target_angle", properties),
+                OnyxClient._numeric_value("actual_angle", properties),
+                OnyxClient._numeric_value("actual_position", properties),
+                OnyxClient._numeric_value("drivetime_down", properties),
+                OnyxClient._numeric_value("drivetime_up", properties),
+                OnyxClient._numeric_value("rotationtime", properties),
+                OnyxClient._boolean_value("switch_button_direction", properties),
+                OnyxClient._boolean_value("switch_drive_direction", properties),
             )
         elif device_type == DeviceType.WEATHER:
-            wind_peak = (
-                NumericValue.create(properties["wind_peak"])
-                if properties is not None
-                else None
-            )
-            sun_brightness_peak = (
-                NumericValue.create(properties["sun_brightness_peak"])
-                if properties is not None
-                else None
-            )
-            sun_brightness_sink = (
-                NumericValue.create(properties["sun_brightness_sink"])
-                if properties is not None
-                else None
-            )
-            air_pressure = (
-                NumericValue.create(properties["air_pressure"])
-                if properties is not None
-                else None
-            )
-            humidity = (
-                NumericValue.create(properties["humidity"])
-                if properties is not None
-                else None
-            )
-            temperature = (
-                NumericValue.create(properties["temperature"])
-                if properties is not None
-                else None
-            )
             return Weather(
                 identifier,
                 name,
                 device_type,
                 device_mode,
                 actions,
-                wind_peak,
-                sun_brightness_peak,
-                sun_brightness_sink,
-                air_pressure,
-                humidity,
-                temperature,
+                OnyxClient._numeric_value("wind_peak", properties),
+                OnyxClient._numeric_value("sun_brightness_peak", properties),
+                OnyxClient._numeric_value("sun_brightness_sink", properties),
+                OnyxClient._numeric_value("air_pressure", properties),
+                OnyxClient._numeric_value("humidity", properties),
+                OnyxClient._numeric_value("temperature", properties),
             )
         else:
             return Device(identifier, name, device_type, device_mode, actions)
+
+    @staticmethod
+    def _is_shutter(device_type: DeviceType, properties: dict) -> bool:
+        if device_type is not None:
+            return device_type.is_shutter()
+        if properties is not None:
+            for key in properties.keys():
+                if key in Shutter.keys():
+                    return True
+        return False
 
     async def _perform_get_request(
         self, path: str, with_api: bool = True
@@ -405,3 +357,29 @@ class OnyxClient:
                 identifier,
             )
         return data is not None
+
+    async def events(self, include_details: bool = False) -> Device:
+        """Stream events continuously."""
+        async with self.client_session.get(
+            self._url("/events"), headers=self._headers
+        ) as response:
+            if not self._check_response(response):
+                yield None
+                return
+            async for message in response.content:
+                if len(message.strip()) > 0:
+                    events = json.loads(message.strip())
+                    for key, value in events["devices"].items():
+                        device = (
+                            await self.device(key)
+                            if include_details
+                            else self._init_device(
+                                key,
+                                value["name"] if "name" in value else None,
+                                DeviceType.convert(value["type"])
+                                if "type" in value
+                                else None,
+                                value["properties"] if "properties" in value else None,
+                            )
+                        )
+                        yield device
