@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [2.4.0](https://github.com/muhlba91/onyx-client/compare/v2.3.1...v2.4.0) (2021-02-14)
+
+
+### Features
+
+* add events endpoint, fix [#4](https://github.com/muhlba91/onyx-client/issues/4) ([5331c71](https://github.com/muhlba91/onyx-client/commit/5331c71dedbe839d8ca93b012afd612e2854a7b8))
+* add update_with method to devices ([5e01c11](https://github.com/muhlba91/onyx-client/commit/5e01c11bf6e9221d6f42a5aa61eaab0d1ea767cc))
+
 ### [2.3.1](https://github.com/muhlba91/onyx-client/compare/v2.3.0...v2.3.1) (2021-02-12)
 
 
