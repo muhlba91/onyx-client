@@ -5,6 +5,7 @@ from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.device import Device
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
+from onyx_client.exception.update_exception import UpdateException
 
 
 class TestDevice:
@@ -25,3 +26,39 @@ class TestDevice:
 
     def test_not_eq(self, device_mode):
         assert Device("id", "name", DeviceType.AWNING, device_mode, list(Action)) != 10
+
+    def test_update_with(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        update = Device(
+            "id",
+            "name1",
+            DeviceType.ROLLERSHUTTER,
+            DeviceMode(DeviceType.AWNING),
+            [Action.STOP],
+        )
+        device.update_with(update)
+        assert device.name == "name1"
+        assert device.device_type == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.mode == DeviceType.AWNING
+        assert Action.STOP in device.actions
+
+    def test_update_with_none(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        update = Device("id", None, None, None, None)
+        device.update_with(update)
+        assert device.name == "name"
+        assert device.device_type == DeviceType.AWNING
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.actions == list(Action)
+
+    def test_update_with_exception(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        update = Device(
+            "other",
+            "name1",
+            DeviceType.ROLLERSHUTTER,
+            DeviceMode(DeviceType.AWNING),
+            [Action.STOP],
+        )
+        with pytest.raises(UpdateException):
+            device.update_with(update)

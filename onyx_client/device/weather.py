@@ -32,3 +32,27 @@ class Weather(Device):
         self.air_pressure = air_pressure
         self.humidity = humidity
         self.temperature = temperature
+
+    def update_with(self, update):
+        super().update_with(update)
+
+        self.wind_peak = (
+            self.wind_peak if update.wind_peak is None else update.wind_peak
+        )
+        self.sun_brightness_peak = (
+            self.sun_brightness_peak
+            if update.sun_brightness_peak is None
+            else update.sun_brightness_peak
+        )
+        self.sun_brightness_sink = (
+            self.sun_brightness_sink
+            if update.sun_brightness_sink is None
+            else update.sun_brightness_sink
+        )
+        self.air_pressure = (
+            self.air_pressure if update.air_pressure is None else update.air_pressure
+        )
+        self.humidity = self.humidity if update.humidity is None else update.humidity
+        self.temperature = (
+            self.temperature if update.temperature is None else update.temperature
+        )

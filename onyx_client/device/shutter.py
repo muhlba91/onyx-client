@@ -54,6 +54,47 @@ class Shutter(Device):
         self.switch_button_direction = switch_button_direction
         self.switch_drive_direction = switch_drive_direction
 
+    def update_with(self, update):
+        super().update_with(update)
+
+        self.target_position = (
+            self.target_position
+            if update.target_position is None
+            else update.target_position
+        )
+        self.target_angle = (
+            self.target_angle if update.target_angle is None else update.target_angle
+        )
+        self.actual_angle = (
+            self.actual_angle if update.actual_angle is None else update.actual_angle
+        )
+        self.actual_position = (
+            self.actual_position
+            if update.actual_position is None
+            else update.actual_position
+        )
+        self.drivetime_down = (
+            self.drivetime_down
+            if update.drivetime_down is None
+            else update.drivetime_down
+        )
+        self.drivetime_up = (
+            self.drivetime_up if update.drivetime_up is None else update.drivetime_up
+        )
+        self.rotationtime = (
+            self.rotationtime if update.rotationtime is None else update.rotationtime
+        )
+        self.switch_button_direction = (
+            self.switch_button_direction
+            if update.switch_button_direction is None
+            else update.switch_button_direction
+        )
+        self.switch_drive_direction = (
+            self.switch_drive_direction
+            if update.switch_drive_direction is None
+            else update.switch_drive_direction
+        )
+
     @staticmethod
     def keys() -> list:
         return [
