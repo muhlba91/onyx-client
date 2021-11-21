@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [2.5.2](https://github.com/muhlba91/onyx-client/compare/v2.5.1...v2.5.2) (2021-11-21)
+
+
+### Bug Fixes
+
+* fix mapping of animations ([1ddea91](https://github.com/muhlba91/onyx-client/commit/1ddea910fd167cf38447c487d19a8cf81d143469))
+
 ### [2.5.1](https://github.com/muhlba91/onyx-client/compare/v2.5.0...v2.5.1) (2021-11-21)
 
 
