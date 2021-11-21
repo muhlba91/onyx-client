@@ -35,7 +35,7 @@ class NumericValue:
             else None,
         )
 
-    def update(self, other: Optional):
+    def update_with(self, other: Optional):
         """Updates this value with the target."""
         if other is not None:
             self.value = self.value if other.value is None else other.value

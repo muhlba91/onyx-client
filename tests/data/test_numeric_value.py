@@ -52,7 +52,7 @@ class TestNumericValue:
         expected = NumericValue(None, 0, 100, False)
         assert NumericValue.create({}) == expected
 
-    def test_update(self):
+    def test_update_with(self):
         value = NumericValue(
             1,
             1,
@@ -67,10 +67,10 @@ class TestNumericValue:
             True,
             AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
         )
-        value.update(expected)
+        value.update_with(expected)
         assert value == expected
 
-    def test_update_only_existing(self):
+    def test_update_with_only_existing(self):
         value = NumericValue(
             10,
             10,
@@ -84,7 +84,7 @@ class TestNumericValue:
             True,
             AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
         )
-        value.update(
+        value.update_with(
             NumericValue(
                 None,
                 None,

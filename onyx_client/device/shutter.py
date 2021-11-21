@@ -54,14 +54,8 @@ class Shutter(Device):
         self.target_angle = (
             self.target_angle if update.target_angle is None else update.target_angle
         )
-        self.actual_angle = (
-            self.actual_angle if update.actual_angle is None else update.actual_angle
-        )
-        self.actual_position = (
-            self.actual_position
-            if update.actual_position is None
-            else update.actual_position
-        )
+        self.actual_angle.update_with(update.actual_angle)
+        self.actual_position.update_with(update.actual_position)
 
     @staticmethod
     def keys() -> list:
