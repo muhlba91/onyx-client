@@ -377,7 +377,6 @@ class OnyxClient:
                 cleaned_message = str(message.strip(), "UTF-8").strip()
                 if len(cleaned_message) > 0 and cleaned_message.startswith("data:"):
                     cleaned_message = cleaned_message[len("data:") :].strip()
-                    print(cleaned_message)
                     events = json.loads(cleaned_message)
                     for key, value in events["devices"].items():
                         device = (
