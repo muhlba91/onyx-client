@@ -1,6 +1,15 @@
 # Changelog
 
 
+### [2.5.1](https://github.com/muhlba91/onyx-client/compare/v2.5.0...v2.5.1) (2021-11-21)
+
+
+### Bug Fixes
+
+* fix event streaming ([60f3eae](https://github.com/muhlba91/onyx-client/commit/60f3eae6f3bec563a15a467dcc1907594969800d))
+* fix line length ([28a56f6](https://github.com/muhlba91/onyx-client/commit/28a56f6494bd27120b65755f2f583e45fc26b7c2))
+* remove print statements ([5b14d2a](https://github.com/muhlba91/onyx-client/commit/5b14d2ab47534c92e063f21f2ab9715e3ef22210))
+
 ## [2.5.0](https://github.com/muhlba91/onyx-client/compare/v2.4.0...v2.5.0) (2021-11-21)
 
 
