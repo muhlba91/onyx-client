@@ -375,10 +375,9 @@ class OnyxClient:
                 return
             async for message in response.content:
                 cleaned_message = str(message.strip(), "UTF-8").strip()
-                print(cleaned_message)
-                print(cleaned_message.startswith("data:"))
                 if len(cleaned_message) > 0 and cleaned_message.startswith("data:"):
-                    events = json.loads(cleaned_message.removeprefix("data:").strip())
+                    cleaned_message = cleaned_message[len("data:") :].strip()
+                    events = json.loads(cleaned_message)
                     for key, value in events["devices"].items():
                         device = (
                             await self.device(key)
