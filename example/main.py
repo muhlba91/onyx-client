@@ -31,7 +31,7 @@ async def shutter_worker(queue, client, device_id):
                 device_id, DeviceCommand(properties={"target_position": position})
             )
         )
-        await asyncio.sleep(5)
+        await asyncio.sleep(15)
         queue.task_done()
 
 
@@ -65,22 +65,24 @@ async def perform(fingerprint: str, access_token: str):
     # move shutter back to where it was
     queue = asyncio.Queue()
     queue.put_nowait(10)
-    queue.put_nowait(0)
+    queue.put_nowait(90)
     task = asyncio.create_task(shutter_worker(queue, client, device_id))
-    await queue.join()
-    task.cancel()
     print()
 
-    # call the streaming API for 10 devices
+    # call the streaming API for 11 devices
     index = 1
     async for device in client.events():
         print(device)
+        print(device.actual_position)
+        print(device.actual_position.animation)
         index += 1
-        if index == 10:
+        if index == 11:
             break
     print()
 
     # cleanup
+    await queue.join()
+    task.cancel()
     await session.close()
 
 
