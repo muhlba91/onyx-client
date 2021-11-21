@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [2.5.4](https://github.com/muhlba91/onyx-client/compare/v2.5.3...v2.5.4) (2021-11-21)
+
+
+### Bug Fixes
+
+* support partial updates of animations ([7eafab3](https://github.com/muhlba91/onyx-client/commit/7eafab3f53d2173912e5bcdb0d8f7658fa5883f0))
+
 ### [2.5.3](https://github.com/muhlba91/onyx-client/compare/v2.5.2...v2.5.3) (2021-11-21)
 
 
