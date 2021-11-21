@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [2.5.0](https://github.com/muhlba91/onyx-client/compare/v2.4.0...v2.5.0) (2021-11-21)
+
+
+### Features
+
+* upgrade to API v3; fix [#5](https://github.com/muhlba91/onyx-client/issues/5) ([be1b1c3](https://github.com/muhlba91/onyx-client/commit/be1b1c39ca7472251e8243917480270de4f2eae7))
+
 ## [2.4.0](https://github.com/muhlba91/onyx-client/compare/v2.3.1...v2.4.0) (2021-02-14)
 
 
