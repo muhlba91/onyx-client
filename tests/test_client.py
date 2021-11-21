@@ -713,14 +713,7 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            payload={
-                "devices": {
-                    "device": {
-                        "name": "device",
-                        "type": "rollershutter",
-                    },
-                }
-            },
+            body="""data: { "devices": { "device": { "name": "device", "type": "rollershutter" } } }""",
         )
         mock_device.return_value = Device(
             "id",

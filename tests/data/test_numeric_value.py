@@ -23,5 +23,9 @@ class TestNumericValue:
             == expected
         )
 
+    def test_create_no_value(self):
+        expected = NumericValue(None, 0, 100, False)
+        assert NumericValue.create({}) == expected
+
     def test_not_eq(self):
         assert NumericValue(10, 10, 100, True) != 10

@@ -26,7 +26,7 @@ class NumericValue:
     def create(properties: dict):
         """Create a numeric value from properties."""
         return NumericValue(
-            properties["value"],
+            properties.get("value", None),
             properties.get("minimum", 0),
             properties.get("maximum", 100),
             properties.get("read_only", False),
