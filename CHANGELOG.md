@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [2.5.3](https://github.com/muhlba91/onyx-client/compare/v2.5.2...v2.5.3) (2021-11-21)
+
+
+### Bug Fixes
+
+* remove print statements ([f267b8c](https://github.com/muhlba91/onyx-client/commit/f267b8ccf66bad8afea4f76dbf81473198bc19b4))
+
 ### [2.5.2](https://github.com/muhlba91/onyx-client/compare/v2.5.1...v2.5.2) (2021-11-21)
 
 
