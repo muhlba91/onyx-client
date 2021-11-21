@@ -1,5 +1,4 @@
 """Shutter class."""
-from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
@@ -34,11 +33,6 @@ class Shutter(Device):
         target_angle: NumericValue = None,
         actual_angle: NumericValue = None,
         actual_position: NumericValue = None,
-        drivetime_down: NumericValue = None,
-        drivetime_up: NumericValue = None,
-        rotationtime: NumericValue = None,
-        switch_button_direction: BooleanValue = None,
-        switch_drive_direction: BooleanValue = None,
     ):
         """Initialize the shutter device."""
         super(Shutter, self).__init__(
@@ -48,11 +42,6 @@ class Shutter(Device):
         self.target_angle = target_angle
         self.actual_angle = actual_angle
         self.actual_position = actual_position
-        self.drivetime_down = drivetime_down
-        self.drivetime_up = drivetime_up
-        self.rotationtime = rotationtime
-        self.switch_button_direction = switch_button_direction
-        self.switch_drive_direction = switch_drive_direction
 
     def update_with(self, update):
         super().update_with(update)
@@ -72,27 +61,6 @@ class Shutter(Device):
             self.actual_position
             if update.actual_position is None
             else update.actual_position
-        )
-        self.drivetime_down = (
-            self.drivetime_down
-            if update.drivetime_down is None
-            else update.drivetime_down
-        )
-        self.drivetime_up = (
-            self.drivetime_up if update.drivetime_up is None else update.drivetime_up
-        )
-        self.rotationtime = (
-            self.rotationtime if update.rotationtime is None else update.rotationtime
-        )
-        self.switch_button_direction = (
-            self.switch_button_direction
-            if update.switch_button_direction is None
-            else update.switch_button_direction
-        )
-        self.switch_drive_direction = (
-            self.switch_drive_direction
-            if update.switch_drive_direction is None
-            else update.switch_drive_direction
         )
 
     @staticmethod

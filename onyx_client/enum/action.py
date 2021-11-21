@@ -11,6 +11,8 @@ class Action(Enum):
     TILT_DOWN = auto()
     TILT_UP = auto()
     WINK = auto()
+    LIGHT_ON = auto()
+    LIGHT_OFF = auto()
 
     def string(self) -> str:
         """Get the string representation for the Onyx API."""

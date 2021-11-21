@@ -6,11 +6,14 @@ import pytest
 from aioresponses import aioresponses
 
 from onyx_client import Configuration, OnyxClient
+from onyx_client.data.animation_keyframe import AnimationKeyframe
+from onyx_client.data.animation_value import AnimationValue
 from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
+from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
@@ -70,6 +73,13 @@ class TestOnyxClient:
         assert device.device_mode.mode == DeviceType.WEATHER
         assert device.device_mode.values is None
 
+    def test_init_device_light(self):
+        device = OnyxClient._init_device("id", "name", DeviceType.BASIC_LIGHT)
+        assert isinstance(device, Device)
+        assert device.identifier == "id"
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert device.device_mode.values is None
+
     def test__numeric_value(self):
         assert OnyxClient._numeric_value("key", {"key": {"value": 1}}) == NumericValue(
             value=1, minimum=0, maximum=100, read_only=False
@@ -123,6 +133,31 @@ class TestOnyxClient:
         assert device.temperature == NumericValue(6, 1, 10, False)
         assert device.actions == list(Action)
 
+    def test_init_device_light_full(self):
+        device = OnyxClient._init_device(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            {
+                "device_type": {
+                    "type": "basic_light",
+                    "values": ["basic_light"],
+                },
+                "target_brightness": {"value": 1, "minimum": 10},
+                "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
+                "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
+            },
+            list(Action),
+        )
+        assert isinstance(device, Light)
+        assert device.identifier == "id"
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert len(device.device_mode.values) == 1
+        assert device.target_brightness == NumericValue(1, 10, 100, False)
+        assert device.actual_brightness == NumericValue(2, 1, 10, False)
+        assert device.dim_duration == NumericValue(3, 1, 10, False)
+        assert device.actions == list(Action)
+
     def test_init_device_shutter(self):
         device = OnyxClient._init_device("id", "name", DeviceType.AWNING)
         assert isinstance(device, Shutter)
@@ -144,19 +179,6 @@ class TestOnyxClient:
                 "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
                 "actual_position": {"value": 10, "maximum": 10},
                 "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
-                "drivetime_down": {
-                    "maximum": 3600000,
-                    "type": "numeric",
-                    "value": 34031,
-                },
-                "drivetime_up": {
-                    "maximum": 3600000,
-                    "value": 34031,
-                    "type": "numeric",
-                },
-                "rotationtime": {"maximum": 40000, "type": "numeric", "value": 5000},
-                "switch_button_direction": {"value": "true"},
-                "switch_drive_direction": {"value": "false"},
             },
             list(Action),
         )
@@ -168,11 +190,6 @@ class TestOnyxClient:
         assert device.target_angle == NumericValue(1, 1, 10, False)
         assert device.actual_position == NumericValue(10, 0, 10, False)
         assert device.actual_angle == NumericValue(1, 1, 10, False)
-        assert device.drivetime_down == NumericValue(34031, 0, 3600000, False)
-        assert device.drivetime_up == NumericValue(34031, 0, 3600000, False)
-        assert device.rotationtime == NumericValue(5000, 0, 40000, False)
-        assert device.switch_button_direction == BooleanValue(True, False)
-        assert device.switch_drive_direction == BooleanValue(False, False)
         assert device.actions == list(Action)
 
     def test_init_device_unknown(self):
@@ -387,25 +404,36 @@ class TestOnyxClient:
                         "maximum": 100,
                         "value": 100,
                         "type": "numeric",
+                        "animation": {
+                            "start": 1637499009.158352,
+                            "current_value": 20,
+                            "keyframes": [
+                                {
+                                    "interpolation": "linear",
+                                    "delay": 0,
+                                    "duration": 42.0273,
+                                    "value": 90,
+                                }
+                            ],
+                        },
                     },
-                    "actual_angle": {"maximum": 360, "type": "numeric", "value": 0},
-                    "drivetime_down": {
-                        "maximum": 3600000,
+                    "actual_angle": {
+                        "maximum": 360,
                         "type": "numeric",
-                        "value": 34031,
+                        "value": 0,
+                        "animation": {
+                            "start": 1637499108.0069883,
+                            "current_value": 90,
+                            "keyframes": [
+                                {
+                                    "interpolation": "linear",
+                                    "delay": 0,
+                                    "duration": 0.791666666,
+                                    "value": 33,
+                                }
+                            ],
+                        },
                     },
-                    "drivetime_up": {
-                        "maximum": 3600000,
-                        "value": 34031,
-                        "type": "numeric",
-                    },
-                    "rotationtime": {
-                        "maximum": 40000,
-                        "type": "numeric",
-                        "value": 5000,
-                    },
-                    "switch_button_direction": {"value": "true"},
-                    "switch_drive_direction": {"value": "false"},
                 },
                 "actions": ["stop"],
             },
@@ -421,13 +449,26 @@ class TestOnyxClient:
         assert device.actions == [Action.STOP]
         assert device.target_position == NumericValue(100, 0, 100, False)
         assert device.target_angle == NumericValue(0, 0, 360, False)
-        assert device.actual_position == NumericValue(100, 0, 100, False)
-        assert device.actual_angle == NumericValue(0, 0, 360, False)
-        assert device.drivetime_down == NumericValue(34031, 0, 3600000, False)
-        assert device.drivetime_up == NumericValue(34031, 0, 3600000, False)
-        assert device.rotationtime == NumericValue(5000, 0, 40000, False)
-        assert device.switch_button_direction == BooleanValue(True, False)
-        assert device.switch_drive_direction == BooleanValue(False, False)
+        assert device.actual_position == NumericValue(
+            100,
+            0,
+            100,
+            False,
+            AnimationValue(
+                1637499009.158352, 20, [AnimationKeyframe("linear", 0, 42.0273, 90)]
+            ),
+        )
+        assert device.actual_angle == NumericValue(
+            0,
+            0,
+            360,
+            False,
+            AnimationValue(
+                1637499108.0069883,
+                90,
+                [AnimationKeyframe("linear", 0, 0.791666666, 33)],
+            ),
+        )
 
     @pytest.mark.asyncio
     async def test_device_weather(self, mock_response, client):
@@ -464,6 +505,36 @@ class TestOnyxClient:
         assert device.air_pressure is not None
         assert device.humidity is not None
         assert device.temperature is not None
+
+    @pytest.mark.asyncio
+    async def test_device_light(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "basic_light",
+                "properties": {
+                    "device_type": {
+                        "type": "basic_light",
+                        "values": ["basic_light"],
+                    },
+                    "target_brightness": {"value": 1, "minimum": 10},
+                    "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
+                    "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
+                },
+                "actions": ["stop"],
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Light)
+        assert device.device_type == DeviceType.BASIC_LIGHT
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert device.device_mode.values == [DeviceType.BASIC_LIGHT]
+        assert device.actions == [Action.STOP]
+        assert device.target_brightness is not None
+        assert device.actual_brightness is not None
+        assert device.dim_duration is not None
 
     @pytest.mark.asyncio
     async def test_device_error(self, mock_response, client):

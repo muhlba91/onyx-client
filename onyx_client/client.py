@@ -13,6 +13,7 @@ from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.data.supported_versions import SupportedVersions
 from onyx_client.device.device import Device
+from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
@@ -130,11 +131,6 @@ class OnyxClient:
                 OnyxClient._numeric_value("target_angle", properties),
                 OnyxClient._numeric_value("actual_angle", properties),
                 OnyxClient._numeric_value("actual_position", properties),
-                OnyxClient._numeric_value("drivetime_down", properties),
-                OnyxClient._numeric_value("drivetime_up", properties),
-                OnyxClient._numeric_value("rotationtime", properties),
-                OnyxClient._boolean_value("switch_button_direction", properties),
-                OnyxClient._boolean_value("switch_drive_direction", properties),
             )
         elif device_type == DeviceType.WEATHER:
             return Weather(
@@ -149,6 +145,17 @@ class OnyxClient:
                 OnyxClient._numeric_value("air_pressure", properties),
                 OnyxClient._numeric_value("humidity", properties),
                 OnyxClient._numeric_value("temperature", properties),
+            )
+        elif device_type == DeviceType.BASIC_LIGHT:
+            return Light(
+                identifier,
+                name,
+                device_type,
+                device_mode,
+                actions,
+                OnyxClient._numeric_value("target_brightness", properties),
+                OnyxClient._numeric_value("actual_brightness", properties),
+                OnyxClient._numeric_value("dim_duration", properties),
             )
         else:
             return Device(identifier, name, device_type, device_mode, actions)

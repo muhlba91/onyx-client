@@ -1,7 +1,8 @@
 """Tests for the Shutter Device class."""
 import pytest
 
-from onyx_client.data.boolean_value import BooleanValue
+from onyx_client.data.animation_keyframe import AnimationKeyframe
+from onyx_client.data.animation_value import AnimationValue
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.shutter import Shutter
@@ -17,9 +18,13 @@ class TestShutter:
 
     def test_init(self, device_mode):
         value1 = NumericValue(10, 0, 10, False)
-        value2 = NumericValue(1, 0, 10, False)
-        boolean1 = BooleanValue(False, True)
-        boolean2 = BooleanValue(True, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
         shutter = Shutter(
             "id",
             "name",
@@ -30,11 +35,6 @@ class TestShutter:
             value2,
             value1,
             value2,
-            value1,
-            value2,
-            value1,
-            boolean1,
-            boolean2,
         )
         assert shutter.identifier == "id"
         assert shutter.device_type == DeviceType.AWNING
@@ -43,11 +43,6 @@ class TestShutter:
         assert shutter.target_angle == value2
         assert shutter.actual_angle == value1
         assert shutter.actual_position == value2
-        assert shutter.drivetime_down == value1
-        assert shutter.drivetime_up == value2
-        assert shutter.rotationtime == value1
-        assert shutter.switch_button_direction == boolean1
-        assert shutter.switch_drive_direction == boolean2
 
     def test_init_no_additional_values(self, device_mode):
         shutter = Shutter("id", "name", DeviceType.AWNING, device_mode, [])
@@ -58,17 +53,16 @@ class TestShutter:
         assert shutter.target_angle is None
         assert shutter.actual_angle is None
         assert shutter.actual_position is None
-        assert shutter.drivetime_down is None
-        assert shutter.drivetime_up is None
-        assert shutter.rotationtime is None
-        assert shutter.switch_button_direction is None
-        assert shutter.switch_drive_direction is None
 
     def test_update_with(self, device_mode):
         value1 = NumericValue(10, 0, 10, False)
-        value2 = NumericValue(1, 0, 10, False)
-        boolean1 = BooleanValue(False, True)
-        boolean2 = BooleanValue(True, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
         shutter = Shutter(
             "id",
             "name",
@@ -79,11 +73,6 @@ class TestShutter:
             value2,
             value1,
             value2,
-            value1,
-            value2,
-            value1,
-            boolean1,
-            boolean2,
         )
         update = Shutter(
             "id",
@@ -95,11 +84,6 @@ class TestShutter:
             value1,
             value2,
             value1,
-            value2,
-            value1,
-            value2,
-            boolean2,
-            boolean1,
         )
         shutter.update_with(update)
         assert shutter.name == "name1"
@@ -107,17 +91,16 @@ class TestShutter:
         assert shutter.target_angle == value1
         assert shutter.actual_angle == value2
         assert shutter.actual_position == value1
-        assert shutter.drivetime_down == value2
-        assert shutter.drivetime_up == value1
-        assert shutter.rotationtime == value2
-        assert shutter.switch_button_direction == boolean2
-        assert shutter.switch_drive_direction == boolean1
 
     def test_update_with_none(self, device_mode):
         value1 = NumericValue(10, 0, 10, False)
-        value2 = NumericValue(1, 0, 10, False)
-        boolean1 = BooleanValue(False, True)
-        boolean2 = BooleanValue(True, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
         shutter = Shutter(
             "id",
             "name",
@@ -128,11 +111,6 @@ class TestShutter:
             value2,
             value1,
             value2,
-            value1,
-            value2,
-            value1,
-            boolean1,
-            boolean2,
         )
         update = Shutter(
             "id",
@@ -147,17 +125,16 @@ class TestShutter:
         assert shutter.target_angle == value2
         assert shutter.actual_angle == value1
         assert shutter.actual_position == value2
-        assert shutter.drivetime_down == value1
-        assert shutter.drivetime_up == value2
-        assert shutter.rotationtime == value1
-        assert shutter.switch_button_direction == boolean1
-        assert shutter.switch_drive_direction == boolean2
 
     def test_update_with_exception(self, device_mode):
         value1 = NumericValue(10, 0, 10, False)
-        value2 = NumericValue(1, 0, 10, False)
-        boolean1 = BooleanValue(False, True)
-        boolean2 = BooleanValue(True, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
         shutter = Shutter(
             "id",
             "name",
@@ -168,11 +145,6 @@ class TestShutter:
             value2,
             value1,
             value2,
-            value1,
-            value2,
-            value1,
-            boolean1,
-            boolean2,
         )
         update = Shutter(
             "other",
