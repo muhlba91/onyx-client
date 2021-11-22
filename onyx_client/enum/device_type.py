@@ -12,6 +12,7 @@ class DeviceType(Enum):
     WEATHER = auto()
     VENEER = auto()
     BASIC_LIGHT = auto()
+    CLICK = auto()
     UNKNOWN = auto()
 
     def string(self) -> str:

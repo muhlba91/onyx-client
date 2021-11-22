@@ -12,6 +12,7 @@ from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
+from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
@@ -537,6 +538,25 @@ class TestOnyxClient:
         assert device.dim_duration is not None
 
     @pytest.mark.asyncio
+    async def test_device_click(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "click",
+                "offline": True,
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Click)
+        assert device.device_type == DeviceType.CLICK
+        assert device.device_mode.mode == DeviceType.CLICK
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+        assert device.offline
+
+    @pytest.mark.asyncio
     async def test_device_no_properties(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
@@ -544,6 +564,7 @@ class TestOnyxClient:
             payload={
                 "name": "device",
                 "type": "rollershutter",
+                "offline": True,
             },
         )
         device = await client.device("device")
@@ -763,5 +784,26 @@ class TestOnyxClient:
         assert not OnyxClient._is_shutter(DeviceType.WEATHER, {})
         assert not OnyxClient._is_shutter(None, {})
         assert not OnyxClient._is_shutter(None, None)
-        assert OnyxClient._is_shutter(None, {"drivetime_down": 10})
+        assert OnyxClient._is_shutter(None, {"target_position": 10})
         assert not OnyxClient._is_shutter(None, {"sun_brightness_sink": 10})
+
+    def test__is_light(self):
+        assert OnyxClient._is_light(DeviceType.BASIC_LIGHT, {})
+        assert not OnyxClient._is_light(DeviceType.WEATHER, {})
+        assert not OnyxClient._is_light(None, {})
+        assert not OnyxClient._is_light(None, None)
+        assert OnyxClient._is_light(None, {"target_brightness": 10})
+        assert not OnyxClient._is_light(None, {"target_position": 10})
+
+    def test__is_weather(self):
+        assert OnyxClient._is_weather(DeviceType.WEATHER, {})
+        assert not OnyxClient._is_weather(DeviceType.BASIC_LIGHT, {})
+        assert not OnyxClient._is_weather(None, {})
+        assert not OnyxClient._is_weather(None, None)
+        assert OnyxClient._is_weather(None, {"sun_brightness_sink": 10})
+        assert not OnyxClient._is_weather(None, {"target_position": 10})
+
+    def test__is_click(self):
+        assert OnyxClient._is_click(DeviceType.CLICK)
+        assert not OnyxClient._is_click(DeviceType.BASIC_LIGHT)
+        assert not OnyxClient._is_click(None)

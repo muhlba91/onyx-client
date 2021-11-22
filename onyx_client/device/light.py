@@ -41,3 +41,11 @@ class Light(Device):
         self.dim_duration = (
             self.dim_duration if update.dim_duration is None else update.dim_duration
         )
+
+    @staticmethod
+    def keys() -> list:
+        return [
+            "target_brightness",
+            "actual_brightness",
+            "dim_duration",
+        ]

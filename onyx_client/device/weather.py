@@ -56,3 +56,14 @@ class Weather(Device):
         self.temperature = (
             self.temperature if update.temperature is None else update.temperature
         )
+
+    @staticmethod
+    def keys() -> list:
+        return [
+            "wind_peak",
+            "sun_brightness_peak",
+            "sun_brightness_sink",
+            "air_pressure",
+            "humidity",
+            "temperature",
+        ]
