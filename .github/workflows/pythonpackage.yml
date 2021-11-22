@@ -3,7 +3,7 @@ name: Python package
 on:
   push:
     branches:
-      - master
+      - main
       - next
 
 jobs:
@@ -67,7 +67,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Build and Publish to TestPyPi and PyPi
-    if: startsWith(github.ref, 'refs/heads/master') || github.ref == 'refs/heads/next'
+    if: startsWith(github.ref, 'refs/heads/main') || github.ref == 'refs/heads/next'
     needs:
       - test
     strategy:
@@ -82,7 +82,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: actions/setup-node@v2
         with:
           node-version: '12'
@@ -103,7 +103,7 @@ jobs:
           git fetch --tags
 
       - name: Versioning and Changelog
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           npx standard-version -i release-CHANGELOG.md --skip.commit --skip.tag
           npx standard-version
@@ -132,23 +132,23 @@ jobs:
           repository_url: https://test.pypi.org/legacy/
 
       - name: Publish release distribution to PyPi
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Push to Repository
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           git push --follow-tags
 
       - name: Get Tag for Release
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           echo "TAG_NAME=`git describe --abbrev=0 --match "v*"`" >> $GITHUB_ENV
 
       - name: Release
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: ncipollo/release-action@v1
         with:
           bodyFile: "release-CHANGELOG.md"

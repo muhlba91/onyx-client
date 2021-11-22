@@ -1,36 +1,6 @@
 # Changelog
 
 
-### [2.5.4](https://github.com/muhlba91/onyx-client/compare/v2.5.3...v2.5.4) (2021-11-21)
-
-
-### Bug Fixes
-
-* support partial updates of animations ([7eafab3](https://github.com/muhlba91/onyx-client/commit/7eafab3f53d2173912e5bcdb0d8f7658fa5883f0))
-
-### [2.5.3](https://github.com/muhlba91/onyx-client/compare/v2.5.2...v2.5.3) (2021-11-21)
-
-
-### Bug Fixes
-
-* remove print statements ([f267b8c](https://github.com/muhlba91/onyx-client/commit/f267b8ccf66bad8afea4f76dbf81473198bc19b4))
-
-### [2.5.2](https://github.com/muhlba91/onyx-client/compare/v2.5.1...v2.5.2) (2021-11-21)
-
-
-### Bug Fixes
-
-* fix mapping of animations ([1ddea91](https://github.com/muhlba91/onyx-client/commit/1ddea910fd167cf38447c487d19a8cf81d143469))
-
-### [2.5.1](https://github.com/muhlba91/onyx-client/compare/v2.5.0...v2.5.1) (2021-11-21)
-
-
-### Bug Fixes
-
-* fix event streaming ([60f3eae](https://github.com/muhlba91/onyx-client/commit/60f3eae6f3bec563a15a467dcc1907594969800d))
-* fix line length ([28a56f6](https://github.com/muhlba91/onyx-client/commit/28a56f6494bd27120b65755f2f583e45fc26b7c2))
-* remove print statements ([5b14d2a](https://github.com/muhlba91/onyx-client/commit/5b14d2ab47534c92e063f21f2ab9715e3ef22210))
-
 ## [2.5.0](https://github.com/muhlba91/onyx-client/compare/v2.4.0...v2.5.0) (2021-11-21)
 
 
