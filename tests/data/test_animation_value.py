@@ -26,5 +26,24 @@ class TestAnimationValue:
             == expected
         )
 
+    def test_create_no_keyframe(self):
+        expected = AnimationValue(1637499108.0069883, 90, [])
+        assert (
+            AnimationValue.create(
+                {
+                    "start": 1637499108.0069883,
+                    "current_value": 90,
+                }
+            )
+            == expected
+        )
+
+    def test_create_no_data(self):
+        expected = AnimationValue(None, None, [])
+        assert AnimationValue.create({}) == expected
+
+    def test_create_none(self):
+        assert AnimationValue.create(None) is None
+
     def test_not_eq(self):
         assert AnimationValue(10, 10, list()) != 10

@@ -12,6 +12,9 @@ class BooleanValue:
     @staticmethod
     def create(properties: dict):
         """Create a boolean value from properties."""
+        if properties is None:
+            return None
+
         return BooleanValue(
             properties.get("value", "false") == "true",
             properties.get("read_only", "false") == "true",

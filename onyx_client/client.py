@@ -52,7 +52,7 @@ class OnyxClient:
                 _LOGGER.error("Could not authorize client for ONYX API.")
                 return None
             data = await response.json()
-            return Configuration(data["fingerprint"], data["token"])
+            return Configuration(data.get("fingerprint", None), data.get("token"))
 
     @property
     def _headers(self) -> dict:
@@ -88,16 +88,16 @@ class OnyxClient:
     @staticmethod
     def _numeric_value(key: str, properties: dict = None):
         return (
-            NumericValue.create(properties[key])
-            if properties is not None and key in properties
+            NumericValue.create(properties.get(key, None))
+            if properties is not None
             else None
         )
 
     @staticmethod
     def _boolean_value(key: str, properties: dict = None):
         return (
-            BooleanValue.create(properties[key])
-            if properties is not None and key in properties
+            BooleanValue.create(properties.get(key, None))
+            if properties is not None
             else None
         )
 
@@ -111,14 +111,18 @@ class OnyxClient:
         data: dict = None,
     ) -> Device:
         """Initialize the device correctly."""
+        device_type = device_type if device_type is not None else DeviceType.UNKNOWN
         device_mode_value = (
-            DeviceType.convert(properties["device_type"]["type"])
-            if properties is not None and "device_type" in properties
+            DeviceType.convert(properties.get("device_type", dict()).get("type", None))
+            if properties is not None
             else device_type
         )
         device_mode_values = (
-            [DeviceType.convert(value) for value in properties["device_type"]["values"]]
-            if properties is not None and "device_type" in properties
+            [
+                DeviceType.convert(value)
+                for value in properties.get("device_type", dict()).get("values", list())
+            ]
+            if properties is not None
             else None
         )
         device_mode = DeviceMode(device_mode_value, device_mode_values)
@@ -159,8 +163,9 @@ class OnyxClient:
                 OnyxClient._numeric_value("actual_brightness", properties),
                 OnyxClient._numeric_value("dim_duration", properties),
             )
-        elif OnyxClient._is_click(device_type):
-            return Click(identifier, name, device_type, data.get("offline", True))
+        elif OnyxClient._is_click(device_type, data):
+            offline = data.get("offline", True) if data is not None else True
+            return Click(identifier, name, device_type, offline)
         else:
             return Device(identifier, name, device_type, device_mode, actions)
 
@@ -195,9 +200,13 @@ class OnyxClient:
         return False
 
     @staticmethod
-    def _is_click(device_type: DeviceType) -> bool:
+    def _is_click(device_type: DeviceType, data: dict) -> bool:
         if device_type is not None:
             return device_type == DeviceType.CLICK
+        if data is not None:
+            for key in data.keys():
+                if key in Click.keys():
+                    return True
         return False
 
     async def _perform_get_request(
@@ -239,7 +248,7 @@ class OnyxClient:
             )
             return None
 
-        return SupportedVersions(data["versions"])
+        return SupportedVersions(data.get("versions", list()))
 
     async def verify(self) -> bool:
         """Check if the ONYX.CENTER supports the version
@@ -258,7 +267,9 @@ class OnyxClient:
             return None
 
         return DateInformation(
-            float(data["time"]), data["zone"], int(data["zone_offset"])
+            float(data.get("time", "0")),
+            data.get("zone", None),
+            int(data.get("zone_offset", "0")),
         )
 
     async def devices(self, include_details: bool = False) -> Optional[list]:
@@ -279,7 +290,11 @@ class OnyxClient:
             ]
         else:
             return [
-                self._init_device(key, value["name"], DeviceType.convert(value["type"]))
+                self._init_device(
+                    key,
+                    value.get("name", None),
+                    DeviceType.convert(value.get("type", None)),
+                )
                 for key, value in data.items()
             ]
 
@@ -294,16 +309,12 @@ class OnyxClient:
             )
             return None
 
-        actions = (
-            [Action.convert(action) for action in data["actions"]]
-            if "actions" in data
-            else None
-        )
+        actions = [Action.convert(action) for action in data.get("actions", list())]
         return self._init_device(
             identifier,
-            data.get("name"),
-            DeviceType.convert(data.get("type")),
-            data.get("properties"),
+            data.get("name", None),
+            DeviceType.convert(data.get("type", None)),
+            data.get("properties", None),
             actions,
             data,
         )
@@ -343,7 +354,8 @@ class OnyxClient:
             return None
 
         return [
-            Group(key, value["name"], value["devices"]) for key, value in data.items()
+            Group(key, value.get("name", None), value.get("devices", list()))
+            for key, value in data.items()
         ]
 
     async def group(self, identifier: str) -> Optional[Group]:
@@ -357,7 +369,7 @@ class OnyxClient:
             )
             return None
 
-        return Group(identifier, data["name"], data["devices"])
+        return Group(identifier, data.get("name", None), data.get("devices", list()))
 
     async def send_group_command(self, identifier: str, command: DeviceCommand) -> bool:
         """Send a command to the group with the provided ID."""
@@ -374,8 +386,8 @@ class OnyxClient:
 
         unsuccessful = [
             key
-            for (key, value) in data["results"].items()
-            if value["status_code"] != 200
+            for (key, value) in data.get("results", dict()).items()
+            if value.get("status_code", 501) != 200
         ]
         if len(unsuccessful) > 0:
             _LOGGER.error(
@@ -409,16 +421,22 @@ class OnyxClient:
                 if len(cleaned_message) > 0 and cleaned_message.startswith("data:"):
                     cleaned_message = cleaned_message[len("data:") :].strip()
                     events = json.loads(cleaned_message)
-                    for key, value in events["devices"].items():
-                        device = (
-                            await self.device(key)
-                            if include_details
-                            else self._init_device(
-                                key,
-                                value.get("name"),
-                                DeviceType.convert(value.get("type")),
-                                value.get("properties"),
-                                value,
+                    for key, value in events.get("devices", dict()).items():
+                        try:
+                            if value is not None:
+                                device = (
+                                    await self.device(key)
+                                    if include_details
+                                    else self._init_device(
+                                        key,
+                                        value.get("name", None),
+                                        DeviceType.convert(value.get("type", None)),
+                                        value.get("properties", None),
+                                        value,
+                                    )
+                                )
+                                yield device
+                        except AttributeError:
+                            _LOGGER.error(
+                                "Received unknown device data. Dropping device %s", key
                             )
-                        )
-                        yield device

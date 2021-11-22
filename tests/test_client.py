@@ -67,20 +67,6 @@ class TestOnyxClient:
         mock_response.status = 401
         assert not OnyxClient._check_response(mock_response)
 
-    def test_init_device_weather(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.WEATHER)
-        assert isinstance(device, Device)
-        assert device.identifier == "id"
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert device.device_mode.values is None
-
-    def test_init_device_light(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.BASIC_LIGHT)
-        assert isinstance(device, Device)
-        assert device.identifier == "id"
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert device.device_mode.values is None
-
     def test__numeric_value(self):
         assert OnyxClient._numeric_value("key", {"key": {"value": 1}}) == NumericValue(
             value=1, minimum=0, maximum=100, read_only=False
@@ -103,6 +89,40 @@ class TestOnyxClient:
     def test__boolean_value_no_properties(self):
         assert OnyxClient._boolean_value("key", None) is None
 
+    def test_init_device_click(self):
+        device = OnyxClient._init_device("id", "name", DeviceType.CLICK)
+        assert isinstance(device, Click)
+        assert device.identifier == "id"
+        assert device.device_mode.mode == DeviceType.CLICK
+        assert device.device_mode.values is None
+        assert device.offline
+
+    def test_init_device_click_full(self):
+        device = OnyxClient._init_device(
+            "id", "name", DeviceType.CLICK, None, list(Action), {"offline": False}
+        )
+        assert isinstance(device, Click)
+        assert device.identifier == "id"
+        assert device.device_mode.mode == DeviceType.CLICK
+        assert device.device_mode.values is None
+        assert not device.offline
+
+    def test_init_device_weather(self):
+        device = OnyxClient._init_device("id", "name", DeviceType.WEATHER)
+        assert isinstance(device, Weather)
+        assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_mode.mode == DeviceType.WEATHER
+        assert device.device_mode.values is None
+
+    def test_init_device_weather_minimal(self):
+        device = OnyxClient._init_device("id", None, DeviceType.WEATHER)
+        assert isinstance(device, Weather)
+        assert device.identifier == "id"
+        assert device.name is None
+        assert device.device_mode.mode == DeviceType.WEATHER
+        assert device.device_mode.values is None
+
     def test_init_device_weather_full(self):
         device = OnyxClient._init_device(
             "id",
@@ -124,6 +144,7 @@ class TestOnyxClient:
         )
         assert isinstance(device, Weather)
         assert device.identifier == "id"
+        assert device.name == "name"
         assert device.device_mode.mode == DeviceType.WEATHER
         assert len(device.device_mode.values) == 1
         assert device.wind_peak == NumericValue(1, 10, 100, False)
@@ -133,6 +154,38 @@ class TestOnyxClient:
         assert device.humidity == NumericValue(5, 1, 10, False)
         assert device.temperature == NumericValue(6, 1, 10, False)
         assert device.actions == list(Action)
+
+    def test_init_device_weather_no_device_type(self):
+        device = OnyxClient._init_device(
+            "id",
+            "name",
+            DeviceType.WEATHER,
+            {
+                "device_type": {},
+            },
+            list(Action),
+        )
+        assert isinstance(device, Weather)
+        assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_mode.mode is None
+        assert len(device.device_mode.values) == 0
+
+    def test_init_device_light(self):
+        device = OnyxClient._init_device("id", "name", DeviceType.BASIC_LIGHT)
+        assert isinstance(device, Light)
+        assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert device.device_mode.values is None
+
+    def test_init_device_light_minimal(self):
+        device = OnyxClient._init_device("id", None, DeviceType.BASIC_LIGHT)
+        assert isinstance(device, Light)
+        assert device.identifier == "id"
+        assert device.name is None
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert device.device_mode.values is None
 
     def test_init_device_light_full(self):
         device = OnyxClient._init_device(
@@ -152,6 +205,7 @@ class TestOnyxClient:
         )
         assert isinstance(device, Light)
         assert device.identifier == "id"
+        assert device.name == "name"
         assert device.device_mode.mode == DeviceType.BASIC_LIGHT
         assert len(device.device_mode.values) == 1
         assert device.target_brightness == NumericValue(1, 10, 100, False)
@@ -163,6 +217,15 @@ class TestOnyxClient:
         device = OnyxClient._init_device("id", "name", DeviceType.AWNING)
         assert isinstance(device, Shutter)
         assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_mode.mode == DeviceType.AWNING
+        assert device.device_mode.values is None
+
+    def test_init_device_shutter_minimal(self):
+        device = OnyxClient._init_device("id", None, DeviceType.AWNING)
+        assert isinstance(device, Shutter)
+        assert device.identifier == "id"
+        assert device.name is None
         assert device.device_mode.mode == DeviceType.AWNING
         assert device.device_mode.values is None
 
@@ -185,6 +248,7 @@ class TestOnyxClient:
         )
         assert isinstance(device, Shutter)
         assert device.identifier == "id"
+        assert device.name == "name"
         assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
         assert len(device.device_mode.values) == 2
         assert device.target_position == NumericValue(10, 10, 100, False)
@@ -201,6 +265,28 @@ class TestOnyxClient:
         )
         assert isinstance(device, Device)
         assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_type == DeviceType.UNKNOWN
+        assert device.device_mode.mode == DeviceType.UNKNOWN
+
+    def test_init_device_no_type(self):
+        device = OnyxClient._init_device(
+            "id",
+            "name",
+        )
+        assert isinstance(device, Device)
+        assert device.identifier == "id"
+        assert device.name == "name"
+        assert device.device_type == DeviceType.UNKNOWN
+        assert device.device_mode.mode == DeviceType.UNKNOWN
+
+    def test_init_device_no_data(self):
+        device = OnyxClient._init_device(
+            "id",
+        )
+        assert isinstance(device, Device)
+        assert device.identifier == "id"
+        assert device.name is None
         assert device.device_type == DeviceType.UNKNOWN
         assert device.device_mode.mode == DeviceType.UNKNOWN
 
@@ -303,6 +389,17 @@ class TestOnyxClient:
         assert versions.supports("v2")
 
     @pytest.mark.asyncio
+    async def test_supported_versions_none(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/versions",
+            status=200,
+            payload={},
+        )
+        versions = await client.supported_versions()
+        assert versions is not None
+        assert len(versions.versions) == 0
+
+    @pytest.mark.asyncio
     async def test_supported_versions_error(self, mock_response, client):
         mock_response.get(f"{API_URL}/box/finger/api/versions", status=401)
         versions = await client.supported_versions()
@@ -320,6 +417,19 @@ class TestOnyxClient:
         assert date.time == 100.5
         assert date.timezone == "Europe"
         assert date.timezone_offset == 100
+
+    @pytest.mark.asyncio
+    async def test_date_information_none(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/clock",
+            status=200,
+            payload={},
+        )
+        date = await client.date_information()
+        assert date is not None
+        assert date.time == 0
+        assert date.timezone is None
+        assert date.timezone_offset == 0
 
     @pytest.mark.asyncio
     async def test_date_information_error(self, mock_response, client):
@@ -375,6 +485,28 @@ class TestOnyxClient:
         assert mock_device.called
         assert devices is not None
         assert len(devices) == 2
+
+    @patch("onyx_client.client.OnyxClient.device")
+    @pytest.mark.asyncio
+    async def test_devices_all_details_none(self, mock_device, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices",
+            status=200,
+            payload={
+                "device1": {},
+            },
+        )
+        mock_device.return_value = Device(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            DeviceMode(DeviceType.ROLLERSHUTTER),
+            list(Action),
+        )
+        devices = await client.devices(True)
+        assert mock_device.called
+        assert devices is not None
+        assert len(devices) == 1
 
     @pytest.mark.asyncio
     async def test_devices_error(self, mock_response, client):
@@ -472,6 +604,26 @@ class TestOnyxClient:
         )
 
     @pytest.mark.asyncio
+    async def test_device_shutter_no_data(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "rollershutter",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Shutter)
+        assert device.device_type == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+        assert device.target_position is None
+        assert device.target_angle is None
+        assert device.actual_position is None
+        assert device.actual_angle is None
+
+    @pytest.mark.asyncio
     async def test_device_weather(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
@@ -508,6 +660,28 @@ class TestOnyxClient:
         assert device.temperature is not None
 
     @pytest.mark.asyncio
+    async def test_device_weather_no_data(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "weather",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Weather)
+        assert device.device_type == DeviceType.WEATHER
+        assert device.device_mode.mode == DeviceType.WEATHER
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+        assert device.wind_peak is None
+        assert device.sun_brightness_peak is None
+        assert device.sun_brightness_sink is None
+        assert device.air_pressure is None
+        assert device.humidity is None
+        assert device.temperature is None
+
+    @pytest.mark.asyncio
     async def test_device_light(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
@@ -538,14 +712,50 @@ class TestOnyxClient:
         assert device.dim_duration is not None
 
     @pytest.mark.asyncio
+    async def test_device_light_no_data(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "basic_light",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Light)
+        assert device.device_type == DeviceType.BASIC_LIGHT
+        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+        assert device.target_brightness is None
+        assert device.actual_brightness is None
+        assert device.dim_duration is None
+
+    @pytest.mark.asyncio
     async def test_device_click(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "click",
+                "offline": True,
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Click)
+        assert device.device_type == DeviceType.CLICK
+        assert device.device_mode.mode == DeviceType.CLICK
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+        assert device.offline
+
+    @pytest.mark.asyncio
+    async def test_device_click_no_data(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
             status=200,
             payload={
                 "name": "device",
                 "type": "click",
-                "offline": True,
             },
         )
         device = await client.device("device")
@@ -572,11 +782,25 @@ class TestOnyxClient:
         assert device.device_type == DeviceType.ROLLERSHUTTER
         assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
         assert device.device_mode.values is None
-        assert device.actions is None
+        assert len(device.actions) == 0
         assert device.target_position is None
         assert device.target_angle is None
         assert device.actual_position is None
         assert device.actual_angle is None
+
+    @pytest.mark.asyncio
+    async def test_device_no_data(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={},
+        )
+        device = await client.device("device")
+        assert isinstance(device, Device)
+        assert device.device_type == DeviceType.UNKNOWN
+        assert device.device_mode.mode == DeviceType.UNKNOWN
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
 
     @pytest.mark.asyncio
     async def test_device_error(self, mock_response, client):
@@ -637,14 +861,34 @@ class TestOnyxClient:
         assert len(groups1) == 1
         group1 = groups1[0]
         assert group1 is not None
+        assert group1.identifier == "group1"
         assert group1.name == "group1"
         assert group1.devices == ["device1"]
         groups2 = list(filter(lambda dev: dev.identifier == "group2", groups))
         assert len(groups2) == 1
         group2 = groups2[0]
         assert group2 is not None
+        assert group2.identifier == "group2"
         assert group2.name == "group2"
         assert group2.devices == ["device1", "device2"]
+
+    @pytest.mark.asyncio
+    async def test_groups_none(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups",
+            status=200,
+            payload={
+                "group1": {},
+            },
+        )
+        groups = await client.groups()
+        assert groups is not None
+        assert len(groups) == 1
+        group1 = groups[0]
+        assert group1 is not None
+        assert group1.identifier == "group1"
+        assert group1.name is None
+        assert len(group1.devices) == 0
 
     @pytest.mark.asyncio
     async def test_groups_error(self, mock_response, client):
@@ -665,6 +909,18 @@ class TestOnyxClient:
         assert group.devices == ["device"]
 
     @pytest.mark.asyncio
+    async def test_group_none(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group",
+            status=200,
+            payload={},
+        )
+        group = await client.group("group")
+        assert group is not None
+        assert group.name is None
+        assert len(group.devices) == 0
+
+    @pytest.mark.asyncio
     async def test_group_error(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/groups/group", status=401
@@ -680,6 +936,39 @@ class TestOnyxClient:
             payload={"results": {"device": {"status_code": 200}}},
         )
         assert await client.send_group_command(
+            "group", DeviceCommand(action=Action.STOP)
+        )
+
+    @pytest.mark.asyncio
+    async def test_send_group_command_no_results(self, mock_response, client):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+            status=200,
+            payload={"results": {}},
+        )
+        assert await client.send_group_command(
+            "group", DeviceCommand(action=Action.STOP)
+        )
+
+    @pytest.mark.asyncio
+    async def test_send_group_command_none(self, mock_response, client):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+            status=200,
+            payload={},
+        )
+        assert await client.send_group_command(
+            "group", DeviceCommand(action=Action.STOP)
+        )
+
+    @pytest.mark.asyncio
+    async def test_send_group_command_no_status_code(self, mock_response, client):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+            status=200,
+            payload={"results": {"device": {}}},
+        )
+        assert not await client.send_group_command(
             "group", DeviceCommand(action=Action.STOP)
         )
 
@@ -729,25 +1018,16 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            payload={
-                "devices": {
-                    "device1": {
-                        "name": "device1",
-                        "type": "rollershutter",
-                    },
-                    "device2": {
-                        "name": "device2",
-                    },
-                    "device3": {
-                        "type": "rollershutter",
-                    },
-                }
-            },
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
         )
         index = 1
         async for device in client.events():
             assert device.identifier == f"device{index}"
             index += 1
+        assert index == 4
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
@@ -765,19 +1045,95 @@ class TestOnyxClient:
             DeviceMode(DeviceType.ROLLERSHUTTER),
             list(Action),
         )
+        index = 1
         async for device in client.events(True):
             assert device.identifier == "id"
+            index += 1
+        assert index == 2
         assert mock_device.called
+
+    @patch("onyx_client.client.OnyxClient.device")
+    @pytest.mark.asyncio
+    async def test_events_device_exception(self, mock_device, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device":'
+            '{ "name": "device", "type": "rollershutter" } } }',
+        )
+        mock_device.side_effect = AttributeError()
+        index = 1
+        async for device in client.events(True):
+            index += 1
+        assert index == 1
+        assert mock_device.called
+
+    @pytest.mark.asyncio
+    async def test_events_click(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 4
+
+    @pytest.mark.asyncio
+    async def test_events_empty_data(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1": {} } }',
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 2
+
+    @pytest.mark.asyncio
+    async def test_events_no_devices(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": {  } }',
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 1
+
+    @pytest.mark.asyncio
+    async def test_events_none(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="data: {  }",
+        )
+        index = 1
+        async for device in client.events():
+            index += 1
+        assert index == 1
 
     @pytest.mark.asyncio
     async def test_events_error(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=500,
-            payload={},
+            body="data: {  }",
         )
+        index = 1
         async for device in client.events():
             assert device is None
+            index += 1
+        assert index == 2
 
     def test__is_shutter(self):
         assert OnyxClient._is_shutter(DeviceType.ROLLERSHUTTER, {})
@@ -804,6 +1160,9 @@ class TestOnyxClient:
         assert not OnyxClient._is_weather(None, {"target_position": 10})
 
     def test__is_click(self):
-        assert OnyxClient._is_click(DeviceType.CLICK)
-        assert not OnyxClient._is_click(DeviceType.BASIC_LIGHT)
-        assert not OnyxClient._is_click(None)
+        assert OnyxClient._is_click(DeviceType.CLICK, {})
+        assert not OnyxClient._is_click(DeviceType.BASIC_LIGHT, {})
+        assert not OnyxClient._is_click(None, {})
+        assert not OnyxClient._is_click(None, None)
+        assert OnyxClient._is_click(None, {"offline": 10})
+        assert not OnyxClient._is_click(None, {"target_position": 10})

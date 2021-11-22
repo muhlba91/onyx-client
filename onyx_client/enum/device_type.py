@@ -33,5 +33,5 @@ class DeviceType(Enum):
         """Get the device type from the Onyx API's type information."""
         try:
             return DeviceType[lower.upper()]
-        except KeyError:
+        except (KeyError, AttributeError):
             return None
