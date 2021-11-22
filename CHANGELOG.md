@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [3.0.4](https://github.com/muhlba91/onyx-client/compare/v3.0.3...v3.0.4) (2021-11-22)
+
+
+### Bug Fixes
+
+* detect device types correctly ([c5285c0](https://github.com/muhlba91/onyx-client/commit/c5285c0b0fb6d3a3acff61dfebdb223a428ff3d8))
+
 ### [3.0.3](https://github.com/muhlba91/onyx-client/compare/v3.0.2...v3.0.3) (2021-11-22)
 
 
