@@ -537,6 +537,27 @@ class TestOnyxClient:
         assert device.dim_duration is not None
 
     @pytest.mark.asyncio
+    async def test_device_no_properties(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "rollershutter",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Shutter)
+        assert device.device_type == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.values is None
+        assert device.actions is None
+        assert device.target_position is None
+        assert device.target_angle is None
+        assert device.actual_position is None
+        assert device.actual_angle is None
+
+    @pytest.mark.asyncio
     async def test_device_error(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device", status=401

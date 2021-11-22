@@ -273,7 +273,7 @@ class OnyxClient:
             identifier,
             data["name"],
             DeviceType.convert(data["type"]),
-            data["properties"],
+            data.get("properties"),
             actions,
         )
 
@@ -384,11 +384,11 @@ class OnyxClient:
                             if include_details
                             else self._init_device(
                                 key,
-                                value["name"] if "name" in value else None,
+                                value.get("name"),
                                 DeviceType.convert(value["type"])
                                 if "type" in value
                                 else None,
-                                value["properties"] if "properties" in value else None,
+                                value.get("properties"),
                             )
                         )
                         yield device
