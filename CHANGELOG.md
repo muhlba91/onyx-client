@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [3.0.3](https://github.com/muhlba91/onyx-client/compare/v3.0.2...v3.0.3) (2021-11-22)
+
+
+### Bug Fixes
+
+* handle none types on dicts ([96c4676](https://github.com/muhlba91/onyx-client/commit/96c467609756fd5233dff0591bd117d77c6c6ce5))
+
 ### [3.0.2](https://github.com/muhlba91/onyx-client/compare/v3.0.1...v3.0.2) (2021-11-22)
 
 
