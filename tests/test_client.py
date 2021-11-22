@@ -278,7 +278,7 @@ class TestOnyxClient:
         assert device.identifier == "id"
         assert device.name == "name"
         assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode == DeviceType.UNKNOWN
+        assert device.device_mode.mode is None
 
     def test_init_device_no_data(self):
         device = OnyxClient._init_device(
@@ -288,7 +288,7 @@ class TestOnyxClient:
         assert device.identifier == "id"
         assert device.name is None
         assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode == DeviceType.UNKNOWN
+        assert device.device_mode.mode is None
 
     @pytest.mark.asyncio
     async def test_authorize(self, mock_response, session):
@@ -798,7 +798,7 @@ class TestOnyxClient:
         device = await client.device("device")
         assert isinstance(device, Device)
         assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode == DeviceType.UNKNOWN
+        assert device.device_mode.mode is None
         assert device.device_mode.values is None
         assert len(device.actions) == 0
 
@@ -1134,6 +1134,22 @@ class TestOnyxClient:
             assert device is None
             index += 1
         assert index == 2
+
+    @pytest.mark.asyncio
+    async def test_events_shutter(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 4
 
     def test__is_shutter(self):
         assert OnyxClient._is_shutter(DeviceType.ROLLERSHUTTER, {})

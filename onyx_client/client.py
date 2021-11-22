@@ -111,7 +111,6 @@ class OnyxClient:
         data: dict = None,
     ) -> Device:
         """Initialize the device correctly."""
-        device_type = device_type if device_type is not None else DeviceType.UNKNOWN
         device_mode_value = (
             DeviceType.convert(properties.get("device_type", dict()).get("type", None))
             if properties is not None
@@ -167,7 +166,7 @@ class OnyxClient:
             offline = data.get("offline", True) if data is not None else True
             return Click(identifier, name, device_type, offline)
         else:
-            return Device(identifier, name, device_type, device_mode, actions)
+            return Device(identifier, name, DeviceType.UNKNOWN, device_mode, actions)
 
     @staticmethod
     def _is_shutter(device_type: DeviceType, properties: dict) -> bool:
