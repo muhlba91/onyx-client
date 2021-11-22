@@ -12,6 +12,7 @@ from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.data.supported_versions import SupportedVersions
+from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
@@ -107,6 +108,7 @@ class OnyxClient:
         device_type: DeviceType = None,
         properties: dict = None,
         actions: list = None,
+        data: dict = None,
     ) -> Device:
         """Initialize the device correctly."""
         device_mode_value = (
@@ -132,7 +134,7 @@ class OnyxClient:
                 OnyxClient._numeric_value("actual_angle", properties),
                 OnyxClient._numeric_value("actual_position", properties),
             )
-        elif device_type == DeviceType.WEATHER:
+        elif OnyxClient._is_weather(device_type, properties):
             return Weather(
                 identifier,
                 name,
@@ -146,7 +148,7 @@ class OnyxClient:
                 OnyxClient._numeric_value("humidity", properties),
                 OnyxClient._numeric_value("temperature", properties),
             )
-        elif device_type == DeviceType.BASIC_LIGHT:
+        elif OnyxClient._is_light(device_type, properties):
             return Light(
                 identifier,
                 name,
@@ -157,6 +159,8 @@ class OnyxClient:
                 OnyxClient._numeric_value("actual_brightness", properties),
                 OnyxClient._numeric_value("dim_duration", properties),
             )
+        elif OnyxClient._is_click(device_type):
+            return Click(identifier, name, device_type, data.get("offline", True))
         else:
             return Device(identifier, name, device_type, device_mode, actions)
 
@@ -168,6 +172,32 @@ class OnyxClient:
             for key in properties.keys():
                 if key in Shutter.keys():
                     return True
+        return False
+
+    @staticmethod
+    def _is_light(device_type: DeviceType, properties: dict) -> bool:
+        if device_type is not None:
+            return device_type == DeviceType.BASIC_LIGHT
+        if properties is not None:
+            for key in properties.keys():
+                if key in Light.keys():
+                    return True
+        return False
+
+    @staticmethod
+    def _is_weather(device_type: DeviceType, properties: dict) -> bool:
+        if device_type is not None:
+            return device_type == DeviceType.WEATHER
+        if properties is not None:
+            for key in properties.keys():
+                if key in Weather.keys():
+                    return True
+        return False
+
+    @staticmethod
+    def _is_click(device_type: DeviceType) -> bool:
+        if device_type is not None:
+            return device_type == DeviceType.CLICK
         return False
 
     async def _perform_get_request(
@@ -271,10 +301,11 @@ class OnyxClient:
         )
         return self._init_device(
             identifier,
-            data["name"],
-            DeviceType.convert(data["type"]),
+            data.get("name"),
+            DeviceType.convert(data.get("type")),
             data.get("properties"),
             actions,
+            data,
         )
 
     async def send_command(self, identifier: str, command: DeviceCommand) -> bool:
@@ -385,10 +416,9 @@ class OnyxClient:
                             else self._init_device(
                                 key,
                                 value.get("name"),
-                                DeviceType.convert(value["type"])
-                                if "type" in value
-                                else None,
+                                DeviceType.convert(value.get("type")),
                                 value.get("properties"),
+                                value,
                             )
                         )
                         yield device

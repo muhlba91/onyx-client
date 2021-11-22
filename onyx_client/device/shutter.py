@@ -64,9 +64,4 @@ class Shutter(Device):
             "target_angle",
             "actual_angle",
             "actual_position",
-            "drivetime_down",
-            "drivetime_up",
-            "rotationtime",
-            "switch_button_direction",
-            "switch_drive_direction",
         ]
