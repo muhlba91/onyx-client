@@ -1,6 +1,14 @@
 # Changelog
 
 
+### [3.0.2](https://github.com/muhlba91/onyx-client/compare/v3.0.1...v3.0.2) (2021-11-22)
+
+
+### Bug Fixes
+
+* add new click device type; do not rely on properties; fix [#8](https://github.com/muhlba91/onyx-client/issues/8) ([9e92a1c](https://github.com/muhlba91/onyx-client/commit/9e92a1c15f27aea6b2a7c1ba5c43f32d362f32a8))
+* remove dependency on properties being present ([3dac7a4](https://github.com/muhlba91/onyx-client/commit/3dac7a4afffb079095d9c7a078da0acadf3150ed))
+
 ### [3.0.1](https://github.com/muhlba91/onyx-client/compare/v3.0.0...v3.0.1) (2021-11-22)
 
 ## [3.0.0](https://github.com/muhlba91/onyx-client/compare/v2.5.0...v3.0.0) (2021-11-22)
