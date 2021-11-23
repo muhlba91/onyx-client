@@ -14,12 +14,15 @@ class AnimationValue:
     @staticmethod
     def create(properties: dict):
         """Create an animation value from properties."""
+        if properties is None:
+            return None
+
         return AnimationValue(
-            properties["start"],
-            properties["current_value"],
+            properties.get("start", None),
+            properties.get("current_value"),
             [
                 AnimationKeyframe.create(keyframe)
-                for keyframe in properties["keyframes"]
+                for keyframe in properties.get("keyframes", list())
             ],
         )
 

@@ -17,5 +17,12 @@ class TestAnimationKeyframe:
             == expected
         )
 
+    def test_create_no_data(self):
+        expected = AnimationKeyframe(None, None, None, None)
+        assert AnimationKeyframe.create({}) == expected
+
+    def test_create_none(self):
+        assert AnimationKeyframe.create(None) is None
+
     def test_not_eq(self):
         assert AnimationKeyframe("linear", 0, 0, 0) != 10

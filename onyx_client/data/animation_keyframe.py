@@ -14,11 +14,14 @@ class AnimationKeyframe:
     @staticmethod
     def create(properties: dict):
         """Create an animation keyframe from properties."""
+        if properties is None:
+            return None
+
         return AnimationKeyframe(
-            properties["interpolation"],
-            properties["delay"],
-            properties["duration"],
-            properties["value"],
+            properties.get("interpolation", None),
+            properties.get("delay", None),
+            properties.get("duration", None),
+            properties.get("value", None),
         )
 
     def __eq__(self, other):

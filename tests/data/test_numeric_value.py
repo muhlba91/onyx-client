@@ -52,6 +52,9 @@ class TestNumericValue:
         expected = NumericValue(None, 0, 100, False)
         assert NumericValue.create({}) == expected
 
+    def test_create_none(self):
+        assert NumericValue.create(None) is None
+
     def test_update_with(self):
         value = NumericValue(
             1,

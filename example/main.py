@@ -4,7 +4,7 @@ from sys import argv
 
 import aiohttp
 
-from onyx_client import create_client
+from onyx_client.client import create
 from onyx_client.data.device_command import DeviceCommand
 
 
@@ -40,7 +40,7 @@ async def perform(fingerprint: str, access_token: str):
 
     # open session and create client
     session = LoggingClientSession()
-    client = create_client(
+    client = create(
         fingerprint=fingerprint, access_token=access_token, client_session=session
     )
 
@@ -55,6 +55,7 @@ async def perform(fingerprint: str, access_token: str):
 
     # get first device in list
     device_id = devices[0].identifier
+    device_id = "5e2912f7-f25e-4f16-bf1a-6cb967a08261"
     device = await client.device(device_id)
     print(device)
     print()

@@ -25,14 +25,15 @@ class NumericValue:
     @staticmethod
     def create(properties: dict):
         """Create a numeric value from properties."""
+        if properties is None:
+            return None
+
         return NumericValue(
             properties.get("value", None),
             properties.get("minimum", 0),
             properties.get("maximum", 100),
             properties.get("read_only", False),
-            AnimationValue.create(properties.get("animation"))
-            if properties.get("animation", None) is not None
-            else None,
+            AnimationValue.create(properties.get("animation", None)),
         )
 
     def update_with(self, other: Optional):

@@ -14,6 +14,16 @@ s [ONYX.CENTER API](https://github.com/hella-info/onyx_api).
 
 ---
 
+## API Versions
+
+It is encouraged to always update Hella devices to the latest software. This will, mostly, also enforce using the newest
+API. In below table you can find an indication of what Hella API version is supported.
+
+| Hella API Version | Client Version   |
+|-------------------|------------------|
+| v3                | > = 3.1.0 < 4.0.0 |
+| v2                | > = 2.5.0 < 3.0.0 |
+
 ## Installation
 
 The package is published in **(Test)PyPi** and can be installed via:
@@ -30,37 +40,37 @@ The configuration defines **connection properties** as a `dict` for the applicat
 the [Onyx API Access Control](https://github.com/hella-info/onyx_api#access-control) description to **retrieve the
 fingerprint and access token**!
 
-| Option | Description |
-|--------|-------------|
-| fingerprint | The fingerprint of the ONYX.CENTER. |
-| access_token | The permanent access token. |
-/ client_session / The initialized `aiohttp.ClientSession`. (Default: `None`, create new session.) |
+| Option         | Description                                                                     |
+|----------------|---------------------------------------------------------------------------------|
+| fingerprint    | The fingerprint of the ONYX.CENTER.                                             |
+| access_token   | The permanent access token.                                                     |
+| client_session | The initialized `aiohttp.ClientSession`. (Default: `None`, create new session.) |
 
 ### Access Control Helper
 
-The method `onyx_client.helpers.exchange_code` takes the **API code** and performs the exchange to a **fingerprint and
-access token**. Please follow the **aforementioned documentation** to retrieve the code.
+The method `onyx_client.authorizer.exchange_code` takes the **API code** and performs the exchange to a **fingerprint
+and access token**. Please follow the **aforementioned documentation** to retrieve the code.
 
 ## Usage
 
-You can **instantiate** the client using the `onyx_client.create_client` method like:
+You can **instantiate** the client using the `onyx_client.client.create` method like:
 
 ```python
 import aiohttp
-from onyx_client import create_client
-from onyx_client.helpers import exchange_code
+from onyx_client.client import create
+from onyx_client.authorizer import exchange_code
 
 # by providing the fingerprint and access token only
-client = create_client(fingerprint="fingerprint", access_token="access_token")
+client = create(fingerprint="fingerprint", access_token="access_token")
 
 # by providing the fingerprint, access token and aiohttp client session
-client = create_client(fingerprint="fingerprint", access_token="access_token", client_session=aiohttp.ClientSession())
+client = create(fingerprint="fingerprint", access_token="access_token", client_session=aiohttp.ClientSession())
 
 # by providing the configuration object
 client_session = aiohttp.ClientSession()
 # e.g. by exchanging the code first
 config = exchange_code("code", client_session)
-client = create_client(config=config, client_session=client_session) if client_session is not None else None
+client = create(config=config, client_session=client_session) if client_session is not None else None
 ```
 
 An **example** is shown in the **`examples` directory**.

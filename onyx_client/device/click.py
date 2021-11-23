@@ -24,3 +24,9 @@ class Click(Device):
         super().update_with(update)
 
         self.offline = self.offline if update.offline is None else update.offline
+
+    @staticmethod
+    def keys() -> list:
+        return [
+            "offline",
+        ]
