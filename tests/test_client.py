@@ -16,6 +16,7 @@ from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
+from onyx_client.device.switch import Switch
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
@@ -486,6 +487,22 @@ class TestOnyxClient:
         assert device.offline
 
     @pytest.mark.asyncio
+    async def test_device_switch(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "switch",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Switch)
+        assert device.device_type == DeviceType.SWITCH
+        assert device.device_mode.mode == DeviceType.SWITCH
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+
+    @pytest.mark.asyncio
     async def test_device_no_properties(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
@@ -786,22 +803,6 @@ class TestOnyxClient:
             index += 1
         assert index == 1
         assert mock_device.called
-
-    @pytest.mark.asyncio
-    async def test_events_click(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body='data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
-        )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
 
     @pytest.mark.asyncio
     async def test_events_empty_data(self, mock_response, client):

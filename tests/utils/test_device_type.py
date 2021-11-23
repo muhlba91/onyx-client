@@ -1,6 +1,13 @@
 """Tests for device type utils."""
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.device_type import is_shutter, is_light, is_weather, is_click
+from onyx_client.utils.device_type import (
+    is_shutter,
+    is_light,
+    is_weather,
+    is_click,
+    is_switch,
+    _in_keys,
+)
 
 
 def test_is_shutter():
@@ -37,3 +44,20 @@ def test_is_click():
     assert not is_click(None, None)
     assert is_click(None, {"offline": 10})
     assert not is_click(None, {"target_position": 10})
+
+
+def test_is_switch():
+    assert is_switch(DeviceType.SWITCH, {})
+    assert not is_switch(DeviceType.BASIC_LIGHT, {})
+    assert not is_switch(None, {})
+    assert not is_switch(None, None)
+    assert not is_switch(None, {"target_position": 10})
+
+
+def test__in_keys():
+    assert _in_keys({"key": "value"}, ["key"])
+    assert not _in_keys({"key": "value"}, ["other"])
+    assert not _in_keys({"key": "value"}, [])
+    assert not _in_keys({}, ["key"])
+    assert not _in_keys(None, ["key"])
+    assert not _in_keys(None, [])

@@ -6,6 +6,7 @@ from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
+from onyx_client.device.switch import Switch
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
@@ -58,6 +59,22 @@ def test_init_device_click_full():
     assert device.device_mode.mode == DeviceType.CLICK
     assert device.device_mode.values is None
     assert not device.offline
+
+
+def test_init_device_switch():
+    device = init_device("id", "name", DeviceType.SWITCH)
+    assert isinstance(device, Switch)
+    assert device.identifier == "id"
+    assert device.device_mode.mode == DeviceType.SWITCH
+    assert device.device_mode.values is None
+
+
+def test_init_device_switch_full():
+    device = init_device("id", "name", DeviceType.CLICK, None, list(Action))
+    assert isinstance(device, Click)
+    assert device.identifier == "id"
+    assert device.device_mode.mode == DeviceType.CLICK
+    assert device.device_mode.values is None
 
 
 def test_init_device_weather():

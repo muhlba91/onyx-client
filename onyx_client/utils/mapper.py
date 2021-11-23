@@ -6,9 +6,16 @@ from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
+from onyx_client.device.switch import Switch
 from onyx_client.device.weather import Weather
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.device_type import is_click, is_light, is_weather, is_shutter
+from onyx_client.utils.device_type import (
+    is_click,
+    is_light,
+    is_weather,
+    is_shutter,
+    is_switch,
+)
 
 
 def numeric_value(key: str, properties: dict = None):
@@ -90,5 +97,7 @@ def init_device(
     elif is_click(device_type, data):
         offline = data.get("offline", True) if data is not None else True
         return Click(identifier, name, device_type, offline)
+    elif is_switch(device_type, data):
+        return Switch(identifier, name, device_type)
     else:
         return Device(identifier, name, DeviceType.UNKNOWN, device_mode, actions)
