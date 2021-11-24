@@ -19,8 +19,8 @@ s [ONYX.CENTER API](https://github.com/hella-info/onyx_api).
 It is encouraged to always update Hella devices to the latest software. This will, mostly, also enforce using the newest
 API. In below table you can find an indication of what Hella API version is supported.
 
-| Hella API Version | Client Version   |
-|-------------------|------------------|
+| Hella API Version | Client Version    |
+|-------------------|-------------------|
 | v3                | > = 3.1.0 < 4.0.0 |
 | v2                | > = 2.5.0 < 3.0.0 |
 
