@@ -1,6 +1,21 @@
 # Changelog
 
 
+## [3.1.0](https://github.com/muhlba91/onyx-client/compare/v3.0.4...v3.1.0) (2021-11-24)
+
+
+### Features
+
+* add switch device; [#11](https://github.com/muhlba91/onyx-client/issues/11) ([c7477bd](https://github.com/muhlba91/onyx-client/commit/c7477bdb35de5f83ae8eb846b5cecba51122705d))
+* refactor client class; fix [#10](https://github.com/muhlba91/onyx-client/issues/10) ([8a052b6](https://github.com/muhlba91/onyx-client/commit/8a052b6fd3a9716171b5a99a07814fdb7e5352e2))
+
+
+### Bug Fixes
+
+* add new click device type; do not rely on properties; fix [#8](https://github.com/muhlba91/onyx-client/issues/8) ([fa039fc](https://github.com/muhlba91/onyx-client/commit/fa039fcdb9b66486b2c495926dec5458c6c62e05))
+* merge in branch next ([462852e](https://github.com/muhlba91/onyx-client/commit/462852e0fb1eefc94eb62110b36efdf362aa0a82))
+* remove dependency on properties being present ([59c4f2a](https://github.com/muhlba91/onyx-client/commit/59c4f2a249fc5dfedad40f46ab900986d31dc814))
+
 ### [3.0.4](https://github.com/muhlba91/onyx-client/compare/v3.0.3...v3.0.4) (2021-11-22)
 
 
