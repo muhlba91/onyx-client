@@ -207,7 +207,6 @@ class OnyxClient:
             )
         return data is not None
 
-    # FIXME
     async def events(self, include_details: bool = False) -> Device:
         """Stream events continuously."""
         async for message in self.url_helper.start_stream("/events"):
