@@ -5,10 +5,10 @@ import aiohttp
 import pytest
 from aioresponses import aioresponses
 
-from onyx_client import Configuration, OnyxClient
+from onyx_client.client import create, OnyxClient
+from onyx_client.configuration.configuration import Configuration
 from onyx_client.data.animation_keyframe import AnimationKeyframe
 from onyx_client.data.animation_value import AnimationValue
-from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
@@ -16,10 +16,45 @@ from onyx_client.device.click import Click
 from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
+from onyx_client.device.switch import Switch
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.const import API_HEADERS, API_URL, API_VERSION
+from onyx_client.utils.const import API_URL, API_VERSION
+
+
+@patch("aiohttp.ClientSession")
+def test_create_client(mock_session):
+    client = create(
+        fingerprint="finger", access_token="token", client_session=mock_session
+    )
+    assert client.url_helper.client_session == mock_session
+    assert client.url_helper.config.fingerprint == "finger"
+    assert client.url_helper.config.access_token == "token"
+
+
+@patch("aiohttp.ClientSession")
+def test_create_client_with_config(mock_session):
+    client = create(
+        config=Configuration("finger", "token"), client_session=mock_session
+    )
+    assert client.url_helper.client_session == mock_session
+    assert client.url_helper.config is not None
+    assert client.url_helper.config.fingerprint == "finger"
+    assert client.url_helper.config.access_token == "token"
+    assert client.config is not None
+    assert client.config.fingerprint == "finger"
+    assert client.config.access_token == "token"
+
+
+@patch("aiohttp.ClientSession")
+def test_create_client_without_session(mock_session):
+    client = create(fingerprint="finger", access_token="token")
+    assert client.url_helper.client_session is not None
+    assert client.url_helper.config.fingerprint == "finger"
+    assert client.url_helper.config.access_token == "token"
+    assert client.config.fingerprint == "finger"
+    assert client.config.access_token == "token"
 
 
 class TestOnyxClient:
@@ -37,321 +72,6 @@ class TestOnyxClient:
     @pytest.fixture
     def client(self, session) -> OnyxClient:
         yield OnyxClient(Configuration("finger", "token"), session)
-
-    def test_headers(self, client):
-        headers = client._headers
-        for header in API_HEADERS:
-            assert header in headers
-        assert "Authorization" in headers
-        assert headers["Authorization"] == "Bearer token"
-
-    def test_base_url(self, client):
-        assert client._base_url() == f"{API_URL}/box/finger/api/{API_VERSION}"
-
-    def test_base_url_without_version(self, client):
-        assert client._base_url(with_api=False) == f"{API_URL}/box/finger/api"
-
-    def test_url(self, client):
-        assert client._url("/path") == f"{API_URL}/box/finger/api/{API_VERSION}/path"
-
-    def test_url_without_version(self, client):
-        assert client._url("/path", with_api=False) == f"{API_URL}/box/finger/api/path"
-
-    @patch("aiohttp.ClientResponse")
-    def test_check_response(self, mock_response):
-        mock_response.status = 200
-        assert OnyxClient._check_response(mock_response)
-
-    @patch("aiohttp.ClientResponse")
-    def test_check_response_error(self, mock_response):
-        mock_response.status = 401
-        assert not OnyxClient._check_response(mock_response)
-
-    def test__numeric_value(self):
-        assert OnyxClient._numeric_value("key", {"key": {"value": 1}}) == NumericValue(
-            value=1, minimum=0, maximum=100, read_only=False
-        )
-
-    def test__numeric_value_empty_properties(self):
-        assert OnyxClient._numeric_value("key", {}) is None
-
-    def test__numeric_value_no_properties(self):
-        assert OnyxClient._numeric_value("key", None) is None
-
-    def test__boolean_value(self):
-        assert OnyxClient._boolean_value(
-            "key", {"key": {"value": "true"}}
-        ) == BooleanValue(value=True, read_only=False)
-
-    def test__boolean_value_empty_properties(self):
-        assert OnyxClient._boolean_value("key", {}) is None
-
-    def test__boolean_value_no_properties(self):
-        assert OnyxClient._boolean_value("key", None) is None
-
-    def test_init_device_click(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.CLICK)
-        assert isinstance(device, Click)
-        assert device.identifier == "id"
-        assert device.device_mode.mode == DeviceType.CLICK
-        assert device.device_mode.values is None
-        assert device.offline
-
-    def test_init_device_click_full(self):
-        device = OnyxClient._init_device(
-            "id", "name", DeviceType.CLICK, None, list(Action), {"offline": False}
-        )
-        assert isinstance(device, Click)
-        assert device.identifier == "id"
-        assert device.device_mode.mode == DeviceType.CLICK
-        assert device.device_mode.values is None
-        assert not device.offline
-
-    def test_init_device_weather(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.WEATHER)
-        assert isinstance(device, Weather)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert device.device_mode.values is None
-
-    def test_init_device_weather_minimal(self):
-        device = OnyxClient._init_device("id", None, DeviceType.WEATHER)
-        assert isinstance(device, Weather)
-        assert device.identifier == "id"
-        assert device.name is None
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert device.device_mode.values is None
-
-    def test_init_device_weather_full(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-            DeviceType.WEATHER,
-            {
-                "device_type": {
-                    "type": "weather",
-                    "values": ["weather"],
-                },
-                "wind_peak": {"value": 1, "minimum": 10},
-                "sun_brightness_peak": {"value": 2, "minimum": 1, "maximum": 10},
-                "sun_brightness_sink": {"value": 3, "minimum": 1, "maximum": 10},
-                "air_pressure": {"value": 4, "minimum": 1, "maximum": 10},
-                "humidity": {"value": 5, "minimum": 1, "maximum": 10},
-                "temperature": {"value": 6, "minimum": 1, "maximum": 10},
-            },
-            list(Action),
-        )
-        assert isinstance(device, Weather)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert len(device.device_mode.values) == 1
-        assert device.wind_peak == NumericValue(1, 10, 100, False)
-        assert device.sun_brightness_peak == NumericValue(2, 1, 10, False)
-        assert device.sun_brightness_sink == NumericValue(3, 1, 10, False)
-        assert device.air_pressure == NumericValue(4, 1, 10, False)
-        assert device.humidity == NumericValue(5, 1, 10, False)
-        assert device.temperature == NumericValue(6, 1, 10, False)
-        assert device.actions == list(Action)
-
-    def test_init_device_weather_no_device_type(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-            DeviceType.WEATHER,
-            {
-                "device_type": {},
-            },
-            list(Action),
-        )
-        assert isinstance(device, Weather)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode is None
-        assert len(device.device_mode.values) == 0
-
-    def test_init_device_light(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.BASIC_LIGHT)
-        assert isinstance(device, Light)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert device.device_mode.values is None
-
-    def test_init_device_light_minimal(self):
-        device = OnyxClient._init_device("id", None, DeviceType.BASIC_LIGHT)
-        assert isinstance(device, Light)
-        assert device.identifier == "id"
-        assert device.name is None
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert device.device_mode.values is None
-
-    def test_init_device_light_full(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            {
-                "device_type": {
-                    "type": "basic_light",
-                    "values": ["basic_light"],
-                },
-                "target_brightness": {"value": 1, "minimum": 10},
-                "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
-                "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
-            },
-            list(Action),
-        )
-        assert isinstance(device, Light)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert len(device.device_mode.values) == 1
-        assert device.target_brightness == NumericValue(1, 10, 100, False)
-        assert device.actual_brightness == NumericValue(2, 1, 10, False)
-        assert device.dim_duration == NumericValue(3, 1, 10, False)
-        assert device.actions == list(Action)
-
-    def test_init_device_shutter(self):
-        device = OnyxClient._init_device("id", "name", DeviceType.AWNING)
-        assert isinstance(device, Shutter)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.AWNING
-        assert device.device_mode.values is None
-
-    def test_init_device_shutter_minimal(self):
-        device = OnyxClient._init_device("id", None, DeviceType.AWNING)
-        assert isinstance(device, Shutter)
-        assert device.identifier == "id"
-        assert device.name is None
-        assert device.device_mode.mode == DeviceType.AWNING
-        assert device.device_mode.values is None
-
-    def test_init_device_shutter_full(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-            DeviceType.AWNING,
-            {
-                "device_type": {
-                    "type": "rollershutter",
-                    "values": ["awning", "rollershutter"],
-                },
-                "target_position": {"value": 10, "minimum": 10},
-                "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
-                "actual_position": {"value": 10, "maximum": 10},
-                "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
-            },
-            list(Action),
-        )
-        assert isinstance(device, Shutter)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-        assert len(device.device_mode.values) == 2
-        assert device.target_position == NumericValue(10, 10, 100, False)
-        assert device.target_angle == NumericValue(1, 1, 10, False)
-        assert device.actual_position == NumericValue(10, 0, 10, False)
-        assert device.actual_angle == NumericValue(1, 1, 10, False)
-        assert device.actions == list(Action)
-
-    def test_init_device_unknown(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-            DeviceType.UNKNOWN,
-        )
-        assert isinstance(device, Device)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode == DeviceType.UNKNOWN
-
-    def test_init_device_no_type(self):
-        device = OnyxClient._init_device(
-            "id",
-            "name",
-        )
-        assert isinstance(device, Device)
-        assert device.identifier == "id"
-        assert device.name == "name"
-        assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode is None
-
-    def test_init_device_no_data(self):
-        device = OnyxClient._init_device(
-            "id",
-        )
-        assert isinstance(device, Device)
-        assert device.identifier == "id"
-        assert device.name is None
-        assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode is None
-
-    @pytest.mark.asyncio
-    async def test_authorize(self, mock_response, session):
-        mock_response.post(
-            f"{API_URL}/authorize",
-            status=200,
-            payload={
-                "fingerprint": "finger",
-                "token": "token",
-            },
-        )
-        config = await OnyxClient.authorize("code", session)
-        assert isinstance(config, Configuration)
-        assert config.fingerprint == "finger"
-        assert config.access_token == "token"
-
-    @pytest.mark.asyncio
-    async def test_authorize_error(self, mock_response, session):
-        mock_response.post(f"{API_URL}/authorize", status=401)
-        auth = await OnyxClient.authorize("code", session)
-        assert auth is None
-
-    @pytest.mark.asyncio
-    async def test_perform_get_request(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await client._perform_get_request("/path")
-        assert response is not None
-
-    @pytest.mark.asyncio
-    async def test_perform_get_request_error(self, mock_response, client):
-        mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/path", status=401)
-        response = await client._perform_get_request("/path")
-        assert response is None
-
-    @pytest.mark.asyncio
-    async def test_perform_delete_request(self, mock_response, client):
-        mock_response.delete(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await client._perform_delete_request("/path")
-        assert response is not None
-
-    @pytest.mark.asyncio
-    async def test_perform_delete_request_error(self, mock_response, client):
-        mock_response.delete(f"{API_URL}/box/finger/api/{API_VERSION}/path", status=401)
-        response = await client._perform_delete_request("/path")
-        assert response is None
-
-    @pytest.mark.asyncio
-    async def test_perform_post_request(self, mock_response, client):
-        mock_response.post(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await client._perform_post_request("/path", {})
-        assert response is not None
-
-    @pytest.mark.asyncio
-    async def test_perform_post_request_error(self, mock_response, client):
-        mock_response.post(f"{API_URL}/box/finger/api/{API_VERSION}/path", status=401)
-        response = await client._perform_post_request("/path", {})
-        assert response is None
 
     @pytest.mark.asyncio
     async def test_verify(self, mock_response, client):
@@ -767,6 +487,22 @@ class TestOnyxClient:
         assert device.offline
 
     @pytest.mark.asyncio
+    async def test_device_switch(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "type": "switch",
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Switch)
+        assert device.device_type == DeviceType.SWITCH
+        assert device.device_mode.mode == DeviceType.SWITCH
+        assert device.device_mode.values is None
+        assert len(device.actions) == 0
+
+    @pytest.mark.asyncio
     async def test_device_no_properties(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
@@ -1069,22 +805,6 @@ class TestOnyxClient:
         assert mock_device.called
 
     @pytest.mark.asyncio
-    async def test_events_click(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body='data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
-        )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
-
-    @pytest.mark.asyncio
     async def test_events_empty_data(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
@@ -1131,9 +851,8 @@ class TestOnyxClient:
         )
         index = 1
         async for device in client.events():
-            assert device is None
             index += 1
-        assert index == 2
+        assert index == 1
 
     @pytest.mark.asyncio
     async def test_events_shutter(self, mock_response, client):
@@ -1150,35 +869,3 @@ class TestOnyxClient:
             assert device.identifier == f"device{index}"
             index += 1
         assert index == 4
-
-    def test__is_shutter(self):
-        assert OnyxClient._is_shutter(DeviceType.ROLLERSHUTTER, {})
-        assert not OnyxClient._is_shutter(DeviceType.WEATHER, {})
-        assert not OnyxClient._is_shutter(None, {})
-        assert not OnyxClient._is_shutter(None, None)
-        assert OnyxClient._is_shutter(None, {"target_position": 10})
-        assert not OnyxClient._is_shutter(None, {"sun_brightness_sink": 10})
-
-    def test__is_light(self):
-        assert OnyxClient._is_light(DeviceType.BASIC_LIGHT, {})
-        assert not OnyxClient._is_light(DeviceType.WEATHER, {})
-        assert not OnyxClient._is_light(None, {})
-        assert not OnyxClient._is_light(None, None)
-        assert OnyxClient._is_light(None, {"target_brightness": 10})
-        assert not OnyxClient._is_light(None, {"target_position": 10})
-
-    def test__is_weather(self):
-        assert OnyxClient._is_weather(DeviceType.WEATHER, {})
-        assert not OnyxClient._is_weather(DeviceType.BASIC_LIGHT, {})
-        assert not OnyxClient._is_weather(None, {})
-        assert not OnyxClient._is_weather(None, None)
-        assert OnyxClient._is_weather(None, {"sun_brightness_sink": 10})
-        assert not OnyxClient._is_weather(None, {"target_position": 10})
-
-    def test__is_click(self):
-        assert OnyxClient._is_click(DeviceType.CLICK, {})
-        assert not OnyxClient._is_click(DeviceType.BASIC_LIGHT, {})
-        assert not OnyxClient._is_click(None, {})
-        assert not OnyxClient._is_click(None, None)
-        assert OnyxClient._is_click(None, {"offline": 10})
-        assert not OnyxClient._is_click(None, {"target_position": 10})

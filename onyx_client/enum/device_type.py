@@ -13,7 +13,8 @@ class DeviceType(Enum):
     VENEER = auto()
     BASIC_LIGHT = auto()
     CLICK = auto()
-    UNKNOWN = auto()
+    SWITCH = auto()
+    UNKNOWN = 9999
 
     def string(self) -> str:
         """Get the string representation for the Onyx API."""
