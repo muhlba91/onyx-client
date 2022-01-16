@@ -1,6 +1,8 @@
 # Changelog
 
 
+### [3.1.2](https://github.com/muhlba91/onyx-client/compare/v3.1.1...v3.1.2) (2022-01-16)
+
 ### [3.1.1](https://github.com/muhlba91/onyx-client/compare/v3.1.0...v3.1.1) (2021-11-24)
 
 ## [3.1.0](https://github.com/muhlba91/onyx-client/compare/v3.0.4...v3.1.0) (2021-11-24)
