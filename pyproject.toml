@@ -38,8 +38,7 @@ brotlipy = "^0.7.0"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"
 pytest-cov = { extras = ["toml"], version = "^3.0.0" }
-flakehell = "^0.9.0"
-flake8 = "3.8.4"
+flakeheaven = "^0.11.0"
 coverage = { extras = ["toml"], version = "^6.1.2" }
 black = "^21.11b1"
 pre-commit = "^2.9.3"
@@ -82,7 +81,7 @@ exclude_lines = [
 fail_under = 95
 show_missing = true
 
-[tool.flakehell]
+[tool.flakeheaven]
 exclude = [
     "README.md"
 ]
@@ -91,7 +90,7 @@ max_line_length = 88
 show_source = true
 whitelist = ".flake8.whitelist"
 
-[tool.flakehell.plugins]
+[tool.flakeheaven.plugins]
 flake8-bandit = [
     "+*",
     "-S322"
