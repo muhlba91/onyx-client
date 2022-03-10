@@ -53,7 +53,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk monitor
-          snyk test --package-manager=poetry --fail-on=all --severity-threshold=medium --sarif-file-output=snyk.sarif
+          snyk test --package-manager=poetry --fail-on=all --severity-threshold=medium --remote-repo-url=${{ github.server_url }}/${{ github.repository }} --sarif-file-output=snyk.sarif
 
       - name: Upload to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
