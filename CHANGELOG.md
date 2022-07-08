@@ -1,6 +1,14 @@
 # Changelog
 
 
+### [4.0.1](https://github.com/muhlba91/onyx-client/compare/v4.0.0...v4.0.1) (2022-07-08)
+
+
+### Bug Fixes
+
+* update min python version to 3.9 ([1c27d89](https://github.com/muhlba91/onyx-client/commit/1c27d89b7a0947f1a46b406fdd9978a6e35e8f40))
+* update min python version to 3.9 ([db399ab](https://github.com/muhlba91/onyx-client/commit/db399ab77be7ded714f7ffc1e22f3ec99ead1472))
+
 ## [4.0.0](https://github.com/muhlba91/onyx-client/compare/v3.1.2...v4.0.0) (2022-07-08)
 
 
