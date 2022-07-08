@@ -1,6 +1,25 @@
 # Changelog
 
 
+## [4.0.0](https://github.com/muhlba91/onyx-client/compare/v3.1.2...v4.0.0) (2022-07-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove brotlipy dependency
+
+### Features
+
+* **ci:** add snyk monitor ([d4c8877](https://github.com/muhlba91/onyx-client/commit/d4c8877c2beb8cb76dbe01835d469d79981dbe13))
+* update dependencies; use python 3.10 for testing ([ab4c55e](https://github.com/muhlba91/onyx-client/commit/ab4c55ef6ca07c278c66d55fed6e38a831c3f627))
+
+
+### Bug Fixes
+
+* **ci:** add remote repo url to snyk ([de3f739](https://github.com/muhlba91/onyx-client/commit/de3f739944c150a634eef8c94a07b9a7e74b079e))
+* **ci:** fix python version ([ebbf387](https://github.com/muhlba91/onyx-client/commit/ebbf387c84eada8d360b005b541bf1625efd545c))
+* **ci:** remove branch modifier for snyk ([5ae9172](https://github.com/muhlba91/onyx-client/commit/5ae9172521219e0d6b856bdb93e3180f700fa994))
+
 ### [3.1.2](https://github.com/muhlba91/onyx-client/compare/v3.1.1...v3.1.2) (2022-01-16)
 
 ### [3.1.1](https://github.com/muhlba91/onyx-client/compare/v3.1.0...v3.1.1) (2021-11-24)
