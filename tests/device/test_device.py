@@ -1,5 +1,6 @@
 """Tests for the Base Device class."""
 import pytest
+import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.device import Device
@@ -9,7 +10,7 @@ from onyx_client.exception.update_exception import UpdateException
 
 
 class TestDevice:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def device_mode(self):
         yield DeviceMode(DeviceType.ROLLERSHUTTER)
 

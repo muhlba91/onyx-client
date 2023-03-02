@@ -1,5 +1,6 @@
 """Tests for the Switch Device class."""
 import pytest
+import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.switch import Switch
@@ -8,7 +9,7 @@ from onyx_client.exception.update_exception import UpdateException
 
 
 class TestSwitch:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def device_mode(self):
         yield DeviceMode(DeviceType.SWITCH)
 

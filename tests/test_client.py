@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import aiohttp
 import pytest
+import pytest_asyncio
 from aioresponses import aioresponses
 
 from onyx_client.client import create, OnyxClient
@@ -58,18 +59,18 @@ def test_create_client_without_session(mock_session):
 
 
 class TestOnyxClient:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def session(self) -> aiohttp.ClientSession:
         sess = aiohttp.ClientSession()
         yield sess
         await sess.close()
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def mock_response(self):
         with aioresponses() as mocked:
             yield mocked
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def client(self, session) -> OnyxClient:
         yield OnyxClient(Configuration("finger", "token"), session)
 

@@ -1,5 +1,6 @@
 """Tests for the Weather Device class."""
 import pytest
+import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
@@ -10,7 +11,7 @@ from onyx_client.exception.update_exception import UpdateException
 
 
 class TestWeather:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def device_mode(self):
         yield DeviceMode(DeviceType.WEATHER)
 
