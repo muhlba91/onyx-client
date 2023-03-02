@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [5.0.0](https://github.com/muhlba91/onyx-client/compare/v4.0.1...v5.0.0) (2023-03-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* update to python 3.11
+
+### Features
+
+* update dependencies ([cf0c45a](https://github.com/muhlba91/onyx-client/commit/cf0c45a9f594ac8f18bf1f8fc496cc5ffc4fbf3a))
+
 ### [4.0.1](https://github.com/muhlba91/onyx-client/compare/v4.0.0...v4.0.1) (2022-07-08)
 
 
