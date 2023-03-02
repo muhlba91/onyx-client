@@ -2,6 +2,7 @@
 
 import aiohttp
 import pytest
+import pytest_asyncio
 from aioresponses import aioresponses
 
 from onyx_client.configuration.configuration import Configuration
@@ -10,18 +11,18 @@ from onyx_client.utils.const import API_HEADERS, API_URL, API_VERSION
 
 
 class TestUrlHelper:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def session(self) -> aiohttp.ClientSession:
         sess = aiohttp.ClientSession()
         yield sess
         await sess.close()
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def mock_response(self):
         with aioresponses() as mocked:
             yield mocked
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def helper(self, session) -> UrlHelper:
         yield UrlHelper(Configuration("finger", "token"), session)
 

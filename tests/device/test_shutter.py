@@ -1,5 +1,6 @@
 """Tests for the Shutter Device class."""
 import pytest
+import pytest_asyncio
 
 from onyx_client.data.animation_keyframe import AnimationKeyframe
 from onyx_client.data.animation_value import AnimationValue
@@ -12,7 +13,7 @@ from onyx_client.exception.update_exception import UpdateException
 
 
 class TestShutter:
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def device_mode(self):
         yield DeviceMode(DeviceType.ROLLERSHUTTER)
 

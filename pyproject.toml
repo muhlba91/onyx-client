@@ -30,19 +30,18 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-aiohttp = "^3.8.1"
-cchardet = "^2.1.7"
+python = "^3.11"
+aiohttp = "^3.8.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
-pytest-cov = { extras = ["toml"], version = "^3.0.0" }
-flakeheaven = "^2.0.0"
-coverage = { extras = ["toml"], version = "^6.4.1" }
-black = "^22.6"
-pre-commit = "^2.19.0"
-pytest-asyncio = "^0.18.3"
-aioresponses = "^0.7.3"
+pytest = "^7.2.1"
+pytest-cov = { extras = ["toml"], version = "^4.0.0" }
+flakeheaven = "^3.2.1"
+coverage = { extras = ["toml"], version = "^6.5.0" }
+black = "^23.1.0"
+pre-commit = "^3.1.1"
+pytest-asyncio = "^0.20.3"
+aioresponses = "^0.7.4"
 coveralls = "^3.3.1"
 
 [tool.poetry-dynamic-versioning]
