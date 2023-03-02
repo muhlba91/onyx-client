@@ -22,7 +22,7 @@ API. In below table you can find an indication of what Hella API version is supp
 
 | Hella API Version | Client Version    |
 |-------------------|-------------------|
-| v3                | > = 3.1.0 < 4.0.0 |
+| v3                | > = 3.1.0 < 6.0.0 |
 | v2                | > = 2.5.0 < 3.0.0 |
 
 ## Installation
