@@ -1,6 +1,13 @@
 # Changelog
 
 
+### [5.0.1](https://github.com/muhlba91/onyx-client/compare/v5.0.0...v5.0.1) (2023-03-02)
+
+
+### Bug Fixes
+
+* fix versioning ([7fbf6dd](https://github.com/muhlba91/onyx-client/commit/7fbf6dd85e9fd909b0f525f2ab8eee7e22752202))
+
 ## [5.0.0](https://github.com/muhlba91/onyx-client/compare/v4.0.1...v5.0.0) (2023-03-02)
 
 
