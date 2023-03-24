@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [6.0.0](https://github.com/muhlba91/onyx-client/compare/v5.0.1...v6.0.0) (2023-03-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* downgrade to python 3.10
+
+### Features
+
+* revert upgrade to python 3.11 ([9a532b2](https://github.com/muhlba91/onyx-client/commit/9a532b2c7f96ffa891043ea8c95c74c03dbf12c6))
+
 ### [5.0.1](https://github.com/muhlba91/onyx-client/compare/v5.0.0...v5.0.1) (2023-03-02)
 
 
