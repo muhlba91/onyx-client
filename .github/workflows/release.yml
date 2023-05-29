@@ -1,10 +1,14 @@
-name: Python package
+name: Release
 
 on:
   push:
     branches:
       - main
       - next
+    paths:
+      - "onyx_client/**"
+      - "poetry.lock"
+      - "pyproject.toml"
 
 jobs:
   test:
@@ -67,13 +71,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Build and Publish to TestPyPi and PyPi
-    if: startsWith(github.ref, 'refs/heads/main') || github.ref == 'refs/heads/next'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
     needs:
       - test
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.10"]
+        node-version: ["16"]
 
     steps:
       - name: Checkout repository
@@ -85,7 +90,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: actions/setup-node@v3
         with:
-          node-version: "12"
+          node-version: ${{ matrix.node-version }}
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -129,7 +134,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
 
       - name: Publish release distribution to PyPi
         if: github.ref == 'refs/heads/main'

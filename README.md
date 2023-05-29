@@ -1,7 +1,7 @@
 # Onyx Client
 
 [![](https://img.shields.io/github/license/muhlba91/onyx-client?style=for-the-badge)](LICENSE)
-[![](https://img.shields.io/github/workflow/status/muhlba91/onyx-client/Python%20package?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions)
+[![](https://img.shields.io/github/actions/workflow/status/muhlba91/onyx-client/release.yml?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions/workflows/release.yml)
 [![](https://img.shields.io/coveralls/github/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/)
 [![](https://img.shields.io/pypi/pyversions/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
@@ -22,8 +22,8 @@ API. In below table you can find an indication of what Hella API version is supp
 
 | Hella API Version | Client Version    |
 |-------------------|-------------------|
-| v3                | > = 3.1.0 < 6.0.0 |
-| v2                | > = 2.5.0 < 3.0.0 |
+| v3                | >= 3.1.0          |
+| v2                | >= 2.5.0 < 3.0.0  |
 
 ## Installation
 
@@ -83,8 +83,8 @@ An **example** is shown in the **`examples` directory**.
 The project uses [poetry](https://poetry.eustace.io/) and to install all dependencies and the build environment, run:
 
 ```bash
-$ pip install poetry
-$ poetry install
+pip install poetry
+poetry install
 ```
 
 ### Testing
@@ -93,9 +93,9 @@ $ poetry install
 2) Run `pytest` by:
 
 ```bash
-$ poetry run pytest
+poetry run pytest
 # or
-$ pytest
+pytest
 ```
 
 ### Linting and Code Style
@@ -108,19 +108,19 @@ using [pre-commit](https://pre-commit.com/).
 2) (Optional) Install pre-commit hooks:
 
 ```bash
-$ poetry run pre-commit install
+poetry run pre-commit install
 ```
 
 3) Run black:
 
 ```bash
-$ poetry run black .
+poetry run black .
 ```
 
 4) Run flakehell:
 
 ```bash
-$ poetry run flakehell lint
+poetry run flakehell lint
 ```
 
 ### Building
@@ -130,8 +130,8 @@ version number based on the Git tags. Hence, to have a proper versioning for the
 like:
 
 ```bash
-$ pip install build
-$ python -m build
+pip install build
+python -m build
 ```
 
 Your distribution will be in the `dist` directory.
@@ -148,15 +148,15 @@ adhere to the additional rules outlined in `.conform.yaml`.
 To draft a release, use [standard-version](https://github.com/conventional-changelog/standard-version):
 
 ```bash
-$ standard-version
+standard-version
 # alternatively
-$ npx standard-version
+npx standard-version
 ```
 
 Finally, push with tags:
 
 ```bash
-$ git push --follow-tags
+git push --follow-tags
 ```
 
 ---
