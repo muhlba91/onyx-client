@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.1.0](https://github.com/muhlba91/onyx-client/compare/v6.0.0...v6.1.0) (2023-05-29)
+
+
+### Features
+
+* update dependencies ([9d997cd](https://github.com/muhlba91/onyx-client/commit/9d997cdca56bb78c86ef3a622a3efd76c6b4e6dc))
+
 ## [6.0.0](https://github.com/muhlba91/onyx-client/compare/v5.0.1...v6.0.0) (2023-03-24)
 
 
