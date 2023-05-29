@@ -7,7 +7,6 @@
     "prHourlyLimit": 0,
     "prConcurrentLimit": 0,
     "baseBranches": [
-        "main",
         "next"
     ],
     "enabledManagers": [
