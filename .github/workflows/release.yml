@@ -9,6 +9,7 @@ on:
       - "onyx_client/**"
       - "poetry.lock"
       - "pyproject.toml"
+  workflow_dispatch:
 
 jobs:
   test:
