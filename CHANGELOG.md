@@ -1,6 +1,24 @@
 # Changelog
 
 
+## [7.0.0](https://github.com/muhlba91/onyx-client/compare/v6.1.0...v7.0.0) (2023-06-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrades python to 3.11
+
+### Features
+
+* **ci:** update coverage to v7; use coveralls github action ([eccc20d](https://github.com/muhlba91/onyx-client/commit/eccc20d48246c5e7b584b6e3f550f2222290d059))
+* update dependencies ([343543b](https://github.com/muhlba91/onyx-client/commit/343543bd9f38f2d6cc8c86fdca5b1f26b9ba9d01))
+* upgrade to python 3.11 ([444b6a2](https://github.com/muhlba91/onyx-client/commit/444b6a2a270e7831d41575fd91b6c46e87a4ebdc))
+
+
+### Bug Fixes
+
+* **ci:** fix renovate commit message ([e10e528](https://github.com/muhlba91/onyx-client/commit/e10e528ae0fee477d1f3802ddb78e5d059e3f802))
+
 ## [6.1.0](https://github.com/muhlba91/onyx-client/compare/v6.0.0...v6.1.0) (2023-05-29)
 
 
