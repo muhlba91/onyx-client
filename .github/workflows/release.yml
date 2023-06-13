@@ -59,7 +59,7 @@ jobs:
           python -m build
 
       - name: Publish distribution to TestPyPi
-        if: !needs.release.outputs.release_created
+        if: needs.release.outputs.release_created != true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_TEST_API_TOKEN }}
