@@ -1,21 +1,37 @@
+---
 name: Release
 
 on:
   push:
     branches:
       - main
-      - next
-    paths:
-      - "onyx_client/**"
-      - "poetry.lock"
-      - "pyproject.toml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Release
+    outputs:
+      release_created: ${{ steps.release.outputs.releases_created }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          command: manifest
+
   publish:
     runs-on: ubuntu-latest
-    name: Build and Publish to TestPyPi and PyPi
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
+    name: Build and Publish
+    needs:
+      - release
     strategy:
       max-parallel: 4
       matrix:
@@ -28,11 +44,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Node
-        if: github.ref == 'refs/heads/main'
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -43,62 +54,19 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build
 
-      - name: Setup Git
-        run: |
-          git config --local user.email "${{ env.GITHUB_ACTION }}+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git fetch --tags
-
-      - name: Versioning and Changelog
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npx standard-version -i release-CHANGELOG.md --skip.commit --skip.tag
-          npx standard-version
-
-      - name: Cache Poetry
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-poetry
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build
 
       - name: Publish distribution to TestPyPi
-        if: github.ref == 'refs/heads/next'
+        if: !needs.release.outputs.release_created
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish release distribution to PyPi
-        if: github.ref == 'refs/heads/main'
+        if: needs.release.outputs.release_created
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-
-      - name: Push to Repository
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git push --follow-tags
-
-      - name: Get Tag for Release
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "TAG_NAME=`git describe --abbrev=0 --match "v*"`" >> $GITHUB_ENV
-
-      - name: Release
-        if: github.ref == 'refs/heads/main'
-        uses: ncipollo/release-action@v1
-        with:
-          bodyFile: "release-CHANGELOG.md"
-          name: "${{ env.TAG_NAME }}"
-          tag: "${{ env.TAG_NAME }}"
-          token: "${{ secrets.GITHUB_TOKEN }}"

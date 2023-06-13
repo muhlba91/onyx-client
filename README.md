@@ -143,24 +143,6 @@ adhere to the additional rules outlined in `.conform.yaml`.
 
 ---
 
-## Release
-
-To draft a release, use [standard-version](https://github.com/conventional-changelog/standard-version):
-
-```bash
-standard-version
-# alternatively
-npx standard-version
-```
-
-Finally, push with tags:
-
-```bash
-git push --follow-tags
-```
-
----
-
 ## Contributions
 
 Please feel free to contribute, be it with Issues or Pull Requests! Please read
