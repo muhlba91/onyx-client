@@ -32,6 +32,9 @@ jobs:
     name: Build and Publish
     needs:
       - release
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       max-parallel: 4
       matrix:
@@ -62,11 +65,11 @@ jobs:
         if: needs.release.outputs.release_created != true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+          skip-existing: true
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish release distribution to PyPi
         if: needs.release.outputs.release_created
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
