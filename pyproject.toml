@@ -1,9 +1,8 @@
 [build-system]
 requires = [
-    "poetry>=1.5.1",
-    "poetry-dynamic-versioning>=0.21.4"
+    "poetry-core"
 ]
-build-backend = "poetry_dynamic_versioning.backend"
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "onyx-client"
@@ -42,13 +41,6 @@ black = "^23.1.0"
 pre-commit = "^3.1.1"
 pytest-asyncio = "^0.21.0"
 aioresponses = "^0.7.4"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "pep440"
-format-jinja = "{% if distance == 0 %}{{ base }}{% else %}{{ base }}.dev{{ distance }}{% endif %}"
-dirty = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
