@@ -27,6 +27,7 @@ class DeviceType(Enum):
             self.AWNING,
             self.RAFFSTORE_90,
             self.RAFFSTORE_180,
+            self.VENEER,
         ]
 
     @staticmethod
