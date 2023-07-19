@@ -1,6 +1,32 @@
 # Changelog
 
 
+## [7.1.0](https://github.com/muhlba91/onyx-client/compare/v7.0.0...v7.1.0) (2023-07-19)
+
+
+### Features
+
+* **ci:** add build verification in pipeline ([ebb017f](https://github.com/muhlba91/onyx-client/commit/ebb017f472f275f84a44c3104bf1294e562e09dd))
+* remove dynamic versioning and test pypi publishing ([f4d6810](https://github.com/muhlba91/onyx-client/commit/f4d6810a18ea2987fbe643d1e5584e929c0a024e))
+
+
+### Bug Fixes
+
+* add missing device types and shutter configuration ([43331f2](https://github.com/muhlba91/onyx-client/commit/43331f295b98b5d2101c00861e67342e6b1ea5c6))
+
+
+### Miscellaneous Chores
+
+* **ci:** fix release workflow ([771ebe0](https://github.com/muhlba91/onyx-client/commit/771ebe071f625389069c4b973909124bdb324f65))
+* **ci:** fix release-please commit message ([4a3904b](https://github.com/muhlba91/onyx-client/commit/4a3904b5abe5f37ddae88d8f675a900446e72348))
+* **ci:** leverage pypi trusted publishers ([0439942](https://github.com/muhlba91/onyx-client/commit/04399424465d0b930a542d8b103b66bd44b9ad2e))
+* **deps:** update dependency black to v23.7.0 ([3054798](https://github.com/muhlba91/onyx-client/commit/3054798fe0d1d948991a1188854bb099636dceec))
+* **deps:** update dependency pre-commit to v3.3.3 ([0106403](https://github.com/muhlba91/onyx-client/commit/0106403c99ec2d5a96d6d84ad34c59fc3f4dd50a))
+* **deps:** update dependency pytest to v7.3.2 ([f841806](https://github.com/muhlba91/onyx-client/commit/f84180629c6fd07ae5bb5302fb3ff70be14fd20e))
+* **deps:** update dependency pytest to v7.4.0 ([e019b0f](https://github.com/muhlba91/onyx-client/commit/e019b0f82d19f320f8f2c6661a4eddae7b701f21))
+* **deps:** update dependency pytest-asyncio to v0.21.1 ([6b2919c](https://github.com/muhlba91/onyx-client/commit/6b2919c1e6caf424f746450ad05ab8243dcf5bf1))
+* replace standard-version with release-please ([b747f7c](https://github.com/muhlba91/onyx-client/commit/b747f7c28ee1bd06385b19866210e872f6f273d1))
+
 ## [7.0.0](https://github.com/muhlba91/onyx-client/compare/v6.1.0...v7.0.0) (2023-06-08)
 
 
