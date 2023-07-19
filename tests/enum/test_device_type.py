@@ -20,3 +20,7 @@ class TestDeviceType:
         assert DeviceType.ROLLERSHUTTER.is_shutter()
         assert DeviceType.RAFFSTORE_90.is_shutter()
         assert DeviceType.RAFFSTORE_180.is_shutter()
+        assert DeviceType.VENEER.is_shutter()
+        assert DeviceType.PERGOLA_AWNING_ROOF.is_shutter()
+        assert DeviceType.PERGOLA_SIDE.is_shutter()
+        assert DeviceType.PERGOLA_SLAT_ROOF.is_shutter()

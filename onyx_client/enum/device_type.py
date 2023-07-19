@@ -14,6 +14,9 @@ class DeviceType(Enum):
     BASIC_LIGHT = auto()
     CLICK = auto()
     SWITCH = auto()
+    PERGOLA_AWNING_ROOF = (auto(),)
+    PERGOLA_SIDE = (auto,)
+    PERGOLA_SLAT_ROOF = (auto(),)
     UNKNOWN = 9999
 
     def string(self) -> str:
@@ -28,6 +31,9 @@ class DeviceType(Enum):
             self.RAFFSTORE_90,
             self.RAFFSTORE_180,
             self.VENEER,
+            self.PERGOLA_AWNING_ROOF,
+            self.PERGOLA_SIDE,
+            self.PERGOLA_SLAT_ROOF,
         ]
 
     @staticmethod
