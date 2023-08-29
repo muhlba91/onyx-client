@@ -1,0 +1,1 @@
+{"results": [["pycodestyle", "E203", 214, 46, "whitespace before ':'", "                message = message[len(\"data:\") :].strip()\n"]], "digest": "80667ad87bfbe906002175bd4fc07daf"}

@@ -1,0 +1,1 @@
+{"results": [["pycodestyle", "W503", 37, 12, "line break before binary operator", "            == expected\n"], ["pycodestyle", "W503", 48, 12, "line break before binary operator", "            == expected\n"]], "digest": "7c31aadfec82d44461d8421d7a63e34e"}
