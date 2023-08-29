@@ -1,6 +1,19 @@
 # Changelog
 
 
+## [7.1.1](https://github.com/muhlba91/onyx-client/compare/v7.1.0...v7.1.1) (2023-08-29)
+
+
+### Bug Fixes
+
+* fix device_type enumeration ([d9483e7](https://github.com/muhlba91/onyx-client/commit/d9483e7217fc10625889ba98617bea2f22571dbb))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency aiohttp to v3.8.5 ([3dd61c6](https://github.com/muhlba91/onyx-client/commit/3dd61c6ec91bec8a7e893ff44a6bc376dce630ef))
+* **deps:** update dependency coverage to v7.3.0 ([5606fbc](https://github.com/muhlba91/onyx-client/commit/5606fbc5d63fdc026ee3506ceb2a118f31c7293b))
+
 ## [7.1.0](https://github.com/muhlba91/onyx-client/compare/v7.0.0...v7.1.0) (2023-07-19)
 
 
