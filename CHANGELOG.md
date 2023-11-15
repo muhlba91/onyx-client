@@ -1,6 +1,33 @@
 # Changelog
 
 
+## [7.2.0](https://github.com/muhlba91/onyx-client/compare/v7.1.1...v7.2.0) (2023-11-15)
+
+
+### Features
+
+* use real values for weather device tests ([d9a4e5e](https://github.com/muhlba91/onyx-client/commit/d9a4e5e48ff7c832e211f731f32742fd0a90f55e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v4 ([5beccd3](https://github.com/muhlba91/onyx-client/commit/5beccd32c11f58edc1a87a5c15cebed60611d612))
+* **deps:** update dependency aiohttp to v3.8.6 ([633284e](https://github.com/muhlba91/onyx-client/commit/633284e8de57a463c1d18f79d06d2e2b0f69e8e1))
+* **deps:** update dependency aioresponses to v0.7.5 ([a76bfc3](https://github.com/muhlba91/onyx-client/commit/a76bfc3a0fd13273eb5dc5f9001bdc4297525e4e))
+* **deps:** update dependency black to v23.10.0 ([b21e719](https://github.com/muhlba91/onyx-client/commit/b21e7194d0c0ac245428953e5847cde6718af677))
+* **deps:** update dependency black to v23.10.1 ([71b57b9](https://github.com/muhlba91/onyx-client/commit/71b57b947c2656c9367d0f58811ef44b3463b624))
+* **deps:** update dependency black to v23.11.0 ([7134dc4](https://github.com/muhlba91/onyx-client/commit/7134dc403f639a50e87d3603bedcf5daba0086b7))
+* **deps:** update dependency black to v23.9.0 ([7630c03](https://github.com/muhlba91/onyx-client/commit/7630c03fe3feae5a5b70b512ed28e7e7cac7911d))
+* **deps:** update dependency black to v23.9.1 ([9beb2b0](https://github.com/muhlba91/onyx-client/commit/9beb2b033308868577a9e73fcdde22e1a5e9337a))
+* **deps:** update dependency coverage to v7.3.1 ([1b90fcc](https://github.com/muhlba91/onyx-client/commit/1b90fcc2ef6d2b5f6bfadc9fdd8543cf995f532d))
+* **deps:** update dependency coverage to v7.3.2 ([0d1b304](https://github.com/muhlba91/onyx-client/commit/0d1b304d6238bb427527d70a44fbe79142ddd625))
+* **deps:** update dependency pre-commit to v3.4.0 ([6946b3c](https://github.com/muhlba91/onyx-client/commit/6946b3c31b3d906ec7708fab538e652391b1ae56))
+* **deps:** update dependency pre-commit to v3.5.0 ([69ea510](https://github.com/muhlba91/onyx-client/commit/69ea510be6f861085d5098918a26969fddbcccf5))
+* **deps:** update dependency pytest to v7.4.1 ([db60906](https://github.com/muhlba91/onyx-client/commit/db609065c2c011a1fc53ee5417c939a15864665c))
+* **deps:** update dependency pytest to v7.4.2 ([a051c07](https://github.com/muhlba91/onyx-client/commit/a051c07dd6b93a5b2b56e5b795ab97cfa002997a))
+* **deps:** update dependency pytest to v7.4.3 ([537384e](https://github.com/muhlba91/onyx-client/commit/537384e172c735ba4a29a04f2d968e57ff248ea1))
+* **deps:** update dependency pytest-asyncio to ^0.22.0 ([789c7ce](https://github.com/muhlba91/onyx-client/commit/789c7ceec140883d85478f1a77a21915fbd57881))
+
 ## [7.1.1](https://github.com/muhlba91/onyx-client/compare/v7.1.0...v7.1.1) (2023-08-29)
 
 
