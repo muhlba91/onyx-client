@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.2.1](https://github.com/muhlba91/onyx-client/compare/v7.2.0...v7.2.1) (2023-11-15)
+
+
+### Bug Fixes
+
+* fix aiohttp version to align with homeassistant ([d5c7634](https://github.com/muhlba91/onyx-client/commit/d5c763479dc01a91dd4596f4f022de1644350cd1))
+
 ## [7.2.0](https://github.com/muhlba91/onyx-client/compare/v7.1.1...v7.2.0) (2023-11-15)
 
 
