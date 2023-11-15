@@ -352,33 +352,83 @@ class TestOnyxClient:
             payload={
                 "name": "device",
                 "type": "weather",
+                "actions": ["wink"],
                 "properties": {
-                    "device_type": {
-                        "type": "weather",
-                        "values": ["weather"],
+                    "air_pressure": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 150000,
+                        "value": 90374,
+                        "readonly": True,
                     },
-                    "wind_peak": {"value": 1, "minimum": 10},
-                    "sun_brightness_peak": {"value": 2, "minimum": 1, "maximum": 10},
-                    "sun_brightness_sink": {"value": 3, "minimum": 1, "maximum": 10},
-                    "air_pressure": {"value": 4, "minimum": 1, "maximum": 10},
-                    "humidity": {"value": 5, "minimum": 1, "maximum": 10},
-                    "temperature": {"value": 6, "minimum": 1, "maximum": 10},
+                    "humidity": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "value": 78,
+                        "readonly": True,
+                    },
+                    "sun_brightness_peak": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 150000,
+                        "value": 53710,
+                        "readonly": True,
+                    },
+                    "sun_brightness_sink": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 150001,
+                        "value": 20966,
+                        "readonly": True,
+                    },
+                    "temperature": {
+                        "type": "numeric",
+                        "minimum": -400,
+                        "maximum": 1500,
+                        "value": 72,
+                        "readonly": True,
+                    },
+                    "wind_peak": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100000,
+                        "value": 2501,
+                        "readonly": True,
+                    },
                 },
-                "actions": ["stop"],
             },
         )
         device = await client.device("device")
         assert isinstance(device, Weather)
         assert device.device_type == DeviceType.WEATHER
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert device.device_mode.values == [DeviceType.WEATHER]
-        assert device.actions == [Action.STOP]
+        assert device.device_mode.mode is None
+        assert device.device_mode.values == []
+        assert device.actions == [Action.WINK]
         assert device.wind_peak is not None
+        assert device.wind_peak.minimum == 0
+        assert device.wind_peak.maximum == 100000
+        assert device.wind_peak.value == 2501
         assert device.sun_brightness_peak is not None
+        assert device.sun_brightness_peak.minimum == 0
+        assert device.sun_brightness_peak.maximum == 150000
+        assert device.sun_brightness_peak.value == 53710
         assert device.sun_brightness_sink is not None
+        assert device.sun_brightness_sink.minimum == 0
+        assert device.sun_brightness_sink.maximum == 150001
+        assert device.sun_brightness_sink.value == 20966
         assert device.air_pressure is not None
+        assert device.air_pressure.minimum == 0
+        assert device.air_pressure.maximum == 150000
+        assert device.air_pressure.value == 90374
         assert device.humidity is not None
+        assert device.humidity.minimum == 0
+        assert device.humidity.maximum == 100
+        assert device.humidity.value == 78
         assert device.temperature is not None
+        assert device.temperature.minimum == -400
+        assert device.temperature.maximum == 1500
+        assert device.temperature.value == 72
 
     @pytest.mark.asyncio
     async def test_device_weather_no_data(self, mock_response, client):

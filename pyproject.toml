@@ -30,7 +30,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiohttp = "^3.8.4"
+aiohttp = "^3.8.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
@@ -39,7 +39,7 @@ flakeheaven = "^3.2.1"
 coverage = { extras = ["toml"], version = "^7.0.0" }
 black = "^23.1.0"
 pre-commit = "^3.1.1"
-pytest-asyncio = "^0.22.0"
+pytest-asyncio = "^0.21.1"
 aioresponses = "^0.7.4"
 
 [tool.pytest.ini_options]
