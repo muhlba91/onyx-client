@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.0.1](https://github.com/muhlba91/onyx-client/compare/v8.0.0...v8.0.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* fix timeout and restart of read loop ([5e669bc](https://github.com/muhlba91/onyx-client/commit/5e669bc119935ca6264738891b2b90129f027739))
+
 ## [8.0.0](https://github.com/muhlba91/onyx-client/compare/v7.2.1...v8.0.0) (2023-11-17)
 
 
