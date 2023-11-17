@@ -934,19 +934,6 @@ class TestOnyxClient:
         assert not client._shutdown
         assert len(client._activeTasks) == 1
 
-    @patch("onyx_client.client.OnyxClient.events")
-    @pytest.mark.asyncio
-    async def test_start_with_events_error(self, mock_events, client):
-        mock_events.side_effect = Exception("error")
-        client.start()
-        assert not client._shutdown
-        assert len(client._activeTasks) == 1
-        for task in client._activeTasks.copy():
-            with pytest.raises(Exception):
-                await task
-        assert len(client._activeTasks) == 0
-        assert mock_events.called
-
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
     async def test_events_details(self, mock_device, mock_response, client):

@@ -271,7 +271,7 @@ class OnyxClient:
         backoff_time: the maximum time in minutes for a connection retry"""
         self._shutdown = False
         self._readLoopTask = self._create_internal_task(
-            self._read_loop(include_details, backoff_time), name="read_loop"
+            self._read_handler(include_details, backoff_time), name="read_loop"
         )
 
     def stop(self):
@@ -293,6 +293,22 @@ class OnyxClient:
         task.add_done_callback(self._complete_internal_task)
         self._activeTasks.add(task)
 
+    async def _read_handler(self, include_details: bool = False, backoff_time: int = 3):
+        """Handle rerunning the task in the background.
+
+        include_details: ensures all device details are queried
+                         before emiting the device
+        backoff_time: the maximum time in minutes for a connection retry"""
+        while not self._shutdown:
+            try:
+                await self._read_loop(include_details)
+            except asyncio.CancelledError:
+                raise
+            except Exception as ex:
+                _LOGGER.error("Unexpected exception: %r", ex)
+                backoff = int(uniform(0, backoff_time) * 60)
+                await asyncio.sleep(backoff)
+
     def _complete_internal_task(self, task):
         """Remove an internal task that was running in the background.
 
@@ -303,13 +319,12 @@ class OnyxClient:
             _LOGGER.error("Unexpected exception: %r", ex)
             raise ex
 
-    async def _read_loop(self, include_details: bool = False, backoff_time: int = 3):
+    async def _read_loop(self, include_details: bool = False):
         """Streams data from the ONYX API endpoint and emits device updates.
         Updates are emitted as events through the event_callback.
 
         include_details: ensures all device details are queried
-                         before emiting the device
-        backoff_time: the maximum time in minutes for a connection retry"""
+                         before emiting the device"""
         while not self._shutdown:
             async for device in self.events(include_details):
                 if self._shutdown:
@@ -319,12 +334,6 @@ class OnyxClient:
                     self._event_callback(device)
                 else:
                     _LOGGER.warning("Received data but no callback is defined")
-
-            # lost connection so reattempt connection with a backoff time
-            if not self._shutdown:
-                backoff = int(uniform(0, backoff_time) * 60)
-                _LOGGER.error("Lost connection. Reconnection attempt in %ds", backoff)
-                await asyncio.sleep(backoff)
 
 
 def create(

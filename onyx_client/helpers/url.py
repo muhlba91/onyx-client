@@ -82,7 +82,11 @@ class UrlHelper:
 
         path: the URL path"""
         async with self.client_session.get(
-            self._url(path), headers=self._headers
+            self._url(path),
+            headers=self._headers,
+            timeout=aiohttp.ClientTimeout(
+                total=0, connect=0, sock_connect=0, sock_read=0
+            ),
         ) as response:
             if not check(response):
                 yield None
