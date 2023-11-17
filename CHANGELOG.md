@@ -1,6 +1,22 @@
 # Changelog
 
 
+## [8.0.0](https://github.com/muhlba91/onyx-client/compare/v7.2.1...v8.0.0) (2023-11-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* adds new method to listen for events in the background
+
+### Features
+
+* implement listening to events endpoint using callbacks ([330dd41](https://github.com/muhlba91/onyx-client/commit/330dd41964175ebb98a6f995e83c431805abde6d))
+
+
+### Miscellaneous Chores
+
+* **deps:** update pre-commit ([3a52c1e](https://github.com/muhlba91/onyx-client/commit/3a52c1e83492a70334b2e486509a075747e029b8))
+
 ## [7.2.1](https://github.com/muhlba91/onyx-client/compare/v7.2.0...v7.2.1) (2023-11-15)
 
 
