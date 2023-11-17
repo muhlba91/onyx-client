@@ -16,7 +16,10 @@ _LOGGER = logging.getLogger(__name__)
 async def exchange_code(
     code: str, client_session: aiohttp.ClientSession = None
 ) -> Optional[Configuration]:
-    """Exchange an API code for an access token and fingerprint."""
+    """Exchange an API code for an access token and fingerprint.
+
+    code: the access code
+    client_session: the aiohttp client session to use"""
     session = client_session if client_session is not None else aiohttp.ClientSession()
     config = await authorize(code, session)
     if await OnyxClient(config, session).verify():
@@ -27,7 +30,10 @@ async def exchange_code(
 async def authorize(
     code: str, client_session: aiohttp.ClientSession
 ) -> Optional[Configuration]:
-    """Authorize the client using an API code."""
+    """Authorize the client using an API code.
+
+    code: the access code
+    client_session: the aiohttp client session to use"""
     async with client_session.post(
         f"{API_URL}/authorize",
         data={"code": code},

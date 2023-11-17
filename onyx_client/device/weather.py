@@ -22,7 +22,18 @@ class Weather(Device):
         humidity: NumericValue = None,
         temperature: NumericValue = None,
     ):
-        """Initialize the weather device."""
+        """Initialize the weather device.
+
+        identifier: the device identifier
+        name: the device name
+        device_type: the device type
+        actions: a list of actions the device supports
+        wind_peak: the maximum wind speed in the last 15 minutes
+        sun_brightness_peak: the maximum brightness in the last 15 minutes
+        sun_brightness_sink: the minimum brightness in the last 15 minutes
+        air_pressure: the absolute air pressure
+        humidity: the relative humidity
+        temperature: the temperature of the station"""
         super(Weather, self).__init__(
             identifier, name, device_type, device_mode, actions
         )
@@ -34,6 +45,9 @@ class Weather(Device):
         self.temperature = temperature
 
     def update_with(self, update):
+        """Update the device with an update patch.
+
+        update: the update patch"""
         super().update_with(update)
 
         self.wind_peak = (
@@ -59,6 +73,7 @@ class Weather(Device):
 
     @staticmethod
     def keys() -> list:
+        """Get the list of keys specific to the device type."""
         return [
             "wind_peak",
             "sun_brightness_peak",

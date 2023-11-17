@@ -16,7 +16,7 @@ from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.group.group import Group
 from onyx_client.helpers.url import UrlHelper
-from onyx_client.utils.const import API_VERSION, MAX_BACKOFF_TIME
+from onyx_client.utils.const import API_VERSION
 from onyx_client.utils.filter import present
 from onyx_client.utils.mapper import init_device
 
@@ -31,7 +31,10 @@ class OnyxClient:
       - the ONYX.CENTER supports the client's API version"""
 
     def __init__(self, config: Configuration, client_session: aiohttp.ClientSession):
-        """Initialize the API client."""
+        """Initialize the API client.
+
+        config: the access configuration of the client
+        client_session: the aiohttp session to use"""
         self.config = config
         self.url_helper = UrlHelper(config, client_session)
         self._shutdown = True
@@ -75,7 +78,10 @@ class OnyxClient:
         )
 
     async def devices(self, include_details: bool = False) -> Optional[list]:
-        """Get all devices controlled by the ONYX.CENTER."""
+        """Get all devices controlled by the ONYX.CENTER.
+
+        include_details: ensures all device details are queried
+                         before returning the device"""
         data = await self.url_helper.perform_get_request("/devices")
         if data is None:
             _LOGGER.error(
@@ -101,7 +107,9 @@ class OnyxClient:
             ]
 
     async def device(self, identifier: str) -> Optional[Device]:
-        """Get the device properties for a provided ID."""
+        """Get the device properties for a provided ID.
+
+        identifier: the identifier of the device to query"""
         data = await self.url_helper.perform_get_request(f"/devices/{identifier}")
         if data is None:
             _LOGGER.error(
@@ -122,7 +130,10 @@ class OnyxClient:
         )
 
     async def send_command(self, identifier: str, command: DeviceCommand) -> bool:
-        """Send a command to the device with the provided ID."""
+        """Send a command to the device with the provided ID.
+
+        identifier: the device identifier
+        command: the command object to send to the device"""
         data = await self.url_helper.perform_post_request(
             f"/devices/{identifier}/command", command.data()
         )
@@ -135,7 +146,9 @@ class OnyxClient:
         return data is not None
 
     async def cancel_command(self, identifier: str) -> bool:
-        """Cancel a command to the device with the provided ID."""
+        """Cancel a command to the device with the provided ID.
+
+        identifier: the device identifier to cancel the command for"""
         data = await self.url_helper.perform_delete_request(
             f"/devices/{identifier}/command"
         )
@@ -163,7 +176,9 @@ class OnyxClient:
         ]
 
     async def group(self, identifier: str) -> Optional[Group]:
-        """Get the group properties for a provided ID."""
+        """Get the group properties for a provided ID.
+
+        identifier: the group identifier to query"""
         data = await self.url_helper.perform_get_request(f"/groups/{identifier}")
         if data is None:
             _LOGGER.error(
@@ -176,7 +191,10 @@ class OnyxClient:
         return Group(identifier, data.get("name", None), data.get("devices", list()))
 
     async def send_group_command(self, identifier: str, command: DeviceCommand) -> bool:
-        """Send a command to the group with the provided ID."""
+        """Send a command to the group with the provided ID.
+
+        identifier: the group identifier
+        command: the command object to send to the group"""
         data = await self.url_helper.perform_post_request(
             f"/groups/{identifier}/command", command.data()
         )
@@ -202,7 +220,9 @@ class OnyxClient:
         return len(unsuccessful) == 0
 
     async def cancel_group_command(self, identifier: str) -> bool:
-        """Cancel a command to the group with the provided ID."""
+        """Cancel a command to the group with the provided ID.
+
+        identifier: the group identifier to cancel the command for"""
         data = await self.url_helper.perform_delete_request(
             f"/groups/{identifier}/command"
         )
@@ -215,7 +235,10 @@ class OnyxClient:
         return data is not None
 
     async def events(self, include_details: bool = False) -> Device:
-        """Stream events continuously."""
+        """Stream events continuously.
+
+        include_details: ensures all device details are queried
+                         before emiting the device"""
         async for message in self.url_helper.start_stream("/events"):
             if message is not None and len(message) > 0 and message.startswith("data:"):
                 message = message[len("data:") :].strip()
@@ -240,38 +263,53 @@ class OnyxClient:
                             "Received unknown device data. Dropping device %s", key
                         )
 
-    def start(self, include_details: bool = False):
-        """Starts the event stream via callback."""
+    def start(self, include_details: bool = False, backoff_time: int = 3):
+        """Start the event stream via callback.
+
+        include_details: ensures all device details are queried
+                         before emiting the device
+        backoff_time: the maximum time in minutes for a connection retry"""
         self._shutdown = False
         self._readLoopTask = self._create_internal_task(
-            self._read_loop(include_details), name="read_loop"
+            self._read_loop(include_details, backoff_time), name="read_loop"
         )
 
     def stop(self):
-        """Stops the event stream via callback."""
+        """Stop the event stream via callback."""
         self._shutdown = True
 
     def set_event_callback(self, callback):
-        """Sets the event stream callback."""
+        """Set the event stream callback.
+
+        callback: the callback function taking the device as the only parameter"""
         self._event_callback = callback
 
     def _create_internal_task(self, coro, name=None):
-        """Creates an internal task running in the background."""
+        """Create an internal task running in the background.
+
+        coro: the coroutine to run
+        name: the event loop name"""
         task = self._eventLoop.create_task(coro, name=name)
         task.add_done_callback(self._complete_internal_task)
         self._activeTasks.add(task)
 
     def _complete_internal_task(self, task):
-        """Removes an internal task that was running in the background."""
+        """Remove an internal task that was running in the background.
+
+        task: the task to remove"""
         self._activeTasks.remove(task)
         if not task.cancelled():
             ex = task.exception()
             _LOGGER.error("Unexpected exception: %r", ex)
             raise ex
 
-    async def _read_loop(self, include_details: bool = False):
+    async def _read_loop(self, include_details: bool = False, backoff_time: int = 3):
         """Streams data from the ONYX API endpoint and emits device updates.
-        Updates are emitted as events through the event_callback."""
+        Updates are emitted as events through the event_callback.
+
+        include_details: ensures all device details are queried
+                         before emiting the device
+        backoff_time: the maximum time in minutes for a connection retry"""
         while not self._shutdown:
             async for device in self.events(include_details):
                 if self._shutdown:
@@ -284,7 +322,7 @@ class OnyxClient:
 
             # lost connection so reattempt connection with a backoff time
             if not self._shutdown:
-                backoff = int(uniform(0, MAX_BACKOFF_TIME) * 60)
+                backoff = int(uniform(0, backoff_time) * 60)
                 _LOGGER.error("Lost connection. Reconnection attempt in %ds", backoff)
                 await asyncio.sleep(backoff)
 
@@ -295,6 +333,14 @@ def create(
     access_token: str = None,
     client_session: aiohttp.ClientSession = None,
 ) -> OnyxClient:
+    """Create the client.
+
+    Either config or fingerprint and access_token must be provided.
+
+    config: the access configuration of the client (optional)
+    fingerprint: the ONYX.CENTER fingerprint (optional)
+    access_token: the access token to use (optional)
+    client_session: the aiohttp session to use"""
     if config is None:
         config = Configuration(fingerprint, access_token)
     session = client_session if client_session is not None else aiohttp.ClientSession()

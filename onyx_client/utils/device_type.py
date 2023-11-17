@@ -10,42 +10,60 @@ from onyx_client.enum.device_type import DeviceType
 
 
 def is_shutter(device_type: DeviceType, properties: dict) -> bool:
-    """Checks if the provided device is a shutter."""
+    """Check if the provided device type is a shutter.
+
+    device_type: the device type to check
+    properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type.is_shutter()
     return _in_keys(properties, Shutter.keys())
 
 
 def is_light(device_type: DeviceType, properties: dict) -> bool:
-    """Checks if the provided device is a light."""
+    """Check if the provided device type is a light.
+
+    device_type: the device type to check
+    properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type == DeviceType.BASIC_LIGHT
     return _in_keys(properties, Light.keys())
 
 
 def is_weather(device_type: DeviceType, properties: dict) -> bool:
-    """Checks if the provided device is a weather station."""
+    """Check if the provided device type is a weather station.
+
+    device_type: the device type to check
+    properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type == DeviceType.WEATHER
     return _in_keys(properties, Weather.keys())
 
 
 def is_click(device_type: DeviceType, data: dict) -> bool:
-    """Checks if the provided device is a click device."""
+    """Check if the provided device type is a click device.
+
+    device_type: the device type to check
+    properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type == DeviceType.CLICK
     return _in_keys(data, Click.keys())
 
 
 def is_switch(device_type: DeviceType, data: dict) -> bool:
-    """Checks if the provided device is a switch."""
+    """Check if the provided device type is a switch.
+
+    device_type: the device type to check
+    properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type == DeviceType.SWITCH
     return _in_keys(data, Switch.keys())
 
 
 def _in_keys(data: Optional[dict], keys: list) -> bool:
-    """Checks if any key in data is listed in the keys list."""
+    """Check if any key in data is listed in the keys list.
+
+    data: the data map to check
+    keys: the keys to check for"""
     if data is not None:
         for key in data.keys():
             if key in keys:

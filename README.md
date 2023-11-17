@@ -54,7 +54,9 @@ and access token**. Please follow the **aforementioned documentation** to retrie
 
 ## Usage
 
-You can **instantiate** the client using the `onyx_client.client.create` method like:
+### Initalization
+
+You can instantiate the client using the `onyx_client.client.create` method like:
 
 ```python
 import aiohttp
@@ -74,7 +76,42 @@ config = exchange_code("code", client_session)
 client = create(config=config, client_session=client_session) if client_session is not None else None
 ```
 
-An **example** is shown in the **`examples` directory**.
+### Events
+
+You can register a event callback which will be triggered if the client receives a device update:
+
+```python
+# all imports and a client exists...
+
+def received_update(device):
+    print(device)
+
+client.set_event_callback(received_update)
+client.start()
+
+# you can stop the client listening for updates using:
+client.stop()
+```
+
+Each device update will be pushed to your `callback` and will create an event loop in the background.
+
+### Streaming
+
+You can stream device updates directly and process them through, e.g., an `async for` loop:
+
+```python
+# all imports and a client exists...
+
+async for device in client.events():
+    print(device)
+```
+
+### Examples
+
+The following examples are available in the [`examples`](examples/) directory:
+
+- [`events`](examples/events/): uses the callback mechanism (`start()`, `stop()`)
+- [`streaming`](examples/streaming/): uses the streaming mechanism (`events()`)
 
 ---
 

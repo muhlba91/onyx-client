@@ -34,7 +34,17 @@ class Shutter(Device):
         actual_angle: NumericValue = None,
         actual_position: NumericValue = None,
     ):
-        """Initialize the shutter device."""
+        """Initialize the shutter device.
+
+        identifier: the device identifier
+        name: the device name
+        device_type: the device type
+        device_mode: the mode the device can operate as
+        actions: a list of actions the device supports
+        target_position: the target position of the shutter
+        target_angle: the target angle of the shutter
+        actual_position: the actual position of the shutter
+        actual_angle: the actual angle of the shutter"""
         super(Shutter, self).__init__(
             identifier, name, device_type, device_mode, actions
         )
@@ -44,6 +54,9 @@ class Shutter(Device):
         self.actual_position = actual_position
 
     def update_with(self, update):
+        """Update the device with an update patch.
+
+        update: the update patch"""
         super().update_with(update)
 
         self.target_position = (
@@ -59,6 +72,7 @@ class Shutter(Device):
 
     @staticmethod
     def keys() -> list:
+        """Get the list of keys specific to the device type."""
         return [
             "target_position",
             "target_angle",

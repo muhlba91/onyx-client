@@ -5,7 +5,12 @@ class AnimationKeyframe:
     """The representation of an animation keyframe."""
 
     def __init__(self, interpolation: str, delay: int, duration: float, value: int):
-        """Initialize the animation keyframe."""
+        """Initialize the animation keyframe.
+
+        interpolation: the interpolation algorithm
+        delay: the delay of the animation
+        duration: the duration of the animation
+        value: the value to interpolate to"""
         self.interpolation = interpolation
         self.delay = delay
         self.duration = duration
@@ -13,7 +18,9 @@ class AnimationKeyframe:
 
     @staticmethod
     def create(properties: dict):
-        """Create an animation keyframe from properties."""
+        """Create an animation keyframe from properties.
+
+        properties: the properties of the device"""
         if properties is None:
             return None
 

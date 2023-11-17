@@ -6,14 +6,20 @@ class AnimationValue:
     """The representation of an animation value."""
 
     def __init__(self, start: float, current_value: int, keyframes: list):
-        """Initialize the animation value."""
+        """Initialize the animation value.
+
+        start: the start value
+        current_value: the current value in the animation
+        keyframes: the list of keyframes until the end of the animation"""
         self.start = start
         self.current_value = current_value
         self.keyframes = keyframes
 
     @staticmethod
     def create(properties: dict):
-        """Create an animation value from properties."""
+        """Create an animation value from properties.
+
+        properties: the properties of the device"""
         if properties is None:
             return None
 

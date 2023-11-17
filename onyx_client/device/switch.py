@@ -8,7 +8,11 @@ class Switch(Device):
     """A ONYX controlled switch device."""
 
     def __init__(self, identifier: str, name: str, device_type: DeviceType):
-        """Initialize the switch device."""
+        """Initialize the switch device.
+
+        identifier: the device identifier
+        name: the device name
+        device_type: the device type"""
         super(Switch, self).__init__(
             identifier,
             name,
@@ -18,8 +22,12 @@ class Switch(Device):
         )
 
     def update_with(self, update):
+        """Update the device with an update patch.
+
+        update: the update patch"""
         super().update_with(update)
 
     @staticmethod
     def keys() -> list:
+        """Get the list of keys specific to the device type."""
         return []

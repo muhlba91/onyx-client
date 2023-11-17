@@ -10,7 +10,11 @@ class Group:
         name: str,
         devices: list,
     ):
-        """Initialize the group."""
+        """Initialize the group.
+
+        identifier: the group identifier
+        name: the group name
+        devices: the list of devices belonging to the group"""
         self.identifier = identifier
         self.name = name
         self.devices = devices

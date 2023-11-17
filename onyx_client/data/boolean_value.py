@@ -5,13 +5,18 @@ class BooleanValue:
     """The representation of a boolean value."""
 
     def __init__(self, value: bool, read_only: bool):
-        """Initialize the boolean value."""
+        """Initialize the boolean value.
+
+        value: the value
+        read_only: set if the value is read only"""
         self.value = value
         self.read_only = read_only
 
     @staticmethod
     def create(properties: dict):
-        """Create a boolean value from properties."""
+        """Create a boolean value from properties.
+
+        properties: the properties of the device"""
         if properties is None:
             return None
 

@@ -10,7 +10,9 @@ def check(response: aiohttp.ClientResponse) -> bool:
     """Check the response for a success HTTP status code.
 
     Success codes are:
-      - 200"""
+      - 200
+
+    response: the response to check"""
     if response.status == 200:
         _LOGGER.debug("Received HTTP response from ONYX API: %s", response.status)
         return True

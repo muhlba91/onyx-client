@@ -20,7 +20,9 @@ class Action(Enum):
 
     @staticmethod
     def convert(lower: str):
-        """Get the action from the Onyx API's type information."""
+        """Get the action from the Onyx API's type information.
+
+        lower: the lower case action identifier"""
         try:
             return Action[lower.upper()]
         except KeyError:

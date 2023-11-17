@@ -15,7 +15,13 @@ class NumericValue:
         read_only: bool,
         animation: Optional[AnimationValue] = None,
     ):
-        """Initialize the numeric value."""
+        """Initialize the numeric value.
+
+        value: the value
+        minimum: the minimum supported value
+        maximum: the maximum supported value
+        read_only: set of the value is read only
+        animation: an optional ongoing animation"""
         self.value = value
         self.minimum = minimum
         self.maximum = maximum
@@ -24,7 +30,9 @@ class NumericValue:
 
     @staticmethod
     def create(properties: dict):
-        """Create a numeric value from properties."""
+        """Create a numeric value from properties.
+
+        properties: the properties of the device"""
         if properties is None:
             return None
 
@@ -37,7 +45,9 @@ class NumericValue:
         )
 
     def update_with(self, other: Optional):
-        """Updates this value with the target."""
+        """Updates this value with the target.
+
+        other: the other value"""
         if other is not None:
             self.value = self.value if other.value is None else other.value
             self.minimum = self.minimum if other.minimum is None else other.minimum

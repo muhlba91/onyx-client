@@ -38,7 +38,9 @@ class DeviceType(Enum):
 
     @staticmethod
     def convert(lower: str):
-        """Get the device type from the Onyx API's type information."""
+        """Get the device type from the Onyx API's type information.
+
+        lower: the lower case device type identifier"""
         try:
             return DeviceType[lower.upper()]
         except (KeyError, AttributeError):

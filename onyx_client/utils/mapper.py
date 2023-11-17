@@ -19,6 +19,10 @@ from onyx_client.utils.device_type import (
 
 
 def numeric_value(key: str, properties: dict = None):
+    """Create a new numeric value.
+
+    key: the key value
+    properties: the device properties"""
     return (
         NumericValue.create(properties.get(key, None))
         if properties is not None
@@ -27,6 +31,10 @@ def numeric_value(key: str, properties: dict = None):
 
 
 def boolean_value(key: str, properties: dict = None):
+    """Create a new boolean value.
+
+    key: the key value
+    properties: the device properties"""
     return (
         BooleanValue.create(properties.get(key, None))
         if properties is not None
@@ -42,7 +50,14 @@ def init_device(
     actions: list = None,
     data: dict = None,
 ) -> Device:
-    """Initialize the device correctly."""
+    """Initialize the device correctly.
+
+    identifier: the device identifier
+    name: the device name
+    device_type: the device type
+    properties: the properties of the device to set
+    actions: a list of actions the device supports
+    data: the data map of the device"""
     device_mode_value = (
         DeviceType.convert(properties.get("device_type", dict()).get("type", None))
         if properties is not None

@@ -19,13 +19,25 @@ class Light(Device):
         actual_brightness: NumericValue = None,
         dim_duration: NumericValue = None,
     ):
-        """Initialize the light device."""
+        """Initialize the light device.
+
+        identifier: the device identifier
+        name: the device name
+        device_type: the device type
+        device_mode: the mode the device can operate as
+        actions: a list of actions the device supports
+        target_brightness: the target brightness of the light
+        actual_brightness: the actual brightness of the light
+        dim_duration: the duration it takes to dim"""
         super(Light, self).__init__(identifier, name, device_type, device_mode, actions)
         self.target_brightness = target_brightness
         self.actual_brightness = actual_brightness
         self.dim_duration = dim_duration
 
     def update_with(self, update):
+        """Update the device with a patch.
+
+        update: the update patch"""
         super().update_with(update)
 
         self.target_brightness = (
@@ -44,6 +56,7 @@ class Light(Device):
 
     @staticmethod
     def keys() -> list:
+        """Get the list of keys specific to the device type."""
         return [
             "target_brightness",
             "actual_brightness",

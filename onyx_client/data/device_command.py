@@ -13,7 +13,12 @@ class DeviceCommand:
         valid_from: int = None,
         best_before: int = None,
     ):
-        """Initialize the command."""
+        """Initialize the command.
+
+        properties: the properties to send
+        action: the action to perform
+        valid_from: the start date of when the action can be triggered
+        bedt_before: deadline of the action validity"""
         if (properties is None and action is None) or (
             properties is not None and action is not None
         ):
