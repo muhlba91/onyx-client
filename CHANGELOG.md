@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.0.2](https://github.com/muhlba91/onyx-client/compare/v8.0.1...v8.0.2) (2023-11-17)
+
+
+### Bug Fixes
+
+* make log messages clearer for streaming ([a65d0d9](https://github.com/muhlba91/onyx-client/commit/a65d0d9f5d3c98d7f4aac9c4615536c848e2b626))
+
 ## [8.0.1](https://github.com/muhlba91/onyx-client/compare/v8.0.0...v8.0.1) (2023-11-17)
 
 
