@@ -32,6 +32,11 @@ def test_create_client(mock_session):
     assert client.url_helper.client_session == mock_session
     assert client.url_helper.config.fingerprint == "finger"
     assert client.url_helper.config.access_token == "token"
+    assert client._shutdown
+    assert client._readLoopTask is None
+    assert client._eventLoop is not None
+    assert len(client._activeTasks) == 0
+    assert client._event_callback is None
 
 
 @patch("aiohttp.ClientSession")
@@ -46,6 +51,11 @@ def test_create_client_with_config(mock_session):
     assert client.config is not None
     assert client.config.fingerprint == "finger"
     assert client.config.access_token == "token"
+    assert client._shutdown
+    assert client._readLoopTask is None
+    assert client._eventLoop is not None
+    assert len(client._activeTasks) == 0
+    assert client._event_callback is None
 
 
 @patch("aiohttp.ClientSession")
@@ -56,6 +66,11 @@ def test_create_client_without_session(mock_session):
     assert client.url_helper.config.access_token == "token"
     assert client.config.fingerprint == "finger"
     assert client.config.access_token == "token"
+    assert client._shutdown
+    assert client._readLoopTask is None
+    assert client._eventLoop is not None
+    assert len(client._activeTasks) == 0
+    assert client._event_callback is None
 
 
 class TestOnyxClient:
@@ -73,6 +88,42 @@ class TestOnyxClient:
     @pytest_asyncio.fixture
     def client(self, session) -> OnyxClient:
         yield OnyxClient(Configuration("finger", "token"), session)
+
+    def test_set_event_callback(self, client):
+        callback = 0
+        client.set_event_callback(callback)
+        assert client._event_callback == callback
+
+    def test__complete_internal_task(self, client):
+        class Task:
+            def cancelled(self):
+                return True
+
+        callback = Task()
+        client._activeTasks.add(callback)
+        assert len(client._activeTasks) == 1
+        assert callback in client._activeTasks
+        client._complete_internal_task(callback)
+        assert len(client._activeTasks) == 0
+
+    def test__complete_internal_task_cancelled(self, client):
+        class Task:
+            def cancelled(self):
+                return False
+
+            def exception(self):
+                raise Exception("error")
+
+        callback = Task()
+        client._activeTasks.add(callback)
+        assert len(client._activeTasks) == 1
+        assert callback in client._activeTasks
+        with pytest.raises(Exception):
+            client._complete_internal_task(callback)
+        assert len(client._activeTasks) == 0
+
+    def test_stop(self, client):
+        assert client._shutdown
 
     @pytest.mark.asyncio
     async def test_verify(self, mock_response, client):
@@ -815,6 +866,86 @@ class TestOnyxClient:
             assert device.identifier == f"device{index}"
             index += 1
         assert index == 4
+
+    @patch("onyx_client.client.OnyxClient._complete_internal_task")
+    @pytest.mark.asyncio
+    async def test_start(self, mock__complete_internal_task, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
+        )
+
+        def callback(device):
+            if device.identifier == "device3":
+                client.stop()
+
+        async def check_index(task):
+            assert task in client._activeTasks
+            assert client._shutdown
+            assert len(client._activeTasks) == 0
+            await task
+
+        mock__complete_internal_task.side_effect = check_index
+        client.set_event_callback(callback)
+        client.start()
+        assert len(client._activeTasks) == 1
+        assert not client._shutdown
+        for task in client._activeTasks.copy():
+            await task
+
+    @pytest.mark.asyncio
+    async def test_start_break(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
+        )
+
+        def callback(device):
+            if device.identifier == "device1":
+                client.stop()
+
+        client.set_event_callback(callback)
+        client.start()
+        assert len(client._activeTasks) == 1
+        assert not client._shutdown
+        for task in client._activeTasks.copy():
+            await task
+
+    @pytest.mark.asyncio
+    async def test_start_without_callback(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }',
+        )
+
+        client.start()
+        assert not client._shutdown
+        assert len(client._activeTasks) == 1
+
+    @patch("onyx_client.client.OnyxClient.events")
+    @pytest.mark.asyncio
+    async def test_start_with_events_error(self, mock_events, client):
+        mock_events.side_effect = Exception("error")
+        client.start()
+        assert not client._shutdown
+        assert len(client._activeTasks) == 1
+        for task in client._activeTasks.copy():
+            with pytest.raises(Exception):
+                await task
+        assert len(client._activeTasks) == 0
+        assert mock_events.called
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
