@@ -305,8 +305,10 @@ class OnyxClient:
             except asyncio.CancelledError:
                 raise
             except Exception as ex:
-                _LOGGER.error("Unexpected exception: %r", ex)
                 backoff = int(uniform(0, backoff_time) * 60)
+                _LOGGER.error(
+                    "Unexpected exception: %r. Retrying with backoff %ds.", ex, backoff
+                )
                 await asyncio.sleep(backoff)
 
     def _complete_internal_task(self, task):
@@ -316,7 +318,7 @@ class OnyxClient:
         self._activeTasks.remove(task)
         if not task.cancelled():
             ex = task.exception()
-            _LOGGER.error("Unexpected exception: %r", ex)
+            _LOGGER.error("Unexpected exception: %r. Completing task.", ex)
             raise ex
 
     async def _read_loop(self, include_details: bool = False):
