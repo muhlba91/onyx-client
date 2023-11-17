@@ -2,8 +2,10 @@
 import json
 import logging
 from typing import Optional
+from random import uniform
 
 import aiohttp
+import asyncio
 
 from onyx_client.configuration.configuration import Configuration
 from onyx_client.data.date_information import DateInformation
@@ -14,7 +16,7 @@ from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.group.group import Group
 from onyx_client.helpers.url import UrlHelper
-from onyx_client.utils.const import API_VERSION
+from onyx_client.utils.const import API_VERSION, MAX_BACKOFF_TIME
 from onyx_client.utils.filter import present
 from onyx_client.utils.mapper import init_device
 
@@ -32,6 +34,11 @@ class OnyxClient:
         """Initialize the API client."""
         self.config = config
         self.url_helper = UrlHelper(config, client_session)
+        self._shutdown = True
+        self._readLoopTask = None
+        self._eventLoop = asyncio.get_event_loop()
+        self._activeTasks = set()
+        self._event_callback = None
 
     async def supported_versions(self) -> Optional[SupportedVersions]:
         """Get all supported versions by the ONYX.CENTER."""
@@ -232,6 +239,54 @@ class OnyxClient:
                         _LOGGER.error(
                             "Received unknown device data. Dropping device %s", key
                         )
+
+    def start(self, include_details: bool = False):
+        """Starts the event stream via callback."""
+        self._shutdown = False
+        self._readLoopTask = self._create_internal_task(
+            self._read_loop(include_details), name="read_loop"
+        )
+
+    def stop(self):
+        """Stops the event stream via callback."""
+        self._shutdown = True
+
+    def set_event_callback(self, callback):
+        """Sets the event stream callback."""
+        self._event_callback = callback
+
+    def _create_internal_task(self, coro, name=None):
+        """Creates an internal task running in the background."""
+        task = self._eventLoop.create_task(coro, name=name)
+        task.add_done_callback(self._complete_internal_task)
+        self._activeTasks.add(task)
+
+    def _complete_internal_task(self, task):
+        """Removes an internal task that was running in the background."""
+        self._activeTasks.remove(task)
+        if not task.cancelled():
+            ex = task.exception()
+            _LOGGER.error("Unexpected exception: %r", ex)
+            raise ex
+
+    async def _read_loop(self, include_details: bool = False):
+        """Streams data from the ONYX API endpoint and emits device updates.
+        Updates are emitted as events through the event_callback."""
+        while not self._shutdown:
+            async for device in self.events(include_details):
+                if self._shutdown:
+                    break
+                if self._event_callback is not None:
+                    _LOGGER.info("Received device: %s", device)
+                    self._event_callback(device)
+                else:
+                    _LOGGER.warning("Received data but no callback is defined")
+
+            # lost connection so reattempt connection with a backoff time
+            if not self._shutdown:
+                backoff = int(uniform(0, MAX_BACKOFF_TIME) * 60)
+                _LOGGER.error("Lost connection. Reconnection attempt in %ds", backoff)
+                await asyncio.sleep(backoff)
 
 
 def create(

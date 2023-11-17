@@ -5,3 +5,5 @@ API_HEADERS = {
     "Content-Type": "application/json",
 }
 API_VERSION = "v3"
+
+MAX_BACKOFF_TIME = 3
