@@ -36,12 +36,11 @@ asyncio = "^3.4.0"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 pytest-cov = { extras = ["toml"], version = "^4.0.0" }
-flakeheaven = "^3.2.1"
 coverage = { extras = ["toml"], version = "^7.0.0" }
-black = "^23.1.0"
 pre-commit = "^3.1.1"
 pytest-asyncio = "^0.21.1"
 aioresponses = "^0.7.4"
+ruff = "^0.1.6"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -70,94 +69,3 @@ exclude_lines = [
 ]
 fail_under = 95
 show_missing = true
-
-[tool.flakeheaven]
-exclude = [
-    "README.md"
-]
-format = "colored"
-max_line_length = 88
-show_source = true
-whitelist = ".flake8.whitelist"
-
-[tool.flakeheaven.plugins]
-flake8-bandit = [
-    "+*",
-    "-S322"
-]
-flake8-bugbear = [
-    "+*"
-]
-flake8-builtins = [
-    "+*"
-]
-flake8-comprehensions = [
-    "+*"
-]
-flake8-darglint = [
-    "+*"
-]
-flake8-docstrings = [
-    "+*"
-]
-flake8-eradicate = [
-    "+*"
-]
-flake8-isort = [
-    "+*"
-]
-flake8-mutable = [
-    "+*"
-]
-flake8-pytest-style = [
-    "+*"
-]
-flake8-spellcheck = [
-    "+*"
-]
-mccabe = [
-    "+*"
-]
-pep8-naming = [
-    "+*"
-]
-pycodestyle = [
-    "+*",
-    "-E402",
-    "-E126",
-    "-W503",
-    "-E203"
-]
-pyflakes = [
-    "+*"
-]
-pylint = [
-    "+*",
-    "-C0330",
-    "-C0326"
-]
-
-[tool.black]
-line-length = 88
-target-version = [
-    "py38"
-]
-include = "\\.pyi?$"
-exclude = """
-(
-  /(
-      \\.eggs         # exclude a few common directories in the
-    | \\.git          # root of the project
-    | \\.hg
-    | \\.mypy_cache
-    | \\.tox
-    | \\.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-"""

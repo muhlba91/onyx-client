@@ -433,3 +433,4 @@ dmypy.json
 
 tests/test_write.yml
 .flakeheaven_cache/
+.ruff_cache/

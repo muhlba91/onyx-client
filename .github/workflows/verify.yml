@@ -89,8 +89,7 @@ jobs:
       - name: Lint files
         run: |
           poetry check
-          poetry run flakeheaven lint
-          poetry run black --check .
+          poetry run ruff check .
 
       - name: Run tests
         run: |
