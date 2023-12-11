@@ -725,7 +725,7 @@ class TestOnyxClient:
         assert device.dim_duration is not None
 
     @pytest.mark.asyncio
-    async def test_device_dimmable_light(self, mock_response, client):
+    async def test_device_dimmable_light_animation(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
             status=200,
