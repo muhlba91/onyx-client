@@ -263,7 +263,7 @@ class OnyxClient:
                             "Received unknown device data. Dropping device %s", key
                         )
 
-    def start(self, include_details: bool = False, backoff_time: int = 3):
+    def start(self, include_details: bool = False, backoff_time: int = 1):
         """Start the event stream via callback.
 
         include_details: ensures all device details are queried
@@ -293,7 +293,7 @@ class OnyxClient:
         task.add_done_callback(self._complete_internal_task)
         self._activeTasks.add(task)
 
-    async def _read_handler(self, include_details: bool = False, backoff_time: int = 3):
+    async def _read_handler(self, include_details: bool = False, backoff_time: int = 1):
         """Handle rerunning the task in the background.
 
         include_details: ensures all device details are queried
