@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.1.1](https://github.com/muhlba91/onyx-client/compare/v8.1.0...v8.1.1) (2023-12-11)
+
+
+### Bug Fixes
+
+* reduce backoff time for reconnects ([3166824](https://github.com/muhlba91/onyx-client/commit/3166824af53e3077d9fb7566b54b52d6b52db7ab))
+
 ## [8.1.0](https://github.com/muhlba91/onyx-client/compare/v8.0.2...v8.1.0) (2023-12-11)
 
 
