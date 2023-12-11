@@ -396,6 +396,152 @@ class TestOnyxClient:
         assert device.actual_angle is None
 
     @pytest.mark.asyncio
+    async def test_device_pergola_awning_roof(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "pergola_awning_roof",
+                "actions": ["close", "open", "stop", "wink"],
+                "properties": {
+                    "actual_angle": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 360,
+                        "value": 0,
+                        "readonly": True,
+                    },
+                    "actual_position": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "value": 100,
+                        "readonly": True,
+                    },
+                    "system_state": {
+                        "type": "enumeration",
+                        "value": "ok",
+                        "values": [
+                            "collision",
+                            "collision_not_calibrated",
+                            "not_calibrated",
+                            "ok",
+                        ],
+                        "readonly": True,
+                    },
+                    "target_angle": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 360,
+                        "value": 0,
+                        "readonly": False,
+                    },
+                    "target_position": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "value": 100,
+                        "readonly": False,
+                    },
+                },
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Shutter)
+        assert device.device_type == DeviceType.PERGOLA_AWNING_ROOF
+        assert device.device_mode.mode is None
+        assert len(device.device_mode.values) == 0
+        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
+        assert device.target_position == NumericValue(100, 0, 100, False)
+        assert device.target_angle == NumericValue(0, 0, 360, False)
+        assert device.actual_position == NumericValue(
+            100,
+            0,
+            100,
+            False,
+        )
+        assert device.actual_angle == NumericValue(
+            0,
+            0,
+            360,
+            False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_device_awning(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "awning",
+                "actions": ["close", "open", "stop", "wink"],
+                "properties": {
+                    "actual_angle": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 360,
+                        "value": 0,
+                        "readonly": True,
+                    },
+                    "actual_position": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "value": 0,
+                        "readonly": True,
+                    },
+                    "system_state": {
+                        "type": "enumeration",
+                        "value": "ok",
+                        "values": [
+                            "collision",
+                            "collision_not_calibrated",
+                            "not_calibrated",
+                            "ok",
+                        ],
+                        "readonly": True,
+                    },
+                    "target_angle": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 360,
+                        "value": 0,
+                        "readonly": False,
+                    },
+                    "target_position": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "value": 0,
+                        "readonly": False,
+                    },
+                },
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Shutter)
+        assert device.device_type == DeviceType.AWNING
+        assert device.device_mode.mode is None
+        assert len(device.device_mode.values) == 0
+        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
+        assert device.target_position == NumericValue(0, 0, 100, False)
+        assert device.target_angle == NumericValue(0, 0, 360, False)
+        assert device.actual_position == NumericValue(
+            0,
+            0,
+            100,
+            False,
+        )
+        assert device.actual_angle == NumericValue(
+            0,
+            0,
+            360,
+            False,
+        )
+
+    @pytest.mark.asyncio
     async def test_device_weather(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
