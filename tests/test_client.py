@@ -725,6 +725,68 @@ class TestOnyxClient:
         assert device.dim_duration is not None
 
     @pytest.mark.asyncio
+    async def test_device_dimmable_light(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "dimmable_light",
+                "actions": ["light_off", "light_on", "stop", "wink"],
+                "properties": {
+                    "actual_brightness": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 65535,
+                        "value": 33153,
+                        "readonly": True,
+                        "animation": {
+                            "current_value": 0,
+                            "keyframes": [
+                                {
+                                    "delay": 0,
+                                    "duration": 0.267689021,
+                                    "interpolation": "linear",
+                                    "value": 35086,
+                                }
+                            ],
+                            "start": 1702300612.2786393,
+                        },
+                    },
+                    "dim_duration": {
+                        "type": "numeric",
+                        "minimum": 20,
+                        "maximum": 3600000,
+                        "value": 6000,
+                        "readonly": False,
+                    },
+                    "target_brightness": {
+                        "type": "numeric",
+                        "minimum": 0,
+                        "maximum": 65535,
+                        "value": 33153,
+                        "readonly": False,
+                    },
+                },
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Light)
+        assert device.device_type == DeviceType.DIMMABLE_LIGHT
+        assert device.device_mode.mode is None
+        assert len(device.device_mode.values) == 0
+        assert device.actions == [
+            Action.LIGHT_OFF,
+            Action.LIGHT_ON,
+            Action.STOP,
+            Action.WINK,
+        ]
+        assert device.target_brightness is not None
+        assert device.actual_brightness is not None
+        assert device.actual_brightness.animation is not None
+        assert device.dim_duration is not None
+
+    @pytest.mark.asyncio
     async def test_device_click(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
