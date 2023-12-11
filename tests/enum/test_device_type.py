@@ -24,3 +24,7 @@ class TestDeviceType:
         assert DeviceType.PERGOLA_AWNING_ROOF.is_shutter()
         assert DeviceType.PERGOLA_SIDE.is_shutter()
         assert DeviceType.PERGOLA_SLAT_ROOF.is_shutter()
+
+    def test_is_light(self):
+        assert DeviceType.BASIC_LIGHT.is_light()
+        assert DeviceType.DIMMABLE_LIGHT.is_light()

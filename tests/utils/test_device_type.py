@@ -12,6 +12,13 @@ from onyx_client.utils.device_type import (
 
 def test_is_shutter():
     assert is_shutter(DeviceType.ROLLERSHUTTER, {})
+    assert is_shutter(DeviceType.AWNING, {})
+    assert is_shutter(DeviceType.RAFFSTORE_90, {})
+    assert is_shutter(DeviceType.RAFFSTORE_180, {})
+    assert is_shutter(DeviceType.VENEER, {})
+    assert is_shutter(DeviceType.PERGOLA_AWNING_ROOF, {})
+    assert is_shutter(DeviceType.PERGOLA_SIDE, {})
+    assert is_shutter(DeviceType.PERGOLA_SLAT_ROOF, {})
     assert not is_shutter(DeviceType.WEATHER, {})
     assert not is_shutter(None, {})
     assert not is_shutter(None, None)
@@ -21,6 +28,7 @@ def test_is_shutter():
 
 def test_is_light():
     assert is_light(DeviceType.BASIC_LIGHT, {})
+    assert is_light(DeviceType.DIMMABLE_LIGHT, {})
     assert not is_light(DeviceType.WEATHER, {})
     assert not is_light(None, {})
     assert not is_light(None, None)

@@ -699,6 +699,32 @@ class TestOnyxClient:
         assert device.dim_duration is None
 
     @pytest.mark.asyncio
+    async def test_device_dimmable_light(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "device",
+                "type": "dimmable_light",
+                "properties": {
+                    "target_brightness": {"value": 1, "minimum": 10},
+                    "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
+                    "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
+                },
+                "actions": ["stop"],
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Light)
+        assert device.device_type == DeviceType.DIMMABLE_LIGHT
+        assert device.device_mode.mode is None
+        assert len(device.device_mode.values) == 0
+        assert device.actions == [Action.STOP]
+        assert device.target_brightness is not None
+        assert device.actual_brightness is not None
+        assert device.dim_duration is not None
+
+    @pytest.mark.asyncio
     async def test_device_click(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
