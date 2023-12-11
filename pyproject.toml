@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "onyx-client"
-version = "8.0.2"
+version = "8.1.0"
 description = "HTTP Client for Hella's ONYX.CENTER API."
 license = "MIT"
 authors = [
