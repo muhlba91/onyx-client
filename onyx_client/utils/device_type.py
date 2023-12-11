@@ -25,7 +25,7 @@ def is_light(device_type: DeviceType, properties: dict) -> bool:
     device_type: the device type to check
     properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
-        return device_type == DeviceType.BASIC_LIGHT
+        return device_type.is_light()
     return _in_keys(properties, Light.keys())
 
 

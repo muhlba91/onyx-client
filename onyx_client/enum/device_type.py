@@ -17,6 +17,7 @@ class DeviceType(Enum):
     PERGOLA_AWNING_ROOF = auto()
     PERGOLA_SIDE = auto()
     PERGOLA_SLAT_ROOF = auto()
+    DIMMABLE_LIGHT = auto()
     UNKNOWN = 9999
 
     def string(self) -> str:
@@ -34,6 +35,13 @@ class DeviceType(Enum):
             self.PERGOLA_AWNING_ROOF,
             self.PERGOLA_SIDE,
             self.PERGOLA_SLAT_ROOF,
+        ]
+
+    def is_light(self) -> bool:
+        """Check if the type corresponds to any kind of light."""
+        return self in [
+            self.BASIC_LIGHT,
+            self.DIMMABLE_LIGHT,
         ]
 
     @staticmethod
