@@ -1,6 +1,35 @@
 # Changelog
 
 
+## [8.1.0](https://github.com/muhlba91/onyx-client/compare/v8.0.2...v8.1.0) (2023-12-11)
+
+
+### Features
+
+* replace linters with ruff ([36bea9d](https://github.com/muhlba91/onyx-client/commit/36bea9d83020c63af1c6713984c13430b6406da8))
+
+
+### Bug Fixes
+
+* add dimmable light mapping ([bd85d11](https://github.com/muhlba91/onyx-client/commit/bd85d11091049d5a1dbf1c2d180a329fe1dd5e1e))
+* add tests for pergola and awning ([d9fb32c](https://github.com/muhlba91/onyx-client/commit/d9fb32cf6c9f65f57a4028375559d90933b45331))
+
+
+### Miscellaneous Chores
+
+* **ci:** adopt release please for v4 ([d14c22e](https://github.com/muhlba91/onyx-client/commit/d14c22e39ba3156db7d29b6432689b6c86c9c557))
+* **ci:** update poetry version ([271c1da](https://github.com/muhlba91/onyx-client/commit/271c1daf8e37fe707f87c03fce54a78b20556c99))
+* **deps:** update actions/setup-python action to v5 ([3b4d1ba](https://github.com/muhlba91/onyx-client/commit/3b4d1bab5d206aeafe1a8b85dbf8cefc994b508f))
+* **deps:** update dependency aiohttp to v3.9.0 ([c3967c2](https://github.com/muhlba91/onyx-client/commit/c3967c280088e9508584dd3d12526a31bfb3d053))
+* **deps:** update dependency aiohttp to v3.9.1 ([84fa5c9](https://github.com/muhlba91/onyx-client/commit/84fa5c9d27c24bed7dab37355047f89be5103085))
+* **deps:** update dependency aioresponses to v0.7.6 ([ed3a04d](https://github.com/muhlba91/onyx-client/commit/ed3a04d3d76467faf2efd086d771d6f67fe402a3))
+* **deps:** update dependency pre-commit to v3.6.0 ([bc65cf2](https://github.com/muhlba91/onyx-client/commit/bc65cf2db9e2f5374de29d3958e5c928bda37125))
+* **deps:** update dependency pytest-asyncio to ^0.23.0 ([d92aa9b](https://github.com/muhlba91/onyx-client/commit/d92aa9b1844b7d44dada09da47b67744d5881168))
+* **deps:** update dependency pytest-asyncio to v0.23.1 ([63ae0af](https://github.com/muhlba91/onyx-client/commit/63ae0afe77f91c64cddc44108533f08d4dc9745d))
+* **deps:** update dependency pytest-asyncio to v0.23.2 ([8cb25b3](https://github.com/muhlba91/onyx-client/commit/8cb25b3436a34483322216bd1f8ca5749fbc123b))
+* **deps:** update dependency ruff to v0.1.7 ([e87dc27](https://github.com/muhlba91/onyx-client/commit/e87dc27a38119249d0bf3ba893d39f6bae1103a5))
+* **deps:** update google-github-actions/release-please-action action to v4 ([49badce](https://github.com/muhlba91/onyx-client/commit/49badcecf1862b4e9414a81e212e7f1f0b6d4cdf))
+
 ## [8.0.2](https://github.com/muhlba91/onyx-client/compare/v8.0.1...v8.0.2) (2023-11-17)
 
 
