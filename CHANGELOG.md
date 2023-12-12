@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.2.0](https://github.com/muhlba91/onyx-client/compare/v8.1.3...v8.2.0) (2023-12-12)
+
+
+### Features
+
+* allow passing in an event loop for background tasks ([570d095](https://github.com/muhlba91/onyx-client/commit/570d09597e435061d5e8844c67f0f5f53d36990a))
+
 ## [8.1.3](https://github.com/muhlba91/onyx-client/compare/v8.1.2...v8.1.3) (2023-12-12)
 
 
