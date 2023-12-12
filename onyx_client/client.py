@@ -332,10 +332,10 @@ class OnyxClient:
                 if self._shutdown:
                     break
                 if self._event_callback is not None:
-                    _LOGGER.info("Received device: %s", device)
+                    _LOGGER.debug("Received device: %s", device)
                     self._event_callback(device)
                 else:
-                    _LOGGER.warning("Received data but no callback is defined")
+                    _LOGGER.warning("Received data but no callback is defined.")
 
 
 def create(

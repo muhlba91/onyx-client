@@ -27,6 +27,11 @@ class Device:
         self.device_mode = device_mode
         self.actions = actions
 
+    def __str__(self):
+        return (
+            f"Device(id={self.identifier}, name={self.name}, type={self.device_type})"
+        )
+
     def __eq__(self, other):
         if isinstance(self, other.__class__):
             return self.identifier == other.identifier

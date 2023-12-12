@@ -20,6 +20,12 @@ class TestDevice:
         assert device.device_type == DeviceType.AWNING
         assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
 
+    def test_str(self, device_mode):
+        assert (
+            str(Device("id", "name", DeviceType.AWNING, device_mode, list(Action)))
+            == "Device(id=id, name=name, type=DeviceType.AWNING)"
+        )
+
     def test_eq(self, device_mode):
         assert Device(
             "id", "name", DeviceType.AWNING, device_mode, list(Action)
