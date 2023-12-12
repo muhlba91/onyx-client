@@ -53,6 +53,9 @@ class Shutter(Device):
         self.actual_angle = actual_angle
         self.actual_position = actual_position
 
+    def __str__(self):
+        return f"Shutter({super().__str__()}, actual_position={self.actual_position}, actual_angle={self.actual_angle}, target_position={self.target_position}, target_angle={self.target_angle})"
+
     def update_with(self, update):
         """Update the device with an update patch.
 

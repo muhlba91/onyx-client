@@ -25,6 +25,19 @@ class TestClick:
         assert click.device_mode.mode == DeviceType.CLICK
         assert not click.offline
 
+    def test_str(self):
+        assert (
+            str(
+                Click(
+                    "id",
+                    "name",
+                    DeviceType.CLICK,
+                    False,
+                )
+            )
+            == "Click(Device(id=id, name=name, type=DeviceType.CLICK), offline=False)"
+        )
+
     def test_update_with(self, device_mode):
         click = Click(
             "id",

@@ -25,6 +25,9 @@ class Click(Device):
         )
         self.offline = offline
 
+    def __str__(self):
+        return f"Click({super().__str__()}, offline={self.offline})"
+
     def update_with(self, update):
         """Update the device with an update patch.
 

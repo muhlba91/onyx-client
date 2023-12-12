@@ -27,6 +27,9 @@ class Switch(Device):
         update: the update patch"""
         super().update_with(update)
 
+    def __str__(self):
+        return f"Switch({super().__str__()})"
+
     @staticmethod
     def keys() -> list:
         """Get the list of keys specific to the device type."""

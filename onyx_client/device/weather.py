@@ -44,6 +44,9 @@ class Weather(Device):
         self.humidity = humidity
         self.temperature = temperature
 
+    def __str__(self):
+        return f"Weather({super().__str__()}, wind_peak={self.wind_peak}, sun_brightness_peak={self.sun_brightness_peak}, sun_brightness_sink={self.sun_brightness_sink}, air_pressure={self.air_pressure}, humidity={self.humidity}, temperature={self.temperature})"
+
     def update_with(self, update):
         """Update the device with an update patch.
 

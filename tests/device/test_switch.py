@@ -23,6 +23,18 @@ class TestSwitch:
         assert switch.device_type == DeviceType.SWITCH
         assert switch.device_mode.mode == DeviceType.SWITCH
 
+    def test_str(self):
+        assert (
+            str(
+                Switch(
+                    "id",
+                    "name",
+                    DeviceType.SWITCH,
+                )
+            )
+            == "Switch(Device(id=id, name=name, type=DeviceType.SWITCH))"
+        )
+
     def test_update_with(self, device_mode):
         switch = Switch(
             "id",

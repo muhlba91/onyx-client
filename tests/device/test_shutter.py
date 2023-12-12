@@ -45,6 +45,31 @@ class TestShutter:
         assert shutter.actual_angle == value1
         assert shutter.actual_position == value2
 
+    def test_str(self):
+        value1 = NumericValue(10, 0, 10, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            None,
+            list(Action),
+            value1,
+            value2,
+            value1,
+            value2,
+        )
+        assert (
+            str(shutter)
+            == "Shutter(Device(id=id, name=name, type=DeviceType.AWNING), actual_position=NumericValue(value=1, minimum=0, maximum=10, animation=AnimationValue(start=10.4, current_value=10, #keyframes=1)), actual_angle=NumericValue(value=10, minimum=0, maximum=10, animation=None), target_position=NumericValue(value=10, minimum=0, maximum=10, animation=None), target_angle=NumericValue(value=1, minimum=0, maximum=10, animation=AnimationValue(start=10.4, current_value=10, #keyframes=1)))"
+        )
+
     def test_init_no_additional_values(self, device_mode):
         shutter = Shutter("id", "name", DeviceType.AWNING, device_mode, [])
         assert shutter.identifier == "id"

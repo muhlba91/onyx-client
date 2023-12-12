@@ -34,6 +34,9 @@ class Light(Device):
         self.actual_brightness = actual_brightness
         self.dim_duration = dim_duration
 
+    def __str__(self):
+        return f"Light({super().__str__()}, actual_brightness={self.actual_brightness}, target_brightness={self.target_brightness}, dim_duration={self.dim_duration})"
+
     def update_with(self, update):
         """Update the device with a patch.
 

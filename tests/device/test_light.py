@@ -36,6 +36,25 @@ class TestLight:
         assert light.actual_brightness == value2
         assert light.dim_duration == value3
 
+    def test_str(self):
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            None,
+            list(Action),
+            value1,
+            value2,
+            value3,
+        )
+        assert (
+            str(light)
+            == "Light(Device(id=id, name=name, type=DeviceType.BASIC_LIGHT), actual_brightness=NumericValue(value=2, minimum=0, maximum=10, animation=None), target_brightness=NumericValue(value=1, minimum=0, maximum=10, animation=None), dim_duration=NumericValue(value=3, minimum=0, maximum=10, animation=None))"
+        )
+
     def test_init_no_additional_values(self, device_mode):
         light = Light(
             "id",
