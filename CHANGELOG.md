@@ -1,6 +1,20 @@
 # Changelog
 
 
+## [8.1.2](https://github.com/muhlba91/onyx-client/compare/v8.1.1...v8.1.2) (2023-12-12)
+
+
+### Bug Fixes
+
+* add test case for dimmable light animation ([22eb648](https://github.com/muhlba91/onyx-client/commit/22eb6480e7c77241eaffc2078ce558894bab5b18))
+* fix dimmable light test ([0d45376](https://github.com/muhlba91/onyx-client/commit/0d45376a148c248728f5e7044510b8203842fb54))
+
+
+### Miscellaneous Chores
+
+* add __str__ method to device ([6498e94](https://github.com/muhlba91/onyx-client/commit/6498e94bac9b80d09c2f5b3ba018a9091077be83))
+* add __str__ methods to data ([ea689ae](https://github.com/muhlba91/onyx-client/commit/ea689ae436448d2d240b7092d79865c4c4cbd0df))
+
 ## [8.1.1](https://github.com/muhlba91/onyx-client/compare/v8.1.0...v8.1.1) (2023-12-11)
 
 
