@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.1.3](https://github.com/muhlba91/onyx-client/compare/v8.1.2...v8.1.3) (2023-12-12)
+
+
+### Bug Fixes
+
+* add __str__ method to all devices ([8e71a57](https://github.com/muhlba91/onyx-client/commit/8e71a57fb78c84abf2a4e24396a35bf1989e309d))
+
 ## [8.1.2](https://github.com/muhlba91/onyx-client/compare/v8.1.1...v8.1.2) (2023-12-12)
 
 
