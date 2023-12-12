@@ -30,17 +30,23 @@ class OnyxClient:
       - the provided connection parameters are correct
       - the ONYX.CENTER supports the client's API version"""
 
-    def __init__(self, config: Configuration, client_session: aiohttp.ClientSession):
+    def __init__(
+        self,
+        config: Configuration,
+        client_session: aiohttp.ClientSession,
+        event_loop=asyncio.get_event_loop(),
+    ):
         """Initialize the API client.
 
         config: the access configuration of the client
-        client_session: the aiohttp session to use"""
+        client_session: the aiohttp session to use
+        event_loop: the event loop to use for background events"""
         self.config = config
         self.url_helper = UrlHelper(config, client_session)
         self._shutdown = True
-        self._readLoopTask = None
-        self._eventLoop = asyncio.get_event_loop()
-        self._activeTasks = set()
+        self._read_loop_task = None
+        self._event_loop = event_loop
+        self._active_tasks = set()
         self._event_callback = None
 
     async def supported_versions(self) -> Optional[SupportedVersions]:
@@ -270,7 +276,7 @@ class OnyxClient:
                          before emiting the device
         backoff_time: the maximum time in minutes for a connection retry"""
         self._shutdown = False
-        self._readLoopTask = self._create_internal_task(
+        self._read_loop_task = self._create_internal_task(
             self._read_handler(include_details, backoff_time), name="read_loop"
         )
 
@@ -289,9 +295,9 @@ class OnyxClient:
 
         coro: the coroutine to run
         name: the event loop name"""
-        task = self._eventLoop.create_task(coro, name=name)
+        task = self._event_loop.create_task(coro, name=name)
         task.add_done_callback(self._complete_internal_task)
-        self._activeTasks.add(task)
+        self._active_tasks.add(task)
 
     async def _read_handler(self, include_details: bool = False, backoff_time: int = 1):
         """Handle rerunning the task in the background.
@@ -315,7 +321,7 @@ class OnyxClient:
         """Remove an internal task that was running in the background.
 
         task: the task to remove"""
-        self._activeTasks.remove(task)
+        self._active_tasks.remove(task)
         if not task.cancelled():
             ex = task.exception()
             _LOGGER.error("Unexpected exception: %r. Completing task.", ex)
@@ -343,6 +349,7 @@ def create(
     fingerprint: str = None,
     access_token: str = None,
     client_session: aiohttp.ClientSession = None,
+    event_loop=None,
 ) -> OnyxClient:
     """Create the client.
 
@@ -351,8 +358,10 @@ def create(
     config: the access configuration of the client (optional)
     fingerprint: the ONYX.CENTER fingerprint (optional)
     access_token: the access token to use (optional)
-    client_session: the aiohttp session to use"""
+    client_session: the aiohttp session to use
+    event_loop: the event loop to use for background events"""
     if config is None:
         config = Configuration(fingerprint, access_token)
     session = client_session if client_session is not None else aiohttp.ClientSession()
-    return OnyxClient(config, session)
+    event_loop = event_loop if event_loop is not None else asyncio.get_event_loop()
+    return OnyxClient(config, session, event_loop)

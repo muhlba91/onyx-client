@@ -4,6 +4,7 @@ from unittest.mock import patch
 import aiohttp
 import pytest
 import pytest_asyncio
+import asyncio
 from aioresponses import aioresponses
 
 from onyx_client.client import create, OnyxClient
@@ -33,9 +34,9 @@ def test_create_client(mock_session):
     assert client.url_helper.config.fingerprint == "finger"
     assert client.url_helper.config.access_token == "token"
     assert client._shutdown
-    assert client._readLoopTask is None
-    assert client._eventLoop is not None
-    assert len(client._activeTasks) == 0
+    assert client._read_loop_task is None
+    assert client._event_loop is not None
+    assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
 
@@ -52,9 +53,9 @@ def test_create_client_with_config(mock_session):
     assert client.config.fingerprint == "finger"
     assert client.config.access_token == "token"
     assert client._shutdown
-    assert client._readLoopTask is None
-    assert client._eventLoop is not None
-    assert len(client._activeTasks) == 0
+    assert client._read_loop_task is None
+    assert client._event_loop is not None
+    assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
 
@@ -67,9 +68,9 @@ def test_create_client_without_session(mock_session):
     assert client.config.fingerprint == "finger"
     assert client.config.access_token == "token"
     assert client._shutdown
-    assert client._readLoopTask is None
-    assert client._eventLoop is not None
-    assert len(client._activeTasks) == 0
+    assert client._read_loop_task is None
+    assert client._event_loop is not None
+    assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
 
@@ -87,7 +88,9 @@ class TestOnyxClient:
 
     @pytest_asyncio.fixture
     def client(self, session) -> OnyxClient:
-        yield OnyxClient(Configuration("finger", "token"), session)
+        yield OnyxClient(
+            Configuration("finger", "token"), session, asyncio.get_event_loop()
+        )
 
     def test_set_event_callback(self, client):
         callback = 0
@@ -100,11 +103,11 @@ class TestOnyxClient:
                 return True
 
         callback = Task()
-        client._activeTasks.add(callback)
-        assert len(client._activeTasks) == 1
-        assert callback in client._activeTasks
+        client._active_tasks.add(callback)
+        assert len(client._active_tasks) == 1
+        assert callback in client._active_tasks
         client._complete_internal_task(callback)
-        assert len(client._activeTasks) == 0
+        assert len(client._active_tasks) == 0
 
     def test__complete_internal_task_cancelled(self, client):
         class Task:
@@ -115,12 +118,12 @@ class TestOnyxClient:
                 raise Exception("error")
 
         callback = Task()
-        client._activeTasks.add(callback)
-        assert len(client._activeTasks) == 1
-        assert callback in client._activeTasks
+        client._active_tasks.add(callback)
+        assert len(client._active_tasks) == 1
+        assert callback in client._active_tasks
         with pytest.raises(Exception):
             client._complete_internal_task(callback)
-        assert len(client._activeTasks) == 0
+        assert len(client._active_tasks) == 0
 
     def test_stop(self, client):
         assert client._shutdown
@@ -1118,17 +1121,17 @@ class TestOnyxClient:
                 client.stop()
 
         async def check_index(task):
-            assert task in client._activeTasks
+            assert task in client._active_tasks
             assert client._shutdown
-            assert len(client._activeTasks) == 0
+            assert len(client._active_tasks) == 0
             await task
 
         mock__complete_internal_task.side_effect = check_index
         client.set_event_callback(callback)
         client.start()
-        assert len(client._activeTasks) == 1
+        assert len(client._active_tasks) == 1
         assert not client._shutdown
-        for task in client._activeTasks.copy():
+        for task in client._active_tasks.copy():
             await task
 
     @pytest.mark.asyncio
@@ -1148,9 +1151,9 @@ class TestOnyxClient:
 
         client.set_event_callback(callback)
         client.start()
-        assert len(client._activeTasks) == 1
+        assert len(client._active_tasks) == 1
         assert not client._shutdown
-        for task in client._activeTasks.copy():
+        for task in client._active_tasks.copy():
             await task
 
     @pytest.mark.asyncio
@@ -1166,7 +1169,7 @@ class TestOnyxClient:
 
         client.start()
         assert not client._shutdown
-        assert len(client._activeTasks) == 1
+        assert len(client._active_tasks) == 1
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
