@@ -25,6 +25,9 @@ class BooleanValue:
             properties.get("read_only", "false") == "true",
         )
 
+    def __str__(self) -> str:
+        return f"BooleanValue(value={self.value})"
+
     def __eq__(self, other):
         if isinstance(self, other.__class__):
             return self.value == other.value and self.read_only == other.read_only

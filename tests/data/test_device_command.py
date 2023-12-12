@@ -30,3 +30,11 @@ class TestDeviceCommand:
     def test_data_best_before(self):
         command = DeviceCommand(action=Action.STOP, best_before=10)
         assert command.data() == {"action": "stop", "best_before": 10}
+
+    def test_str(self):
+        command = DeviceCommand(properties={"property": 10})
+        assert str(command) == "DeviceCommand(data={'properties': {'property': 10}})"
+        command = DeviceCommand(action=Action.STOP, valid_from=10)
+        assert (
+            str(command) == "DeviceCommand(data={'action': 'stop', 'valid_from': 10})"
+        )

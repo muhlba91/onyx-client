@@ -28,6 +28,9 @@ class NumericValue:
         self.read_only = read_only
         self.animation = animation
 
+    def __str__(self) -> str:
+        return f"NumericValue(value={self.value}, minimum={self.minimum}, maximum={self.maximum}, animation={self.animation})"
+
     @staticmethod
     def create(properties: dict):
         """Create a numeric value from properties.

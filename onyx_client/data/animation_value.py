@@ -15,6 +15,9 @@ class AnimationValue:
         self.current_value = current_value
         self.keyframes = keyframes
 
+    def __str__(self) -> str:
+        return f"AnimationValue(start={self.start}, current_value={self.current_value}, #keyframes={len(self.keyframes)})"
+
     @staticmethod
     def create(properties: dict):
         """Create an animation value from properties.

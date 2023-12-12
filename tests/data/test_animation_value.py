@@ -45,5 +45,26 @@ class TestAnimationValue:
     def test_create_none(self):
         assert AnimationValue.create(None) is None
 
+    def test_str(self):
+        assert (
+            str(
+                AnimationValue.create(
+                    {
+                        "start": 1637499108.0069883,
+                        "current_value": 90,
+                        "keyframes": [
+                            {
+                                "interpolation": "linear",
+                                "delay": 0,
+                                "duration": 0.791666666,
+                                "value": 33,
+                            }
+                        ],
+                    }
+                )
+            )
+            == "AnimationValue(start=1637499108.0069883, current_value=90, #keyframes=1)"
+        )
+
     def test_not_eq(self):
         assert AnimationValue(10, 10, list()) != 10

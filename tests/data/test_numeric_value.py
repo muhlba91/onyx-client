@@ -55,6 +55,33 @@ class TestNumericValue:
     def test_create_none(self):
         assert NumericValue.create(None) is None
 
+    def test_str(self):
+        assert (
+            str(
+                NumericValue.create(
+                    {
+                        "value": 10,
+                        "minimum": 10,
+                        "maximum": 100,
+                        "read_only": True,
+                        "animation": {
+                            "start": 10,
+                            "current_value": 10,
+                            "keyframes": [
+                                {
+                                    "interpolation": "linear",
+                                    "delay": 10,
+                                    "duration": 10,
+                                    "value": 10,
+                                }
+                            ],
+                        },
+                    }
+                )
+            )
+            == "NumericValue(value=10, minimum=10, maximum=100, animation=AnimationValue(start=10, current_value=10, #keyframes=1))"
+        )
+
     def test_update_with(self):
         value = NumericValue(
             1,

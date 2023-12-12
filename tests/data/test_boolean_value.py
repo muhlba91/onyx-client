@@ -25,5 +25,17 @@ class TestBooleanValue:
     def test_create_none(self):
         assert BooleanValue.create(None) is None
 
+    def test_str(self):
+        assert (
+            str(
+                BooleanValue.create(
+                    {
+                        "value": "true",
+                    }
+                )
+            )
+            == "BooleanValue(value=True)"
+        )
+
     def test_not_eq(self):
         assert BooleanValue(True, True) != 10

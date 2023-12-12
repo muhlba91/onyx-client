@@ -31,6 +31,9 @@ class AnimationKeyframe:
             properties.get("value", None),
         )
 
+    def __str__(self) -> str:
+        return f"AnimationKeyframe(interpolation={self.interpolation}, delay={self.delay}, duration={self.duration}, value={self.value})"
+
     def __eq__(self, other):
         if isinstance(self, other.__class__):
             return (

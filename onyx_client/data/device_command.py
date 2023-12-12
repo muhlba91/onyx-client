@@ -29,6 +29,9 @@ class DeviceCommand:
         self.valid_from = valid_from
         self.best_before = best_before
 
+    def __str__(self) -> str:
+        return f"DeviceCommand(data={self.data()})"
+
     def data(self) -> dict:
         """Get the dict representation."""
         data = {}
