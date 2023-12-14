@@ -1,6 +1,25 @@
 # Changelog
 
 
+## [8.3.0](https://github.com/muhlba91/onyx-client/compare/v8.2.0...v8.3.0) (2023-12-14)
+
+
+### Features
+
+* perform deep merging of updates ([e560027](https://github.com/muhlba91/onyx-client/commit/e560027a892a48c51bb96ce505508443fc089cbe))
+
+
+### Bug Fixes
+
+* add typings to update_with methods ([4dd841c](https://github.com/muhlba91/onyx-client/commit/4dd841c3d0c3ad6c71761408b453863601675c0e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverage to v7.3.3 ([c0c9b81](https://github.com/muhlba91/onyx-client/commit/c0c9b81cb206ca181c9565892f5b36829464b365))
+* **deps:** update dependency ruff to v0.1.8 ([87af727](https://github.com/muhlba91/onyx-client/commit/87af727d20a941789d8d3d8cb34a64248ee2a607))
+* **deps:** update github/codeql-action action to v3 ([0e733bb](https://github.com/muhlba91/onyx-client/commit/0e733bbbad87a27b576ff304accd45740a459a3a))
+
 ## [8.2.0](https://github.com/muhlba91/onyx-client/compare/v8.1.3...v8.2.0) (2023-12-12)
 
 
