@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.3.1](https://github.com/muhlba91/onyx-client/compare/v8.3.0...v8.3.1) (2023-12-14)
+
+
+### Bug Fixes
+
+* fix exception when targets are none ([ae8517a](https://github.com/muhlba91/onyx-client/commit/ae8517a96b3d57b2fc4d8d0a1e5b6b321c283978))
+
 ## [8.3.0](https://github.com/muhlba91/onyx-client/compare/v8.2.0...v8.3.0) (2023-12-14)
 
 
