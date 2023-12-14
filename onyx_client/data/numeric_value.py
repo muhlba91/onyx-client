@@ -58,10 +58,9 @@ class NumericValue:
             self.read_only = (
                 self.read_only if other.read_only is None else other.read_only
             )
-            if self.animation is not None:
-                self.animation.update_with(other.animation)
-            else:
-                self.animation = other.animation
+            # if other.animation is None it would mean that the animation is cancelled by Onyx.
+            # in fact, we can just overwrite it no matter the value.
+            self.animation = other.animation
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):

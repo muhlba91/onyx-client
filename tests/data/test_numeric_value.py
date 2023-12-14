@@ -125,5 +125,24 @@ class TestNumericValue:
         )
         assert value == expected
 
+    def test_update_with_none_animation(self):
+        value = NumericValue(
+            10,
+            10,
+            100,
+            True,
+        )
+        expected = NumericValue(20, 20, 200, True, None)
+        value.update_with(
+            NumericValue(
+                20,
+                20,
+                200,
+                None,
+                None,
+            )
+        )
+        assert value == expected
+
     def test_not_eq(self):
         assert NumericValue(10, 10, 100, True) != 10
