@@ -181,3 +181,41 @@ class TestShutter:
         )
         with pytest.raises(UpdateException):
             shutter.update_with(update)
+
+    def test_update_with_partials(self, device_mode):
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        value4 = NumericValue(4, 0, 10, False)
+        value5 = NumericValue(10, None, None, False)
+        value6 = NumericValue(None, 10, None, False)
+        value7 = NumericValue(None, None, 100, False)
+        value8 = NumericValue(None, None, None, False)
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            value3,
+            value4,
+        )
+        update = Shutter(
+            "id",
+            "name1",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            value5,
+            value6,
+            value7,
+            value8,
+        )
+        shutter.update_with(update)
+        assert shutter.name == "name1"
+        assert shutter.target_position == NumericValue(10, 0, 10, False)
+        assert shutter.target_angle == NumericValue(2, 10, 10, False)
+        assert shutter.actual_angle == NumericValue(3, 0, 100, False)
+        assert shutter.actual_position == NumericValue(4, 0, 10, False)

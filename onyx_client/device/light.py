@@ -43,19 +43,9 @@ class Light(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.target_brightness = (
-            self.target_brightness
-            if update.target_brightness is None
-            else update.target_brightness
-        )
-        self.actual_brightness = (
-            self.actual_brightness
-            if update.actual_brightness is None
-            else update.actual_brightness
-        )
-        self.dim_duration = (
-            self.dim_duration if update.dim_duration is None else update.dim_duration
-        )
+        self.target_brightness.update_with(update.target_brightness)
+        self.actual_brightness.update_with(update.actual_brightness)
+        self.dim_duration.update_with(update.dim_duration)
 
     @staticmethod
     def keys() -> list:

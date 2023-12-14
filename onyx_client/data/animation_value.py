@@ -1,4 +1,6 @@
 """Animation Values of Onyx devices."""
+from typing import Optional
+
 from onyx_client.data.animation_keyframe import AnimationKeyframe
 
 
@@ -34,6 +36,21 @@ class AnimationValue:
                 for keyframe in properties.get("keyframes", list())
             ],
         )
+
+    def update_with(self, other: Optional):
+        """Updates this value with the target.
+
+        other: the other value"""
+        if other is not None:
+            self.start = self.start if other.start is None else other.start
+            self.current_value = (
+                self.current_value
+                if other.current_value is None
+                else other.current_value
+            )
+            self.keyframes = (
+                self.keyframes if other.keyframes is None else other.keyframes
+            )
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):

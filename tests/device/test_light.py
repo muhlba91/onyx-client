@@ -150,3 +150,36 @@ class TestLight:
         )
         with pytest.raises(UpdateException):
             light.update_with(update)
+
+    def test_update_with_partials(self, device_mode):
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        value4 = NumericValue(None, 10, None, False)
+        value5 = NumericValue(20, None, None, False)
+        value6 = NumericValue(None, None, 100, False)
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            value3,
+        )
+        update = Light(
+            "id",
+            "name1",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            value4,
+            value5,
+            value6,
+        )
+        light.update_with(update)
+        assert light.name == "name1"
+        assert light.target_brightness == NumericValue(1, 10, 10, False)
+        assert light.actual_brightness == NumericValue(20, 0, 10, False)
+        assert light.dim_duration == NumericValue(3, 0, 100, False)

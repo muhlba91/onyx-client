@@ -195,3 +195,51 @@ class TestWeather:
         )
         with pytest.raises(UpdateException):
             weather.update_with(update)
+
+    def test_update_with_partials(self, device_mode):
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        value4 = NumericValue(4, 0, 10, False)
+        value5 = NumericValue(5, 0, 10, False)
+        value6 = NumericValue(6, 0, 10, False)
+        value7 = NumericValue(10, None, None, False)
+        value8 = NumericValue(None, 10, None, False)
+        value9 = NumericValue(None, None, 100, False)
+        value10 = NumericValue(40, None, None, False)
+        value11 = NumericValue(None, 10, None, False)
+        value12 = NumericValue(None, None, 100, False)
+        weather = Weather(
+            "id",
+            "name",
+            DeviceType.WEATHER,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            value3,
+            value4,
+            value5,
+            value6,
+        )
+        update = Weather(
+            "id",
+            "name1",
+            DeviceType.WEATHER,
+            device_mode,
+            list(Action),
+            value7,
+            value8,
+            value9,
+            value10,
+            value11,
+            value12,
+        )
+        weather.update_with(update)
+        assert weather.name == "name1"
+        assert weather.wind_peak == NumericValue(10, 0, 10, False)
+        assert weather.sun_brightness_peak == NumericValue(2, 10, 10, False)
+        assert weather.sun_brightness_sink == NumericValue(3, 0, 100, False)
+        assert weather.air_pressure == NumericValue(40, 0, 10, False)
+        assert weather.humidity == NumericValue(5, 10, 10, False)
+        assert weather.temperature == NumericValue(6, 0, 100, False)

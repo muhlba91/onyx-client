@@ -62,16 +62,10 @@ class Shutter(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.target_position = (
-            self.target_position
-            if update.target_position is None
-            else update.target_position
-        )
-        self.target_angle = (
-            self.target_angle if update.target_angle is None else update.target_angle
-        )
-        self.actual_angle.update_with(update.actual_angle)
+        self.target_position.update_with(update.target_position)
+        self.target_angle.update_with(update.target_angle)
         self.actual_position.update_with(update.actual_position)
+        self.actual_angle.update_with(update.actual_angle)
 
     @staticmethod
     def keys() -> list:

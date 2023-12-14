@@ -58,9 +58,10 @@ class NumericValue:
             self.read_only = (
                 self.read_only if other.read_only is None else other.read_only
             )
-            self.animation = (
-                self.animation if other.animation is None else other.animation
-            )
+            if self.animation is not None:
+                self.animation.update_with(other.animation)
+            else:
+                self.animation = other.animation
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):

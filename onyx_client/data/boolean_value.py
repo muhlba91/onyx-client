@@ -1,4 +1,5 @@
 """Boolean Values of Onyx devices."""
+from typing import Optional
 
 
 class BooleanValue:
@@ -24,6 +25,13 @@ class BooleanValue:
             properties.get("value", "false") == "true",
             properties.get("read_only", "false") == "true",
         )
+
+    def update_with(self, other: Optional):
+        """Updates this value with the target.
+
+        other: the other value"""
+        if other is not None:
+            self.value = self.value if other.value is None else other.value
 
     def __str__(self) -> str:
         return f"BooleanValue(value={self.value})"
