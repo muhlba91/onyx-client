@@ -1,4 +1,6 @@
 """Light class."""
+from typing import Optional
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
@@ -37,7 +39,7 @@ class Light(Device):
     def __str__(self):
         return f"Light({super().__str__()}, actual_brightness={self.actual_brightness}, target_brightness={self.target_brightness}, dim_duration={self.dim_duration})"
 
-    def update_with(self, update):
+    def update_with(self, update: Optional["Light"]):
         """Update the device with a patch.
 
         update: the update patch"""

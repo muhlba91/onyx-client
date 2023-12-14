@@ -26,7 +26,7 @@ class BooleanValue:
             properties.get("read_only", "false") == "true",
         )
 
-    def update_with(self, other: Optional):
+    def update_with(self, other: Optional["BooleanValue"]):
         """Updates this value with the target.
 
         other: the other value"""

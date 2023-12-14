@@ -37,7 +37,7 @@ class AnimationValue:
             ],
         )
 
-    def update_with(self, other: Optional):
+    def update_with(self, other: Optional["AnimationValue"]):
         """Updates this value with the target.
 
         other: the other value"""

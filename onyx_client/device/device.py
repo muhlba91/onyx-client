@@ -1,4 +1,6 @@
 """Device class."""
+from typing import Optional
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.exception.update_exception import UpdateException
@@ -37,7 +39,7 @@ class Device:
             return self.identifier == other.identifier
         return False
 
-    def update_with(self, update):
+    def update_with(self, update: Optional["Device"]):
         """Update the device with an update patch.
 
         update: the update patch"""

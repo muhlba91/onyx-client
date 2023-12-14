@@ -47,7 +47,7 @@ class NumericValue:
             AnimationValue.create(properties.get("animation", None)),
         )
 
-    def update_with(self, other: Optional):
+    def update_with(self, other: Optional["NumericValue"]):
         """Updates this value with the target.
 
         other: the other value"""

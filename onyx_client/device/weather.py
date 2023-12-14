@@ -1,4 +1,6 @@
 """Weather class."""
+from typing import Optional
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
@@ -47,7 +49,7 @@ class Weather(Device):
     def __str__(self):
         return f"Weather({super().__str__()}, wind_peak={self.wind_peak}, sun_brightness_peak={self.sun_brightness_peak}, sun_brightness_sink={self.sun_brightness_sink}, air_pressure={self.air_pressure}, humidity={self.humidity}, temperature={self.temperature})"
 
-    def update_with(self, update):
+    def update_with(self, update: Optional["Weather"]):
         """Update the device with an update patch.
 
         update: the update patch"""

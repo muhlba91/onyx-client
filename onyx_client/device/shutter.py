@@ -1,4 +1,6 @@
 """Shutter class."""
+from typing import Optional
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.device import Device
@@ -56,7 +58,7 @@ class Shutter(Device):
     def __str__(self):
         return f"Shutter({super().__str__()}, actual_position={self.actual_position}, actual_angle={self.actual_angle}, target_position={self.target_position}, target_angle={self.target_angle})"
 
-    def update_with(self, update):
+    def update_with(self, update: Optional["Shutter"]):
         """Update the device with an update patch.
 
         update: the update patch"""

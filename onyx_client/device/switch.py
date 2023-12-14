@@ -1,4 +1,6 @@
 """Switch class."""
+from typing import Optional
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.device import Device
 from onyx_client.enum.device_type import DeviceType
@@ -21,7 +23,7 @@ class Switch(Device):
             list(),
         )
 
-    def update_with(self, update):
+    def update_with(self, update: Optional["Switch"]):
         """Update the device with an update patch.
 
         update: the update patch"""
