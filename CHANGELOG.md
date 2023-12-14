@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.3.2](https://github.com/muhlba91/onyx-client/compare/v8.3.1...v8.3.2) (2023-12-14)
+
+
+### Bug Fixes
+
+* hard update animations ([63b341e](https://github.com/muhlba91/onyx-client/commit/63b341e4dc885437310aa8844be851d073cc1d29))
+
 ## [8.3.1](https://github.com/muhlba91/onyx-client/compare/v8.3.0...v8.3.1) (2023-12-14)
 
 
