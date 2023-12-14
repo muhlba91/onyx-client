@@ -219,3 +219,36 @@ class TestShutter:
         assert shutter.target_angle == NumericValue(2, 10, 10, False)
         assert shutter.actual_angle == NumericValue(3, 0, 100, False)
         assert shutter.actual_position == NumericValue(4, 0, 10, False)
+
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        value4 = NumericValue(4, 0, 10, False)
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            None,
+            None,
+            value3,
+            value4,
+        )
+        update = Shutter(
+            "id",
+            "name1",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            None,
+            None,
+        )
+        shutter.update_with(update)
+        assert shutter.name == "name1"
+        assert shutter.target_position == value1
+        assert shutter.target_angle == value2
+        assert shutter.actual_angle == value3
+        assert shutter.actual_position == value4

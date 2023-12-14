@@ -183,3 +183,32 @@ class TestLight:
         assert light.target_brightness == NumericValue(1, 10, 10, False)
         assert light.actual_brightness == NumericValue(20, 0, 10, False)
         assert light.dim_duration == NumericValue(3, 0, 100, False)
+
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            None,
+            value2,
+            value3,
+        )
+        update = Light(
+            "id",
+            "name1",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            value1,
+            None,
+            None,
+        )
+        light.update_with(update)
+        assert light.name == "name1"
+        assert light.target_brightness == value1
+        assert light.actual_brightness == value2
+        assert light.dim_duration == value3

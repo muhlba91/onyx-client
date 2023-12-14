@@ -45,7 +45,10 @@ class Light(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.target_brightness.update_with(update.target_brightness)
+        if self.target_brightness is not None:
+            self.target_brightness.update_with(update.target_brightness)
+        else:
+            self.target_brightness = update.target_brightness
         self.actual_brightness.update_with(update.actual_brightness)
         self.dim_duration.update_with(update.dim_duration)
 

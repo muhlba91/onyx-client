@@ -64,8 +64,14 @@ class Shutter(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.target_position.update_with(update.target_position)
-        self.target_angle.update_with(update.target_angle)
+        if self.target_position is not None:
+            self.target_position.update_with(update.target_position)
+        else:
+            self.target_position = update.target_position
+        if self.target_angle is not None:
+            self.target_angle.update_with(update.target_angle)
+        else:
+            self.target_angle = update.target_angle
         self.actual_position.update_with(update.actual_position)
         self.actual_angle.update_with(update.actual_angle)
 
