@@ -41,8 +41,8 @@ class NumericValue:
 
         return NumericValue(
             properties.get("value", None),
-            properties.get("minimum", 0),
-            properties.get("maximum", 100),
+            properties.get("minimum", None),
+            properties.get("maximum", None),
             properties.get("read_only", False),
             AnimationValue.create(properties.get("animation", None)),
         )

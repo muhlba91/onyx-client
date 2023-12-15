@@ -38,7 +38,7 @@ class TestNumericValue:
         )
 
     def test_create_value_only(self):
-        expected = NumericValue(10, 0, 100, False)
+        expected = NumericValue(10, None, None, False)
         assert (
             NumericValue.create(
                 {
@@ -49,7 +49,7 @@ class TestNumericValue:
         )
 
     def test_create_no_value(self):
-        expected = NumericValue(None, 0, 100, False)
+        expected = NumericValue(None, None, None, False)
         assert NumericValue.create({}) == expected
 
     def test_create_none(self):

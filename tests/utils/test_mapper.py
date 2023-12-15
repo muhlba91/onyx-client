@@ -15,8 +15,14 @@ from onyx_client.utils.mapper import numeric_value, boolean_value, init_device
 
 def test_numeric_value():
     assert numeric_value("key", {"key": {"value": 1}}) == NumericValue(
-        value=1, minimum=0, maximum=100, read_only=False
+        value=1, minimum=None, maximum=None, read_only=False
     )
+
+
+def test_numeric_value_full():
+    assert numeric_value(
+        "key", {"key": {"value": 1, "minimum": 0, "maximum": 10}}
+    ) == NumericValue(value=1, minimum=0, maximum=10, read_only=False)
 
 
 def test_numeric_value_empty_properties():
@@ -106,8 +112,8 @@ def test_init_device_weather_full():
                 "values": ["weather"],
             },
             "wind_peak": {"value": 1, "minimum": 10},
-            "sun_brightness_peak": {"value": 2, "minimum": 1, "maximum": 10},
-            "sun_brightness_sink": {"value": 3, "minimum": 1, "maximum": 10},
+            "sun_brightness_peak": {"value": 2, "minimum": 1},
+            "sun_brightness_sink": {"minimum": 1, "maximum": 10},
             "air_pressure": {"value": 4, "minimum": 1, "maximum": 10},
             "humidity": {"value": 5, "minimum": 1, "maximum": 10},
             "temperature": {"value": 6, "minimum": 1, "maximum": 10},
@@ -119,9 +125,9 @@ def test_init_device_weather_full():
     assert device.name == "name"
     assert device.device_mode.mode == DeviceType.WEATHER
     assert len(device.device_mode.values) == 1
-    assert device.wind_peak == NumericValue(1, 10, 100, False)
-    assert device.sun_brightness_peak == NumericValue(2, 1, 10, False)
-    assert device.sun_brightness_sink == NumericValue(3, 1, 10, False)
+    assert device.wind_peak == NumericValue(1, 10, None, False)
+    assert device.sun_brightness_peak == NumericValue(2, 1, None, False)
+    assert device.sun_brightness_sink == NumericValue(None, 1, 10, False)
     assert device.air_pressure == NumericValue(4, 1, 10, False)
     assert device.humidity == NumericValue(5, 1, 10, False)
     assert device.temperature == NumericValue(6, 1, 10, False)
@@ -174,8 +180,8 @@ def test_init_device_light_full():
                 "values": ["basic_light"],
             },
             "target_brightness": {"value": 1, "minimum": 10},
-            "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
-            "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
+            "actual_brightness": {"value": 2, "maximum": 10},
+            "dim_duration": {"minimum": 1, "maximum": 10},
         },
         list(Action),
     )
@@ -184,9 +190,9 @@ def test_init_device_light_full():
     assert device.name == "name"
     assert device.device_mode.mode == DeviceType.BASIC_LIGHT
     assert len(device.device_mode.values) == 1
-    assert device.target_brightness == NumericValue(1, 10, 100, False)
-    assert device.actual_brightness == NumericValue(2, 1, 10, False)
-    assert device.dim_duration == NumericValue(3, 1, 10, False)
+    assert device.target_brightness == NumericValue(1, 10, None, False)
+    assert device.actual_brightness == NumericValue(2, None, 10, False)
+    assert device.dim_duration == NumericValue(None, 1, 10, False)
     assert device.actions == list(Action)
 
 
@@ -219,8 +225,8 @@ def test_init_device_shutter_full():
                 "values": ["awning", "rollershutter"],
             },
             "target_position": {"value": 10, "minimum": 10},
-            "target_angle": {"value": 1, "minimum": 1, "maximum": 10},
-            "actual_position": {"value": 10, "maximum": 10},
+            "target_angle": {"value": 1, "maximum": 10},
+            "actual_position": {"minimum": 0, "maximum": 10},
             "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
         },
         list(Action),
@@ -230,9 +236,9 @@ def test_init_device_shutter_full():
     assert device.name == "name"
     assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
     assert len(device.device_mode.values) == 2
-    assert device.target_position == NumericValue(10, 10, 100, False)
-    assert device.target_angle == NumericValue(1, 1, 10, False)
-    assert device.actual_position == NumericValue(10, 0, 10, False)
+    assert device.target_position == NumericValue(10, 10, None, False)
+    assert device.target_angle == NumericValue(1, None, 10, False)
+    assert device.actual_position == NumericValue(None, 0, 10, False)
     assert device.actual_angle == NumericValue(1, 1, 10, False)
     assert device.actions == list(Action)
 

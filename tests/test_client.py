@@ -310,6 +310,7 @@ class TestOnyxClient:
                     "target_angle": {"maximum": 360, "type": "numeric", "value": 0},
                     "actual_position": {
                         "maximum": 100,
+                        "minimum": 0,
                         "value": 100,
                         "type": "numeric",
                         "animation": {
@@ -327,6 +328,7 @@ class TestOnyxClient:
                     },
                     "actual_angle": {
                         "maximum": 360,
+                        "minimum": 0,
                         "type": "numeric",
                         "value": 0,
                         "animation": {
@@ -355,8 +357,8 @@ class TestOnyxClient:
             DeviceType.ROLLERSHUTTER,
         ]
         assert device.actions == [Action.STOP]
-        assert device.target_position == NumericValue(100, 0, 100, False)
-        assert device.target_angle == NumericValue(0, 0, 360, False)
+        assert device.target_position == NumericValue(100, None, 100, False)
+        assert device.target_angle == NumericValue(0, None, 360, False)
         assert device.actual_position == NumericValue(
             100,
             0,
