@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.3.3](https://github.com/muhlba91/onyx-client/compare/v8.3.2...v8.3.3) (2023-12-15)
+
+
+### Bug Fixes
+
+* fix numeric value initialization defaults ([5ac467e](https://github.com/muhlba91/onyx-client/commit/5ac467ebf58ebdcb5e47cc8402f14c0639375d9d))
+
 ## [8.3.2](https://github.com/muhlba91/onyx-client/compare/v8.3.1...v8.3.2) (2023-12-14)
 
 
