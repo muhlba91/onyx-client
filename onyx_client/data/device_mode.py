@@ -1,5 +1,5 @@
 """Device Mode for an Onyx device."""
-from onyx_client.enum.device_type import DeviceType
+from ..enum.device_type import DeviceType
 
 
 class DeviceMode:

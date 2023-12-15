@@ -1,7 +1,7 @@
 """Click class."""
-from onyx_client.data.device_mode import DeviceMode
-from onyx_client.device.device import Device
-from onyx_client.enum.device_type import DeviceType
+from ..data.device_mode import DeviceMode
+from ..device.device import Device
+from ..enum.device_type import DeviceType
 
 
 class Click(Device):

@@ -1,15 +1,15 @@
 """Onyx Client mapper utils."""
-from onyx_client.data.boolean_value import BooleanValue
-from onyx_client.data.device_mode import DeviceMode
-from onyx_client.data.numeric_value import NumericValue
-from onyx_client.device.click import Click
-from onyx_client.device.device import Device
-from onyx_client.device.light import Light
-from onyx_client.device.shutter import Shutter
-from onyx_client.device.switch import Switch
-from onyx_client.device.weather import Weather
-from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.device_type import (
+from ..data.boolean_value import BooleanValue
+from ..data.device_mode import DeviceMode
+from ..data.numeric_value import NumericValue
+from ..device.click import Click
+from ..device.device import Device
+from ..device.light import Light
+from ..device.shutter import Shutter
+from ..device.switch import Switch
+from ..device.weather import Weather
+from ..enum.device_type import DeviceType
+from ..utils.device_type import (
     is_click,
     is_light,
     is_weather,

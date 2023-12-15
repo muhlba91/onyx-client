@@ -1,5 +1,4 @@
 """Tests for mapper utils."""
-
 from onyx_client.data.boolean_value import BooleanValue
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.click import Click

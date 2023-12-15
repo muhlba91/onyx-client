@@ -1,10 +1,10 @@
 """Tests for the Onyx Client."""
-from unittest.mock import patch
-
 import aiohttp
 import pytest
 import pytest_asyncio
 import asyncio
+
+from unittest.mock import patch
 from aioresponses import aioresponses
 
 from onyx_client.client import create, OnyxClient

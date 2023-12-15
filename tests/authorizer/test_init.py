@@ -1,8 +1,8 @@
 """Tests for __init__."""
-from unittest.mock import patch
-
 import aiohttp
 import pytest
+
+from unittest.mock import patch
 from aioresponses import aioresponses
 
 from onyx_client.authorizer import exchange_code, authorize

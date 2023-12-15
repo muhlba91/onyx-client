@@ -1,12 +1,12 @@
 """Onyx Client device type utils."""
 from typing import Optional
 
-from onyx_client.device.click import Click
-from onyx_client.device.light import Light
-from onyx_client.device.shutter import Shutter
-from onyx_client.device.switch import Switch
-from onyx_client.device.weather import Weather
-from onyx_client.enum.device_type import DeviceType
+from ..device.click import Click
+from ..device.light import Light
+from ..device.shutter import Shutter
+from ..device.switch import Switch
+from ..device.weather import Weather
+from ..enum.device_type import DeviceType
 
 
 def is_shutter(device_type: DeviceType, properties: dict) -> bool:

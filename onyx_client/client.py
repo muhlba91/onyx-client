@@ -1,24 +1,24 @@
 """Onyx Client API class."""
 import json
 import logging
-from typing import Optional
-from random import uniform
-
 import aiohttp
 import asyncio
 
-from onyx_client.configuration.configuration import Configuration
-from onyx_client.data.date_information import DateInformation
-from onyx_client.data.device_command import DeviceCommand
-from onyx_client.data.supported_versions import SupportedVersions
-from onyx_client.device.device import Device
-from onyx_client.enum.action import Action
-from onyx_client.enum.device_type import DeviceType
-from onyx_client.group.group import Group
-from onyx_client.helpers.url import UrlHelper
-from onyx_client.utils.const import API_VERSION
-from onyx_client.utils.filter import present
-from onyx_client.utils.mapper import init_device
+from typing import Optional
+from random import uniform
+
+from .configuration.configuration import Configuration
+from .data.date_information import DateInformation
+from .data.device_command import DeviceCommand
+from .data.supported_versions import SupportedVersions
+from .device.device import Device
+from .enum.action import Action
+from .enum.device_type import DeviceType
+from .group.group import Group
+from .helpers.url import UrlHelper
+from .utils.const import API_VERSION
+from .utils.filter import present
+from .utils.mapper import init_device
 
 _LOGGER = logging.getLogger(__name__)
 

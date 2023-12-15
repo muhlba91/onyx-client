@@ -1,7 +1,7 @@
 """Numeric Values of Onyx devices."""
 from typing import Optional
 
-from onyx_client.data.animation_value import AnimationValue
+from ..data.animation_value import AnimationValue
 
 
 class NumericValue:

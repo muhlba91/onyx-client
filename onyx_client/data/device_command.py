@@ -1,6 +1,6 @@
 """Device Command for an Onyx device."""
-from onyx_client.enum.action import Action
-from onyx_client.exception.invalid_command import InvalidCommandException
+from ..enum.action import Action
+from ..exception.invalid_command import InvalidCommandException
 
 
 class DeviceCommand:

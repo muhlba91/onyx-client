@@ -1,11 +1,11 @@
 """Onyx Client URL helper."""
-from typing import Optional, Any
-
 import aiohttp
 
-from onyx_client.configuration.configuration import Configuration
-from onyx_client.utils.const import API_URL, API_HEADERS, API_VERSION
-from onyx_client.utils.response import check
+from typing import Optional, Any
+
+from ..configuration.configuration import Configuration
+from ..utils.const import API_URL, API_HEADERS, API_VERSION
+from ..utils.response import check
 
 
 class UrlHelper:

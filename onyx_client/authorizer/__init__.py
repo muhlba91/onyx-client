@@ -1,14 +1,13 @@
 """Onyx Client authorizer."""
-
 import logging
-from typing import Optional
-
 import aiohttp
 
-from onyx_client.client import OnyxClient
-from onyx_client.configuration.configuration import Configuration
-from onyx_client.utils.const import API_URL, API_HEADERS
-from onyx_client.utils.response import check
+from typing import Optional
+
+from ..client import OnyxClient
+from ..configuration.configuration import Configuration
+from ..utils.const import API_URL, API_HEADERS
+from ..utils.response import check
 
 _LOGGER = logging.getLogger(__name__)
 
