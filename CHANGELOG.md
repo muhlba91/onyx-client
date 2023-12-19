@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [8.3.4](https://github.com/muhlba91/onyx-client/compare/v8.3.3...v8.3.4) (2023-12-19)
+
+
+### Bug Fixes
+
+* fix code exchange ([7f87813](https://github.com/muhlba91/onyx-client/commit/7f87813bb4eb2615f1ffddae97a88f2334bceb89))
+
 ## [8.3.3](https://github.com/muhlba91/onyx-client/compare/v8.3.2...v8.3.3) (2023-12-15)
 
 
