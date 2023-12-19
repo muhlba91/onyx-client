@@ -21,7 +21,7 @@ async def exchange_code(
     client_session: the aiohttp client session to use"""
     session = client_session if client_session is not None else aiohttp.ClientSession()
     config = await authorize(code, session)
-    if await OnyxClient(config, session).verify():
+    if config is not None and await OnyxClient(config, session).verify():
         return config
     return None
 
@@ -35,11 +35,11 @@ async def authorize(
     client_session: the aiohttp client session to use"""
     async with client_session.post(
         f"{API_URL}/authorize",
-        data={"code": code},
+        json={"code": code},
         headers=API_HEADERS,
     ) as response:
         if not check(response):
             _LOGGER.error("Could not authorize client for ONYX API.")
             return None
         data = await response.json()
-        return Configuration(data.get("fingerprint", None), data.get("token"))
+        return Configuration(data.get("fingerprint", None), data.get("token", None))
