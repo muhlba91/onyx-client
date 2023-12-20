@@ -8,6 +8,7 @@
 [![](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
 [![](https://img.shields.io/pypi/dm/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![Known Vulnerabilities](https://snyk.io/test/github/muhlba91/onyx-client/badge.svg)](https://snyk.io/test/github/muhlba91/onyx-client)
+[![](https://img.shields.io/github/all-contributors/muhlba91/onyx-client?color=ee8449&style=for-the-badge)](#contributors)
 <a href="https://www.buymeacoffee.com/muhlba91" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="28" width="150"></a>
 
 This repository contains a **Python HTTP client** for [Hella](https://www.hella.info)'
@@ -173,10 +174,28 @@ adhere to the additional rules outlined in `.conform.yaml`.
 
 ---
 
-## Contributions
+## Contributors
 
-Please feel free to contribute, be it with Issues or Pull Requests! Please read
-the [Contribution guidelines](CONTRIBUTING.md)
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://muehlbachler.io/"><img src="https://avatars.githubusercontent.com/u/653739?v=4?s=100" width="100px;" alt="Daniel Mühlbachler-Pietrzykowski"/><br /><sub><b>Daniel Mühlbachler-Pietrzykowski</b></sub></a><br /><a href="#maintenance-muhlba91" title="Maintenance">🚧</a> <a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=muhlba91" title="Code">💻</a> <a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=muhlba91" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/MitterdorferMathias"><img src="https://avatars.githubusercontent.com/u/32190212?v=4?s=100" width="100px;" alt="Mathias Mitterdorfer"/><br /><sub><b>Mathias Mitterdorfer</b></sub></a><br /><a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=MitterdorferMathias" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Supporting
 
