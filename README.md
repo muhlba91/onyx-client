@@ -7,7 +7,6 @@
 [![](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
 [![](https://img.shields.io/pypi/dm/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
-[![Known Vulnerabilities](https://snyk.io/test/github/muhlba91/onyx-client/badge.svg)](https://snyk.io/test/github/muhlba91/onyx-client)
 [![](https://img.shields.io/github/all-contributors/muhlba91/onyx-client?color=ee8449&style=for-the-badge)](#contributors)
 <a href="https://www.buymeacoffee.com/muhlba91" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="28" width="150"></a>
 
