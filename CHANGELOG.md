@@ -1,6 +1,46 @@
 # Changelog
 
 
+## [9.0.0](https://github.com/muhlba91/onyx-client/compare/v8.3.4...v9.0.0) (2024-02-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* set the minimum python version 3.12
+
+### Features
+
+* update python to 3.12 ([aeaf3be](https://github.com/muhlba91/onyx-client/commit/aeaf3bece13d5436222c4c919c54a64aba567123))
+
+
+### Bug Fixes
+
+* **ci:** remove snyk ([efb5a03](https://github.com/muhlba91/onyx-client/commit/efb5a038304a18a879bb7ee97ea61258d02066b7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update abatilo/actions-poetry action to v3 ([b94509e](https://github.com/muhlba91/onyx-client/commit/b94509ef68aec858265dcdd9bb53ad44c341fb22))
+* **deps:** update dependencies ([df30a2b](https://github.com/muhlba91/onyx-client/commit/df30a2b9bb57b4c7a950c6dd019a7e891ec4b8bf))
+* **deps:** update dependency aiohttp to v3.9.2 ([7e980af](https://github.com/muhlba91/onyx-client/commit/7e980af3a6206a07b81fcacc870a62d62f31cb0e))
+* **deps:** update dependency aiohttp to v3.9.3 ([6e0e38b](https://github.com/muhlba91/onyx-client/commit/6e0e38bfcf8c783fa6212d2bf7b0160a72b3472d))
+* **deps:** update dependency coverage to v7.3.4 ([dd81b56](https://github.com/muhlba91/onyx-client/commit/dd81b5694c6780186dbaddee29dd4279c184d0ce))
+* **deps:** update dependency coverage to v7.4.0 ([dc17c57](https://github.com/muhlba91/onyx-client/commit/dc17c57c04b66552e43f1fde5e3fcc85093d63b0))
+* **deps:** update dependency coverage to v7.4.1 ([53ce856](https://github.com/muhlba91/onyx-client/commit/53ce8563b304e14490d6f078829cd4f46cf7ce78))
+* **deps:** update dependency pre-commit to v3.6.1 ([cb33b42](https://github.com/muhlba91/onyx-client/commit/cb33b421edd2ac5a703f6f08d35ab69994009f00))
+* **deps:** update dependency pytest to v7.4.4 ([7b9d028](https://github.com/muhlba91/onyx-client/commit/7b9d028eec520e92a67e90ba853ae406be6d765f))
+* **deps:** update dependency pytest to v8 ([b2cdb42](https://github.com/muhlba91/onyx-client/commit/b2cdb42f093edac1ec926b6921a423fe32591cca))
+* **deps:** update dependency pytest-asyncio to v0.23.3 ([ae36715](https://github.com/muhlba91/onyx-client/commit/ae36715974a70bb68aed816b14b2e8c0d36b59f1))
+* **deps:** update dependency pytest-asyncio to v0.23.4 ([a48a652](https://github.com/muhlba91/onyx-client/commit/a48a6525dbbaf197ca92890324a3d3857bdc1e97))
+* **deps:** update dependency pytest-asyncio to v0.23.5 ([0e93524](https://github.com/muhlba91/onyx-client/commit/0e935249fca4ee026eb0f6676ec67ffbdaf3d591))
+* **deps:** update dependency ruff to ^0.2.0 ([c3004df](https://github.com/muhlba91/onyx-client/commit/c3004df7d47027a5387845b0d054cc2669169539))
+* **deps:** update dependency ruff to v0.1.11 ([4ad5836](https://github.com/muhlba91/onyx-client/commit/4ad5836c453fa3e51304c66d2f29b8eed39ce32a))
+* **deps:** update dependency ruff to v0.1.13 ([67a4123](https://github.com/muhlba91/onyx-client/commit/67a4123beac8c9ca53fd1971cb2b8430e0354fcb))
+* **deps:** update dependency ruff to v0.1.14 ([031792e](https://github.com/muhlba91/onyx-client/commit/031792ee8be5f534d7a6e1e28175f223443b7590))
+* **deps:** update dependency ruff to v0.1.15 ([2f7e01c](https://github.com/muhlba91/onyx-client/commit/2f7e01c5c23dcdb5a82a49bddd4ce59d456bf051))
+* **deps:** update dependency ruff to v0.1.9 ([7db8f6e](https://github.com/muhlba91/onyx-client/commit/7db8f6e4a3e02745ed78e76e717ebb39d7f80312))
+* **deps:** update dependency ruff to v0.2.1 ([e34cc92](https://github.com/muhlba91/onyx-client/commit/e34cc92c33221651d5c68f77fc9514b456c44ece))
+
 ## [8.3.4](https://github.com/muhlba91/onyx-client/compare/v8.3.3...v8.3.4) (2023-12-19)
 
 
