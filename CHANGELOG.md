@@ -1,6 +1,29 @@
 # Changelog
 
 
+## [9.0.1](https://github.com/muhlba91/onyx-client/compare/v9.0.0...v9.0.1) (2024-03-25)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverage to v7.4.2 ([55b7c66](https://github.com/muhlba91/onyx-client/commit/55b7c668d77a152ba72fbddf743b14bd0ba5ed90))
+* **deps:** update dependency coverage to v7.4.3 ([301cf89](https://github.com/muhlba91/onyx-client/commit/301cf896b23975e550b3d044f8d6e89b69151331))
+* **deps:** update dependency coverage to v7.4.4 ([5bb9ba7](https://github.com/muhlba91/onyx-client/commit/5bb9ba7a4265d9db86c16e0113d482f302c464b3))
+* **deps:** update dependency pre-commit to v3.6.2 ([9fe44b7](https://github.com/muhlba91/onyx-client/commit/9fe44b7df419679f5a17b9f44124fbce60eed1a8))
+* **deps:** update dependency pre-commit to v3.7.0 ([e7bda03](https://github.com/muhlba91/onyx-client/commit/e7bda034272bea1123f1faeee9f685e3953c2a46))
+* **deps:** update dependency pytest to v8.0.1 ([2cec6d2](https://github.com/muhlba91/onyx-client/commit/2cec6d2c785444db9d56ca9ddc87fbfc7d6676b8))
+* **deps:** update dependency pytest to v8.0.2 ([5a62d13](https://github.com/muhlba91/onyx-client/commit/5a62d13af9d962c05fbef5555df24d07b0bc1157))
+* **deps:** update dependency pytest to v8.1.0 ([93c8038](https://github.com/muhlba91/onyx-client/commit/93c8038ec3afdcc25729d6376605cf4b50d61043))
+* **deps:** update dependency pytest to v8.1.1 ([55f289c](https://github.com/muhlba91/onyx-client/commit/55f289c19ee3f1572faa1b4c573e26f66d334c00))
+* **deps:** update dependency pytest-asyncio to v0.23.6 ([7006820](https://github.com/muhlba91/onyx-client/commit/7006820a8f9d53eb1b01edfbbadbf3e9a0bf1f9d))
+* **deps:** update dependency pytest-cov to v5 ([0a81db8](https://github.com/muhlba91/onyx-client/commit/0a81db833f52ee76a2613c9feb76733505b121c4))
+* **deps:** update dependency ruff to ^0.3.0 ([274899b](https://github.com/muhlba91/onyx-client/commit/274899bf54123b29a8c8c07e84a75788984831bf))
+* **deps:** update dependency ruff to v0.2.2 ([460bec9](https://github.com/muhlba91/onyx-client/commit/460bec916b1058058a89ac0d3efc8441193635c9))
+* **deps:** update dependency ruff to v0.3.1 ([f68e7e0](https://github.com/muhlba91/onyx-client/commit/f68e7e076025c990c3619c4efb153e21826cfa46))
+* **deps:** update dependency ruff to v0.3.2 ([7b9de16](https://github.com/muhlba91/onyx-client/commit/7b9de16120631581abb0a2107a331ca6e029474c))
+* **deps:** update dependency ruff to v0.3.3 ([a068d5e](https://github.com/muhlba91/onyx-client/commit/a068d5ed786124b93fb6f9bafcd8bbdd6f84597d))
+* **deps:** update dependency ruff to v0.3.4 ([be5b1ff](https://github.com/muhlba91/onyx-client/commit/be5b1fffaf123ea61dfd7a0345f889382601a7e4))
+
 ## [9.0.0](https://github.com/muhlba91/onyx-client/compare/v8.3.4...v9.0.0) (2024-02-14)
 
 
