@@ -28,7 +28,7 @@ API. In below table you can find an indication of what Hella API version is supp
 
 ## Installation
 
-The package is published in **(Test)PyPi** and can be installed via:
+The package is published in [**PyPi**](https://pypi.org/project/onyx-client/) and can be installed via:
 
 ```bash
 pip install onyx-client
