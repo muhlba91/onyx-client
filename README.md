@@ -3,6 +3,7 @@
 [![](https://img.shields.io/github/license/muhlba91/onyx-client?style=for-the-badge)](LICENSE)
 [![](https://img.shields.io/github/actions/workflow/status/muhlba91/onyx-client/release.yml?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions/workflows/release.yml)
 [![](https://img.shields.io/coveralls/github/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/)
+[![](https://api.scorecard.dev/projects/github.com/muhlba91/onyx-client/badge?style=for-the-badge)](https://scorecard.dev/viewer/?uri=github.com/muhlba91/onyx-client)
 [![](https://img.shields.io/pypi/pyversions/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
 [![](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
