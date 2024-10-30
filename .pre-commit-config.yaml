@@ -1,19 +1,19 @@
 ---
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.7.1
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
       - id: ruff-format
   - repo: https://github.com/talos-systems/conform
-    rev: v0.1.0-alpha.27
+    rev: v0.1.0-alpha.30
     hooks:
       - id: conform
         stages:
           - commit-msg
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -24,11 +24,9 @@ repos:
       - id: check-xml
       - id: check-yaml
       - id: detect-aws-credentials
-        args: [
-            "--allow-missing-credentials"
-        ]
+        args: ["--allow-missing-credentials"]
       - id: detect-private-key
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.16.3
+    rev: v8.21.2
     hooks:
       - id: gitleaks
