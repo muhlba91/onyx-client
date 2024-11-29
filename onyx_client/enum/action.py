@@ -1,4 +1,5 @@
 """Device Actions of Onyx devices."""
+
 from enum import Enum, auto
 
 

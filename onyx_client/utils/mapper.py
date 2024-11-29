@@ -1,4 +1,5 @@
 """Onyx Client mapper utils."""
+
 from ..data.boolean_value import BooleanValue
 from ..data.device_mode import DeviceMode
 from ..data.numeric_value import NumericValue

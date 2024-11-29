@@ -1,4 +1,5 @@
 """Tests for the BooleanValue data class."""
+
 from onyx_client.data.boolean_value import BooleanValue
 
 

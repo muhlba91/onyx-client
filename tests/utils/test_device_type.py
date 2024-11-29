@@ -1,4 +1,5 @@
 """Tests for device type utils."""
+
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.utils.device_type import (
     is_shutter,

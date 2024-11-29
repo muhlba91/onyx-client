@@ -1,4 +1,5 @@
 """Tests for the Base Device class."""
+
 import pytest
 import pytest_asyncio
 

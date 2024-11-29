@@ -1,4 +1,5 @@
 """Tests for the Action enum."""
+
 import pytest
 
 from onyx_client.enum.device_type import DeviceType

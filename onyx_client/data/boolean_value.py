@@ -1,4 +1,5 @@
 """Boolean Values of Onyx devices."""
+
 from typing import Optional
 
 

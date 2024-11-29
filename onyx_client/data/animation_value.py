@@ -1,4 +1,5 @@
 """Animation Values of Onyx devices."""
+
 from typing import Optional
 
 from ..data.animation_keyframe import AnimationKeyframe

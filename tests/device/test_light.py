@@ -1,4 +1,5 @@
 """Tests for the Light Device class."""
+
 import pytest
 import pytest_asyncio
 

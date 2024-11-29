@@ -1,4 +1,5 @@
 """Tests for the Shutter Device class."""
+
 import pytest
 import pytest_asyncio
 

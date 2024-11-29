@@ -1,4 +1,5 @@
 """Tests for __init__."""
+
 import aiohttp
 import pytest
 

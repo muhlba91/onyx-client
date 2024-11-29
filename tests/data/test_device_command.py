@@ -1,4 +1,5 @@
 """Tests for the DeviceCommand data class."""
+
 import pytest
 
 from onyx_client.data.device_command import DeviceCommand

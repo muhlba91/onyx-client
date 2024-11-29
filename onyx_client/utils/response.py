@@ -1,4 +1,5 @@
 """Onyx Client response utils."""
+
 import logging
 import aiohttp
 

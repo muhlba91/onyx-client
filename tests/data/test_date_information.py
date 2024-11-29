@@ -1,4 +1,5 @@
 """Tests for the DateInformation data class."""
+
 from onyx_client.data.date_information import DateInformation
 
 

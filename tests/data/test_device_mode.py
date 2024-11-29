@@ -1,4 +1,5 @@
 """Tests for the DeviceMode data class."""
+
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.enum.device_type import DeviceType
 

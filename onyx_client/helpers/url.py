@@ -1,4 +1,5 @@
 """Onyx Client URL helper."""
+
 import aiohttp
 
 from typing import Optional, Any

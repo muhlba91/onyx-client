@@ -1,4 +1,5 @@
 """Onyx Client authorizer."""
+
 import logging
 import aiohttp
 

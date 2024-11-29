@@ -1,4 +1,5 @@
 """Tests for the SupportedVersions data class."""
+
 from onyx_client.data.supported_versions import SupportedVersions
 from onyx_client.utils.const import API_VERSION
 

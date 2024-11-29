@@ -1,4 +1,5 @@
 """Device Types of Onyx devices."""
+
 from enum import Enum, auto
 
 

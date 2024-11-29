@@ -1,4 +1,5 @@
 """Tests for the Onyx Client."""
+
 import aiohttp
 import pytest
 import pytest_asyncio
@@ -1155,6 +1156,7 @@ class TestOnyxClient:
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',
         )
+
         def callback(device):
             if device.identifier == "device1":
                 client.stop()
@@ -1266,10 +1268,7 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            "data: {  }",
+            body="event: pulse\n" "data: 1730803627\n\n" "event: patch\n" "data: {  }",
         )
         index = 1
         async for device in client.events():
@@ -1281,10 +1280,7 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=500,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            "data: {  }",
+            body="event: pulse\n" "data: 1730803627\n\n" "event: patch\n" "data: {  }",
         )
         index = 1
         async for device in client.events():

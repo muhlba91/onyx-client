@@ -1,4 +1,5 @@
 """Click class."""
+
 from ..data.device_mode import DeviceMode
 from ..device.device import Device
 from ..enum.device_type import DeviceType

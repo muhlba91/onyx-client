@@ -1,4 +1,5 @@
 """Tests for the Action enum."""
+
 from onyx_client.enum.action import Action
 
 

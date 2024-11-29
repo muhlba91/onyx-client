@@ -1,4 +1,5 @@
 """Shutter class."""
+
 from typing import Optional
 
 from ..data.device_mode import DeviceMode

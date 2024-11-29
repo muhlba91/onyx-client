@@ -1,4 +1,5 @@
 """Onyx Client API class."""
+
 import json
 import logging
 import aiohttp

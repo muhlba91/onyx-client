@@ -1,4 +1,5 @@
 """Tests for the Weather Device class."""
+
 import pytest
 import pytest_asyncio
 

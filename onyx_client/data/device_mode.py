@@ -1,4 +1,5 @@
 """Device Mode for an Onyx device."""
+
 from ..enum.device_type import DeviceType
 
 

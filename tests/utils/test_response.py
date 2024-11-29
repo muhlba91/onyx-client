@@ -1,4 +1,5 @@
 """Tests for response utils."""
+
 from unittest.mock import patch
 
 from onyx_client.utils.response import check

@@ -1,4 +1,5 @@
 """Tests for the Group class."""
+
 from onyx_client.group.group import Group
 
 

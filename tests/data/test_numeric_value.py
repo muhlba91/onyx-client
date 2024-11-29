@@ -1,4 +1,5 @@
 """Tests for the NumericValue data class."""
+
 from onyx_client.data.animation_keyframe import AnimationKeyframe
 from onyx_client.data.animation_value import AnimationValue
 from onyx_client.data.numeric_value import NumericValue

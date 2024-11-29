@@ -1,4 +1,5 @@
 """Tests for the Click Device class."""
+
 import pytest
 import pytest_asyncio
 

@@ -1,4 +1,5 @@
 """Onyx Client device type utils."""
+
 from typing import Optional
 
 from ..device.click import Click

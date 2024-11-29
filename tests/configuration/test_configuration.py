@@ -1,4 +1,5 @@
 """Tests for the Configuration class."""
+
 from onyx_client.configuration.configuration import Configuration
 
 

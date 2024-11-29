@@ -1,4 +1,5 @@
 """Device Command for an Onyx device."""
+
 from ..enum.action import Action
 from ..exception.invalid_command import InvalidCommandException
 
