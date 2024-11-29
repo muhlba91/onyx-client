@@ -1095,7 +1095,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: snapshot\n"
+            'data: { "devices": { "device1":'
             '{ "name": "device1", "type": "rollershutter" },'
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',
@@ -1112,7 +1115,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: snapshot\n"
+            'data: { "devices": { "device1":'
             '{ "name": "device1", "type": "rollershutter" },'
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',
@@ -1141,12 +1147,14 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: snapshot\n"
+            'data: { "devices": { "device1":'
             '{ "name": "device1", "type": "rollershutter" },'
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',
         )
-
         def callback(device):
             if device.identifier == "device1":
                 client.stop()
@@ -1163,7 +1171,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: snapshot\n"
+            'data: { "devices": { "device1":'
             '{ "name": "device1", "type": "rollershutter" },'
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',
@@ -1179,7 +1190,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: snapshot\n"
+            'data: { "devices": { "device":'
             '{ "name": "device", "type": "rollershutter" } } }',
         )
         mock_device.return_value = Device(
@@ -1202,7 +1216,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            'data: { "devices": { "device":'
             '{ "name": "device", "type": "rollershutter" } } }',
         )
         mock_device.side_effect = AttributeError()
@@ -1217,7 +1234,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1": {} } }',
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            'data: { "devices": { "device1": {} } }',
         )
         index = 1
         async for device in client.events():
@@ -1230,7 +1250,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": {  } }',
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            'data: { "devices": {  } }',
         )
         index = 1
         async for device in client.events():
@@ -1243,7 +1266,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body="data: {  }",
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            "data: {  }",
         )
         index = 1
         async for device in client.events():
@@ -1255,7 +1281,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=500,
-            body="data: {  }",
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            "data: {  }",
         )
         index = 1
         async for device in client.events():
@@ -1267,7 +1296,10 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body='data: { "devices": { "device1":'
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            'data: { "devices": { "device1":'
             '{ "name": "device1", "type": "rollershutter" },'
             '"device2": { "name": "device2" },'
             '"device3": { "type": "rollershutter" } } }',

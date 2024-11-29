@@ -245,29 +245,34 @@ class OnyxClient:
 
         include_details: ensures all device details are queried
                          before emiting the device"""
+        event = ""
         async for message in self.url_helper.start_stream("/events"):
-            if message is not None and len(message) > 0 and message.startswith("data:"):
-                message = message[len("data:") :].strip()
-                events = json.loads(message)
-                for key, value in events.get("devices", dict()).items():
-                    try:
-                        if value is not None:
-                            device = (
-                                await self.device(key)
-                                if include_details
-                                else init_device(
+            if message is not None and len(message) > 0:
+                if message.startswith("event:"):
+                    event = message[len("event:") :].strip()
+                elif message.startswith("data:"):
+                    if event in ["snapshot", "patch"]:
+                        data = json.loads(message[len("data:") :].strip())
+                        for key, value in data.get("devices", dict()).items():
+                            try:
+                                if value is not None:
+                                    device = (
+                                        await self.device(key)
+                                        if include_details
+                                        else init_device(
+                                            key,
+                                            value.get("name", None),
+                                            DeviceType.convert(value.get("type", None)),
+                                            value.get("properties", None),
+                                            value,
+                                        )
+                                    )
+                                    yield device
+                            except AttributeError:
+                                _LOGGER.error(
+                                    "Received unknown device data. Dropping device %s",
                                     key,
-                                    value.get("name", None),
-                                    DeviceType.convert(value.get("type", None)),
-                                    value.get("properties", None),
-                                    value,
                                 )
-                            )
-                            yield device
-                    except AttributeError:
-                        _LOGGER.error(
-                            "Received unknown device data. Dropping device %s", key
-                        )
 
     def start(self, include_details: bool = False, backoff_time: int = 1):
         """Start the event stream via callback.
