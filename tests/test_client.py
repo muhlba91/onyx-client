@@ -1305,3 +1305,51 @@ class TestOnyxClient:
             assert device.identifier == f"device{index}"
             index += 1
         assert index == 4
+
+    @pytest.mark.asyncio
+    async def test_events_multiple_pulses(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: pulse\n"
+            "data: 1732886606\n\n"
+            "event: patch\n"
+            'data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }\n\n'
+            "event: pulse\n"
+            "data: 1730803627\n\n",
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 4
+
+    @pytest.mark.asyncio
+    async def test_events_invalid_orders(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: pulse\n"
+            "data: 1730803627\n\n"
+            "data: 1732886606\n\n"
+            "event: patch\n"
+            "event: pulse\n"
+            "data: 1730803627\n\n"
+            "event: patch\n"
+            'data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter" },'
+            '"device2": { "name": "device2" },'
+            '"device3": { "type": "rollershutter" } } }\n\n'
+            "event: pulse\n"
+            "data: 1730803627\n\n",
+        )
+        index = 1
+        async for device in client.events():
+            assert device.identifier == f"device{index}"
+            index += 1
+        assert index == 4
