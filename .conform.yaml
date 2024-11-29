@@ -3,7 +3,7 @@ policies:
   - type: commit
     spec:
       header:
-        length: 80
+        length: 200
         imperative: true
         case: lower
         invalidLastCharacters: .
@@ -22,5 +22,8 @@ policies:
           - test
           - docs
           - no_type
-        scopes: [ ]
+        scopes:
+          - release
+          - deps
+          - ci
         descriptionLength: 100
