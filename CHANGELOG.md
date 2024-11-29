@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [9.1.1](https://github.com/muhlba91/onyx-client/compare/v9.1.0...v9.1.1) (2024-11-29)
+
+
+### Bug Fixes
+
+* add more tests for events ([5a0f32e](https://github.com/muhlba91/onyx-client/commit/5a0f32e332cd3447313d985624dc74970fe49326))
+* **ci:** add scopes to conform ([2aa518f](https://github.com/muhlba91/onyx-client/commit/2aa518f3267550dc423db481eb2ecdfb634c48ba))
+
 ## [9.1.0](https://github.com/muhlba91/onyx-client/compare/v9.0.0...v9.1.0) (2024-11-29)
 
 
