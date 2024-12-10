@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [9.2.1](https://github.com/muhlba91/onyx-client/compare/v9.2.0...v9.2.1) (2024-12-10)
+
+
+### Miscellaneous Chores
+
+* **deps:** update pypa/gh-action-pypi-publish digest to 67339c7 ([e6350e2](https://github.com/muhlba91/onyx-client/commit/e6350e2d7cbbf3fac532ca6030092c1758e0ceef))
+* **deps:** update pypa/gh-action-pypi-publish digest to daa8997 ([31a832c](https://github.com/muhlba91/onyx-client/commit/31a832c1bf3f536e34ea3aebdb068427e1c26f57))
+
 ## [9.2.0](https://github.com/muhlba91/onyx-client/compare/v9.1.1...v9.2.0) (2024-12-07)
 
 
