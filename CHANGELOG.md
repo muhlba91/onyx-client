@@ -1,6 +1,16 @@
 # Changelog
 
 
+## [9.2.1](https://github.com/muhlba91/onyx-client/compare/v9.2.0...v9.2.1) (2024-12-10)
+
+
+### Miscellaneous Chores
+
+* **deps:** update github/codeql-action action to v3.27.7 ([87cc243](https://github.com/muhlba91/onyx-client/commit/87cc2436d371011f771c94a2630b1801014991a7))
+* **deps:** update pypa/gh-action-pypi-publish digest to 67339c7 ([e6350e2](https://github.com/muhlba91/onyx-client/commit/e6350e2d7cbbf3fac532ca6030092c1758e0ceef))
+* **deps:** update pypa/gh-action-pypi-publish digest to 916e576 ([bcd4734](https://github.com/muhlba91/onyx-client/commit/bcd47348ee11e32f4c12e66c00942cdbb6297727))
+* **deps:** update pypa/gh-action-pypi-publish digest to daa8997 ([31a832c](https://github.com/muhlba91/onyx-client/commit/31a832c1bf3f536e34ea3aebdb068427e1c26f57))
+
 ## [9.2.0](https://github.com/muhlba91/onyx-client/compare/v9.1.1...v9.2.0) (2024-12-07)
 
 
