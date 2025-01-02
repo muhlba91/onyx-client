@@ -1,6 +1,35 @@
 # Changelog
 
 
+## [9.2.1](https://github.com/muhlba91/onyx-client/compare/v9.2.0...v9.2.1) (2025-01-02)
+
+
+### Miscellaneous Chores
+
+* **deps:** update abatilo/actions-poetry action to v4 ([b519840](https://github.com/muhlba91/onyx-client/commit/b519840daf6e921e91557c8d18936307d7c27b88))
+* **deps:** update actions/upload-artifact action to v4.5.0 ([d5fa71a](https://github.com/muhlba91/onyx-client/commit/d5fa71a60471936fbfc4d6a248887fa2ff038ec9))
+* **deps:** update dependency aiohttp to v3.11.11 ([6564ed7](https://github.com/muhlba91/onyx-client/commit/6564ed74e137a49524abeb3329708ae944cd43fc))
+* **deps:** update dependency coverage to v7.6.10 ([0bebb0f](https://github.com/muhlba91/onyx-client/commit/0bebb0f1112c29484b8688d2179547a692a11aef))
+* **deps:** update dependency pytest-asyncio to ^0.25.0 ([f9f06a4](https://github.com/muhlba91/onyx-client/commit/f9f06a4e5535ee9b76cfa491237abda01a555894))
+* **deps:** update dependency pytest-asyncio to v0.25.1 ([ef3f9c3](https://github.com/muhlba91/onyx-client/commit/ef3f9c3e27f099a1141d40435bfe03246fae66bb))
+* **deps:** update dependency ruff to v0.8.3 ([ddaccd5](https://github.com/muhlba91/onyx-client/commit/ddaccd5b2d5728ec3469a09908084e4b7aa31c88))
+* **deps:** update dependency ruff to v0.8.4 ([0d30397](https://github.com/muhlba91/onyx-client/commit/0d30397f42e1df5b0289f4b681f4c92e54b334ef))
+* **deps:** update dependency ruff to v0.8.5 ([c57f8ab](https://github.com/muhlba91/onyx-client/commit/c57f8ab9b50ebe56365b939badf44fce47fda920))
+* **deps:** update github/codeql-action action to v3.27.7 ([87cc243](https://github.com/muhlba91/onyx-client/commit/87cc2436d371011f771c94a2630b1801014991a7))
+* **deps:** update github/codeql-action action to v3.27.8 ([e05b319](https://github.com/muhlba91/onyx-client/commit/e05b319e3560eb7bc687da95614ff86d3b6e6809))
+* **deps:** update github/codeql-action action to v3.27.9 ([3426e1f](https://github.com/muhlba91/onyx-client/commit/3426e1f44831b1a3879bf429e3dfc507a69f434d))
+* **deps:** update github/codeql-action action to v3.28.0 ([205b6e1](https://github.com/muhlba91/onyx-client/commit/205b6e1983207721d936eaa5b0321ff37bc2fcf8))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.8.3 ([4b42bbc](https://github.com/muhlba91/onyx-client/commit/4b42bbc067788a1edc6f1e892e717a3cc3d11460))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.8.4 ([6a2db2a](https://github.com/muhlba91/onyx-client/commit/6a2db2a8ba88224d5b635176c35509d8642d3f5d))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.8.5 ([d6d31c8](https://github.com/muhlba91/onyx-client/commit/d6d31c835febeb31cbf059c727042a5064b3613d))
+* **deps:** update pre-commit hook gitleaks/gitleaks to v8.21.3 ([e45b490](https://github.com/muhlba91/onyx-client/commit/e45b49098b316104e2efd4037041eadb6fd17bf4))
+* **deps:** update pre-commit hook gitleaks/gitleaks to v8.22.0 ([1fe25f9](https://github.com/muhlba91/onyx-client/commit/1fe25f9259fd614aae79a9be7a7de5d7b5623246))
+* **deps:** update pre-commit hook gitleaks/gitleaks to v8.22.1 ([fd36336](https://github.com/muhlba91/onyx-client/commit/fd36336323fd14f4ef45f1f68ad5ab42514e1c3c))
+* **deps:** update pypa/gh-action-pypi-publish digest to 67339c7 ([e6350e2](https://github.com/muhlba91/onyx-client/commit/e6350e2d7cbbf3fac532ca6030092c1758e0ceef))
+* **deps:** update pypa/gh-action-pypi-publish digest to 8cafb5c ([a6522fb](https://github.com/muhlba91/onyx-client/commit/a6522fbcb9026347a3838e64d076d3937e32ac8b))
+* **deps:** update pypa/gh-action-pypi-publish digest to 916e576 ([bcd4734](https://github.com/muhlba91/onyx-client/commit/bcd47348ee11e32f4c12e66c00942cdbb6297727))
+* **deps:** update pypa/gh-action-pypi-publish digest to daa8997 ([31a832c](https://github.com/muhlba91/onyx-client/commit/31a832c1bf3f536e34ea3aebdb068427e1c26f57))
+
 ## [9.2.0](https://github.com/muhlba91/onyx-client/compare/v9.1.1...v9.2.0) (2024-12-07)
 
 
