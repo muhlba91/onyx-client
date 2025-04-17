@@ -1,6 +1,24 @@
 # Changelog
 
 
+## [9.2.2](https://github.com/muhlba91/onyx-client/compare/v9.2.1...v9.2.2) (2025-04-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency pytest-cov to v6.1.1 ([d8ceb11](https://github.com/muhlba91/onyx-client/commit/d8ceb11af853f8a4486a19b456ad5af95978bf20))
+* **deps:** update dependency ruff to v0.11.3 ([52b050b](https://github.com/muhlba91/onyx-client/commit/52b050b70d43cfe7e19a8834583dde6edc46cdd6))
+* **deps:** update dependency ruff to v0.11.4 ([6e3550c](https://github.com/muhlba91/onyx-client/commit/6e3550ce6aea3a0d2eda29992e3b9bbc51dd3649))
+* **deps:** update dependency ruff to v0.11.5 ([2ab0398](https://github.com/muhlba91/onyx-client/commit/2ab0398efe66b1380199bb3bd2c24c47672d696d))
+* **deps:** update dependency ruff to v0.11.6 ([6eef240](https://github.com/muhlba91/onyx-client/commit/6eef240c95daa29fb6d10a2810cab718610c783f))
+* **deps:** update github/codeql-action action to v3.28.14 ([f999c16](https://github.com/muhlba91/onyx-client/commit/f999c1624d1a980f445deb3c2c798d6f37fbec74))
+* **deps:** update github/codeql-action action to v3.28.15 ([9fa2d83](https://github.com/muhlba91/onyx-client/commit/9fa2d83aa3103a04fff06d075e5db75342bceb4d))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.11.3 ([2a0ee45](https://github.com/muhlba91/onyx-client/commit/2a0ee455266a8f850395f7cb8f2f9365cae003e5))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.11.4 ([b08ecbc](https://github.com/muhlba91/onyx-client/commit/b08ecbc46aee6800efa866cbe4a8034820ba2ef3))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.11.5 ([6b0f5cb](https://github.com/muhlba91/onyx-client/commit/6b0f5cbeaeaa46067bca91b82b82aa2cc3f5f5fd))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.11.6 ([6739c5b](https://github.com/muhlba91/onyx-client/commit/6739c5bf9492d55c30dd649596fda2c874a4c57a))
+* **deps:** update pre-commit hook gitleaks/gitleaks to v8.24.3 ([bb1d362](https://github.com/muhlba91/onyx-client/commit/bb1d362fdc99b233f3633e4952448c552e8dcd5d))
+
 ## [9.2.1](https://github.com/muhlba91/onyx-client/compare/v9.2.0...v9.2.1) (2025-04-02)
 
 
