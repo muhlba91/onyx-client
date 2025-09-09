@@ -29,7 +29,7 @@ asyncio = "^4.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.0.0"
-pytest-cov = { extras = ["toml"], version = "^6.0.0" }
+pytest-cov = { extras = ["toml"], version = "^7.0.0" }
 coverage = { extras = ["toml"], version = "^7.0.0" }
 pre-commit = "^4.0.0"
 pytest-asyncio = "^1.0.0"
