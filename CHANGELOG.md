@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [10.1.0](https://github.com/muhlba91/onyx-client/compare/v10.0.0...v10.1.0) (2025-10-26)
+
+
+### Features
+
+* upgrade to python 3.13 ([3f2c2b2](https://github.com/muhlba91/onyx-client/commit/3f2c2b2d75e2087539f16ff8f08edeed342cb14a))
+
 ## [10.0.0](https://github.com/muhlba91/onyx-client/compare/v9.3.0...v10.0.0) (2025-10-26)
 
 
