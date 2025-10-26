@@ -1,6 +1,68 @@
 # Changelog
 
 
+## [10.0.0](https://github.com/muhlba91/onyx-client/compare/v9.3.0...v10.0.0) (2025-10-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* support local API address
+
+### Features
+
+* implement local API access; fix [#275](https://github.com/muhlba91/onyx-client/issues/275) ([ba95ed0](https://github.com/muhlba91/onyx-client/commit/ba95ed0e719fa60af6906777c952cfe9fd3bb84c))
+
+
+### Bug Fixes
+
+* fix authorizer for local API address ([bc07051](https://github.com/muhlba91/onyx-client/commit/bc070512cbc4c91423b77a0ae00f153e837c0b0c))
+* fix ssl setting for local requests and examples ([e0c7743](https://github.com/muhlba91/onyx-client/commit/e0c7743741b00c7072ed7213c16e9798d8b3d3b1))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/dependency-review-action action to v4.7.2 ([c16f6ad](https://github.com/muhlba91/onyx-client/commit/c16f6ade6637a2e1e014e336f37315e9b79b2218))
+* **deps:** update actions/dependency-review-action action to v4.7.3 ([f85518a](https://github.com/muhlba91/onyx-client/commit/f85518a53ef59b03696ab2a05d6d8f95c1fd108d))
+* **deps:** update actions/dependency-review-action action to v4.8.0 ([49b021d](https://github.com/muhlba91/onyx-client/commit/49b021db60c596986aa7f8e9f9f1b258651931a1))
+* **deps:** update actions/dependency-review-action action to v4.8.1 ([8a4aca1](https://github.com/muhlba91/onyx-client/commit/8a4aca1a5175c03122cf7828f495b8b026822ff6))
+* **deps:** update actions/setup-python action to v6 ([ed4ced1](https://github.com/muhlba91/onyx-client/commit/ed4ced12f7858995ca47f686d57dec6cc87c96c6))
+* **deps:** update actions/upload-artifact action to v5 ([5ad0a5f](https://github.com/muhlba91/onyx-client/commit/5ad0a5f8ffff866890b5eed2c47539955f3c864f))
+* **deps:** update dependency aiohttp to v3.13.0 ([37305db](https://github.com/muhlba91/onyx-client/commit/37305db8ded192ef57f74a48925cb29d4376f53d))
+* **deps:** update dependency aiohttp to v3.13.1 ([328a359](https://github.com/muhlba91/onyx-client/commit/328a3595a5d31afe835fa30b934b34e3d7457f31))
+* **deps:** update dependency coverage to v7.10.5 ([15ebf28](https://github.com/muhlba91/onyx-client/commit/15ebf28047218b7b140e79595c376b8e599b8a10))
+* **deps:** update dependency coverage to v7.10.6 ([b63364e](https://github.com/muhlba91/onyx-client/commit/b63364e957d19c15519234b9ae0e26d351e97e78))
+* **deps:** update dependency coverage to v7.10.7 ([ed42ac1](https://github.com/muhlba91/onyx-client/commit/ed42ac1816062ad1057d18f01eabe2f92b2f064d))
+* **deps:** update dependency coverage to v7.11.0 ([b4b91ce](https://github.com/muhlba91/onyx-client/commit/b4b91ce71bc1a37149eb00c49789c88105fb1f0c))
+* **deps:** update dependency pytest to v8.4.2 ([4d12c42](https://github.com/muhlba91/onyx-client/commit/4d12c42515d0b63b9cc3a063fee65a887596e418))
+* **deps:** update dependency pytest-asyncio to v1.2.0 ([1a7b35b](https://github.com/muhlba91/onyx-client/commit/1a7b35b55a71acf291f3424b76eef0a770734c39))
+* **deps:** update dependency pytest-cov to v6.3.0 ([9762ba4](https://github.com/muhlba91/onyx-client/commit/9762ba4ff64f7ae2014a23c3a14c6873718afa64))
+* **deps:** update dependency pytest-cov to v7 ([caf7bd1](https://github.com/muhlba91/onyx-client/commit/caf7bd17d46521685921d73bf3fe6331bb631c7a))
+* **deps:** update dependency ruff to ^0.13.0 ([7fd6357](https://github.com/muhlba91/onyx-client/commit/7fd6357382336008faf7744e6faff011815359f7))
+* **deps:** update dependency ruff to ^0.14.0 ([17ef3f1](https://github.com/muhlba91/onyx-client/commit/17ef3f18b65557c07b242ff47e24c891ab4aaca0))
+* **deps:** update dependency ruff to v0.12.10 ([61391a8](https://github.com/muhlba91/onyx-client/commit/61391a85e96fd1e7d685c66ea778b79b1d5f8dba))
+* **deps:** update dependency ruff to v0.12.11 ([4be2a34](https://github.com/muhlba91/onyx-client/commit/4be2a348b4e222cdb8f74a2e5d39db279f473b87))
+* **deps:** update dependency ruff to v0.12.12 ([04b7be2](https://github.com/muhlba91/onyx-client/commit/04b7be2b4a58e19f89227062dfa6c7a7913e4221))
+* **deps:** update dependency ruff to v0.13.1 ([de05744](https://github.com/muhlba91/onyx-client/commit/de05744ce8d83fb039a38689ed89f9d2cba1fce5))
+* **deps:** update dependency ruff to v0.13.2 ([a019da7](https://github.com/muhlba91/onyx-client/commit/a019da71155b895928f85e1b04c9628ba8aa70b4))
+* **deps:** update dependency ruff to v0.13.3 ([ea56e09](https://github.com/muhlba91/onyx-client/commit/ea56e0933e20996dd47884070dbdac67564c15ec))
+* **deps:** update dependency ruff to v0.14.1 ([c458374](https://github.com/muhlba91/onyx-client/commit/c4583748425c4a8aeb9150ce1b94bfbe3189a24a))
+* **deps:** update dependency ruff to v0.14.2 ([2ea8bad](https://github.com/muhlba91/onyx-client/commit/2ea8bad0f282f31fb3d97b9dec07e0732a188b20))
+* **deps:** update github/codeql-action action to v3.29.10 ([b6daadb](https://github.com/muhlba91/onyx-client/commit/b6daadbe9a50b168e5f74890d4ffb2c84def7878))
+* **deps:** update github/codeql-action action to v3.29.11 ([1e863e3](https://github.com/muhlba91/onyx-client/commit/1e863e3c2e7ed2d1722e76a0b377f32750eff8c4))
+* **deps:** update github/codeql-action action to v3.30.1 ([cfc917d](https://github.com/muhlba91/onyx-client/commit/cfc917de2ddcbc9302b0311230999c9f6807860b))
+* **deps:** update github/codeql-action action to v3.30.2 ([bc0a949](https://github.com/muhlba91/onyx-client/commit/bc0a949397e95a7cdf3a2b31280e80802426065f))
+* **deps:** update github/codeql-action action to v3.30.3 ([ec204a3](https://github.com/muhlba91/onyx-client/commit/ec204a3426d4297b730fcc480e0f1cbcd0480ec2))
+* **deps:** update github/codeql-action action to v3.30.4 ([0ef6ef1](https://github.com/muhlba91/onyx-client/commit/0ef6ef1ee61507a928ca4ae7d4645bee6d7dbe7b))
+* **deps:** update github/codeql-action action to v3.30.5 ([58d4f55](https://github.com/muhlba91/onyx-client/commit/58d4f55619900a1f9f5e4f79e3eb98651823b7d0))
+* **deps:** update github/codeql-action action to v3.30.6 ([3385e55](https://github.com/muhlba91/onyx-client/commit/3385e5544c55e804656475c66596537cf78e44e5))
+* **deps:** update github/codeql-action action to v3.30.7 ([0ec4101](https://github.com/muhlba91/onyx-client/commit/0ec4101619c0b033646f2fb8e32770b356febddf))
+* **deps:** update github/codeql-action action to v4 ([a6223d1](https://github.com/muhlba91/onyx-client/commit/a6223d137eaeded307d0044d37a822b8161e617f))
+* **deps:** update github/codeql-action action to v4.30.8 ([5eef2c9](https://github.com/muhlba91/onyx-client/commit/5eef2c94df4937ba456334ddb5e79de82e669d38))
+* **deps:** update github/codeql-action action to v4.30.9 ([37c1ae8](https://github.com/muhlba91/onyx-client/commit/37c1ae810d04ae964f037c190de5a41ad3dd08d1))
+* **deps:** update github/codeql-action action to v4.31.0 ([8c2e3a6](https://github.com/muhlba91/onyx-client/commit/8c2e3a61c9768df752524f57a548df0553138319))
+* **deps:** update ossf/scorecard-action action to v2.4.3 ([5d36a09](https://github.com/muhlba91/onyx-client/commit/5d36a09b4b7a56f37ffa44d371dcfb02a837bca1))
+* **deps:** update step-security/harden-runner action to v2.13.1 ([166dc1f](https://github.com/muhlba91/onyx-client/commit/166dc1f5ab681cf4a2acd6acd38462d956994ec8))
+
 ## [9.3.0](https://github.com/muhlba91/onyx-client/compare/v9.2.1...v9.3.0) (2025-08-17)
 
 
