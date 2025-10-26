@@ -72,7 +72,8 @@ if __name__ == "__main__":
     # process command line args
     finger = ""
     token = ""
-    opts, args = getopt.getopt(argv[1:], "hf:t:", ["fingerprint=", "token="])
+    address = None
+    opts, args = getopt.getopt(argv[1:], "hf:t:a:", ["fingerprint=", "token=", "address="])
     for opt, arg in opts:
         if opt in ("-f", "--fingerprint"):
             finger = arg

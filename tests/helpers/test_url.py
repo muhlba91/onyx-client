@@ -65,6 +65,14 @@ class TestUrlHelper:
         assert response is not None
 
     @pytest.mark.asyncio
+    async def test_perform_get_request_with_local_address(self, mock_response, helper_local):
+        mock_response.get(
+            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+        )
+        response = await helper_local.perform_get_request("/path")
+        assert response is not None
+
+    @pytest.mark.asyncio
     async def test_perform_get_request_error(self, mock_response, helper):
         mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/path", status=401)
         response = await helper.perform_get_request("/path")
@@ -76,6 +84,14 @@ class TestUrlHelper:
             f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
         )
         response = await helper.perform_delete_request("/path")
+        assert response is not None
+
+    @pytest.mark.asyncio
+    async def test_perform_delete_request_with_local_address(self, mock_response, helper_local):
+        mock_response.delete(
+            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+        )
+        response = await helper_local.perform_delete_request("/path")
         assert response is not None
 
     @pytest.mark.asyncio
@@ -93,6 +109,14 @@ class TestUrlHelper:
         assert response is not None
 
     @pytest.mark.asyncio
+    async def test_perform_post_request_with_local_address(self, mock_response, helper_local):
+        mock_response.post(
+            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+        )
+        response = await helper_local.perform_post_request("/path", {})
+        assert response is not None
+
+    @pytest.mark.asyncio
     async def test_perform_post_request_error(self, mock_response, helper):
         mock_response.post(f"{API_URL}/box/finger/api/{API_VERSION}/path", status=401)
         response = await helper.perform_post_request("/path", {})
@@ -107,6 +131,19 @@ class TestUrlHelper:
         )
         index = 1
         async for data in helper.start_stream("/events"):
+            assert len(data) > 0
+            index += 1
+        assert index == 2
+
+    @pytest.mark.asyncio
+    async def test_start_stream_with_local_address(self, mock_response, helper_local):
+        mock_response.get(
+            f"https://localhost/api/{API_VERSION}/events",
+            status=200,
+            body="data: {  }",
+        )
+        index = 1
+        async for data in helper_local.start_stream("/events"):
             assert len(data) > 0
             index += 1
         assert index == 2
