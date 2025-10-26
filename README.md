@@ -46,7 +46,12 @@ fingerprint and access token**!
 |----------------|---------------------------------------------------------------------------------|
 | fingerprint    | The fingerprint of the ONYX.CENTER.                                             |
 | access_token   | The permanent access token.                                                     |
+| local_address  | The local address to use (default: None).                                       |
 | client_session | The initialized `aiohttp.ClientSession`. (Default: `None`, create new session.) |
+
+### Local Access
+
+The local address can be used to access the ONYX.CENTER API from within the local network. If set, the client will use this address for all API requests.
 
 ### Access Control Helper
 

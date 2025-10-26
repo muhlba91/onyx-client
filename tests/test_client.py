@@ -42,6 +42,22 @@ def test_create_client(mock_session):
 
 
 @patch("aiohttp.ClientSession")
+def test_create_client_with_local_address(mock_session):
+    client = create(
+        fingerprint="finger", access_token="token", client_session=mock_session, local_address="192.168.1.1"
+    )
+    assert client.url_helper.client_session == mock_session
+    assert client.url_helper.config.fingerprint == "finger"
+    assert client.url_helper.config.access_token == "token"
+    assert client.url_helper.config.local_address == "192.168.1.1"
+    assert client._shutdown
+    assert client._read_loop_task is None
+    assert client._event_loop is not None
+    assert len(client._active_tasks) == 0
+    assert client._event_callback is None
+
+
+@patch("aiohttp.ClientSession")
 def test_create_client_with_config(mock_session):
     client = create(
         config=Configuration("finger", "token"), client_session=mock_session

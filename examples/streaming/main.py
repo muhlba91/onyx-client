@@ -35,13 +35,13 @@ async def shutter_worker(queue, client, device_id):
         queue.task_done()
 
 
-async def perform(fingerprint: str, access_token: str):
+async def perform(fingerprint: str, access_token: str, local_address: str):
     """Performs your actions."""
 
     # open session and create client
     session = LoggingClientSession()
     client = create(
-        fingerprint=fingerprint, access_token=access_token, client_session=session
+        fingerprint=fingerprint, access_token=access_token, client_session=session, local_address=local_address
     )
 
     # verify API
@@ -97,6 +97,8 @@ if __name__ == "__main__":
             finger = arg
         elif opt in ("-t", "--token"):
             token = arg
+        elif opt in ("-a", "--address"):
+            address = arg
 
     # check if args are not empty
     if len(finger) == 0 or len(token) == 0:
@@ -105,4 +107,4 @@ if __name__ == "__main__":
 
     # we are async, so wait until everything completed
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(perform(finger, token))
+    loop.run_until_complete(perform(finger, token, address))

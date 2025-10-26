@@ -27,6 +27,10 @@ class TestUrlHelper:
     def helper(self, session) -> UrlHelper:
         yield UrlHelper(Configuration("finger", "token"), session)
 
+    @pytest_asyncio.fixture
+    def helper_local(self, session) -> UrlHelper:
+        yield UrlHelper(Configuration("finger", "token", local_address="localhost"), session)
+
     def test_headers(self, helper):
         headers = helper._headers
         for header in API_HEADERS:
@@ -37,11 +41,17 @@ class TestUrlHelper:
     def test_base_url(self, helper):
         assert helper._base_url() == f"{API_URL}/box/finger/api/{API_VERSION}"
 
+    def test_base_url_local(self, helper_local):
+        assert helper_local._base_url() == f"https://localhost/api/{API_VERSION}"
+
     def test_base_url_without_version(self, helper):
         assert helper._base_url(with_api=False) == f"{API_URL}/box/finger/api"
 
     def test_url(self, helper):
         assert helper._url("/path") == f"{API_URL}/box/finger/api/{API_VERSION}/path"
+
+    def test_url_local(self, helper_local):
+        assert helper_local._url("/path") == f"https://localhost/api/{API_VERSION}/path"
 
     def test_url_without_version(self, helper):
         assert helper._url("/path", with_api=False) == f"{API_URL}/box/finger/api/path"

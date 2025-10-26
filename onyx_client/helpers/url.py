@@ -30,6 +30,8 @@ class UrlHelper:
 
         with_api: append the API version to the URL"""
         api = f"{API_URL}/box/{self.config.fingerprint}/api"
+        if self.config.local_address:
+            api = f"https://{self.config.local_address}/api"
         if with_api:
             api = f"{api}/{API_VERSION}"
         return api
@@ -49,7 +51,7 @@ class UrlHelper:
         path: the URL path
         with_api: append the API version to the URL"""
         async with self.client_session.get(
-            self._url(path, with_api=with_api), headers=self._headers
+            self._url(path, with_api=with_api), headers=self._headers, ssl=self.config.local_address is not None
         ) as response:
             if not check(response):
                 return None
@@ -60,7 +62,7 @@ class UrlHelper:
 
         path: the URL path"""
         async with self.client_session.delete(
-            self._url(path), headers=self._headers
+            self._url(path), headers=self._headers, ssl=self.config.local_address is not None
         ) as response:
             if not check(response):
                 return None
@@ -72,7 +74,7 @@ class UrlHelper:
         path: the URL path
         data: the data to POST to the API"""
         async with self.client_session.post(
-            self._url(path), json=data, headers=self._headers
+            self._url(path), json=data, headers=self._headers, ssl=self.config.local_address is not None
         ) as response:
             if not check(response):
                 return None
@@ -88,6 +90,7 @@ class UrlHelper:
             timeout=aiohttp.ClientTimeout(
                 total=0, connect=0, sock_connect=0, sock_read=0
             ),
+            ssl=self.config.local_address is not None,
         ) as response:
             if not check(response):
                 yield None
