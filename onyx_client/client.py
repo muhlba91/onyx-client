@@ -56,7 +56,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /versions.",
-                self.config.fingerprint,
+                self.config.identifier,
             )
             return None
 
@@ -74,7 +74,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /clock.",
-                self.config.fingerprint,
+                self.config.identifier,
             )
             return None
 
@@ -93,7 +93,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices.",
-                self.config.fingerprint,
+                self.config.identifier,
             )
             return None
 
@@ -121,7 +121,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
             return None
@@ -147,7 +147,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s/command.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
         return data is not None
@@ -162,7 +162,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s/command.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
         return data is not None
@@ -173,7 +173,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups.",
-                self.config.fingerprint,
+                self.config.identifier,
             )
             return None
 
@@ -190,7 +190,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
             return None
@@ -208,7 +208,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s/command.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
             return False
@@ -236,7 +236,7 @@ class OnyxClient:
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s/command.",
-                self.config.fingerprint,
+                self.config.identifier,
                 identifier,
             )
         return data is not None
@@ -353,6 +353,7 @@ def create(
     config: Configuration = None,
     fingerprint: str = None,
     access_token: str = None,
+    local_address: str = None,
     client_session: aiohttp.ClientSession = None,
     event_loop=None,
 ) -> OnyxClient:
@@ -363,10 +364,11 @@ def create(
     config: the access configuration of the client (optional)
     fingerprint: the ONYX.CENTER fingerprint (optional)
     access_token: the access token to use (optional)
+    local_address: the local address to use (optional)
     client_session: the aiohttp session to use
     event_loop: the event loop to use for background events"""
     if config is None:
-        config = Configuration(fingerprint, access_token)
+        config = Configuration(fingerprint, access_token, local_address=local_address)
     session = client_session if client_session is not None else aiohttp.ClientSession()
     event_loop = event_loop if event_loop is not None else asyncio.get_event_loop()
     return OnyxClient(config, session, event_loop)

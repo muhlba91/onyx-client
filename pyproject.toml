@@ -27,7 +27,7 @@ python = ">=3.12,<3.14"
 aiohttp = "^3.8.5"
 asyncio = "^4.0.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 pytest-cov = { extras = ["toml"], version = "^7.0.0" }
 coverage = { extras = ["toml"], version = "^7.0.0" }
