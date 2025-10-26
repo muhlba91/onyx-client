@@ -50,6 +50,7 @@ async def test_authorize():
         assert isinstance(config, Configuration)
         assert config.fingerprint == "finger"
         assert config.access_token == "token"
+        assert config.local_address is None
     await session.close()
 
 
@@ -69,6 +70,7 @@ async def test_authorize_with_local_address():
         assert isinstance(config, Configuration)
         assert config.fingerprint == "finger"
         assert config.access_token == "token"
+        assert config.local_address == "localhost"
     await session.close()
 
 
@@ -81,8 +83,10 @@ async def test_authorize_error():
         assert auth is None
     await session.close()
 
+
 def test_api_url():
     assert _api_url() == API_URL
+
 
 def test_api_url_with_local_address():
     assert _api_url("localhost") == "https://localhost/api/v3"

@@ -40,12 +40,18 @@ async def authorize(
         f"{_api_url(local_address)}/authorize",
         json={"code": code},
         headers=API_HEADERS,
+        ssl=local_address is None,
     ) as response:
         if not check(response):
             _LOGGER.error("Could not authorize client for ONYX API.")
             return None
         data = await response.json()
-        return Configuration(data.get("fingerprint", None), data.get("token", None))
+        return Configuration(
+            data.get("fingerprint", None),
+            data.get("token", None),
+            local_address=local_address,
+        )
+
 
 def _api_url(local_address: str = None) -> str:
     """Get the base API URL.
