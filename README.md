@@ -55,8 +55,7 @@ The local address can be used to access the ONYX.CENTER API from within the loca
 
 ### Access Control Helper
 
-The method `onyx_client.authorizer.exchange_code` takes the **API code** and performs the exchange to a **fingerprint
-and access token**. Please follow the **aforementioned documentation** to retrieve the code.
+The method `onyx_client.authorizer.exchange_code` takes the **API code** and an optional **local API address**, and performs the exchange to a **fingerprint and access token**. Please follow the **aforementioned documentation** to retrieve the code.
 
 ## Usage
 
@@ -74,6 +73,9 @@ client = create(fingerprint="fingerprint", access_token="access_token")
 
 # by providing the fingerprint, access token and aiohttp client session
 client = create(fingerprint="fingerprint", access_token="access_token", client_session=aiohttp.ClientSession())
+
+# by providing the fingerprint, access token and local API address
+client = create(fingerprint="fingerprint", access_token="access_token", local_address="localhost")
 
 # by providing the configuration object
 client_session = aiohttp.ClientSession()
