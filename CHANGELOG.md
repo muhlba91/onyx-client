@@ -1,6 +1,16 @@
 # Changelog
 
 
+## [10.1.1](https://github.com/muhlba91/onyx-client/compare/v10.1.0...v10.1.1) (2025-10-31)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency aiohttp to v3.13.2 ([11c8f6c](https://github.com/muhlba91/onyx-client/commit/11c8f6c16b857b984881c379df04e22524595792))
+* **deps:** update dependency ruff to v0.14.3 ([7a5bc71](https://github.com/muhlba91/onyx-client/commit/7a5bc71f75155165a199e6b584000356a4531c9a))
+* **deps:** update github/codeql-action action to v4.31.1 ([3810333](https://github.com/muhlba91/onyx-client/commit/381033330f67472518f32f6ac2971da5c0addc01))
+* **deps:** update github/codeql-action action to v4.31.2 ([f8e213e](https://github.com/muhlba91/onyx-client/commit/f8e213e3b855f89da037a4c3cc5ebb4ef6a3dbde))
+
 ## [10.1.0](https://github.com/muhlba91/onyx-client/compare/v10.0.0...v10.1.0) (2025-10-26)
 
 
