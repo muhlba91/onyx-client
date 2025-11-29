@@ -1,6 +1,22 @@
 # Changelog
 
 
+## [10.1.2](https://github.com/muhlba91/onyx-client/compare/v10.1.1...v10.1.2) (2025-11-29)
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v5.0.1 ([2e44511](https://github.com/muhlba91/onyx-client/commit/2e445117fa5ec4927d60bc31df3f4b6fe78c374c))
+* **deps:** update actions/checkout action to v6 ([8188fd5](https://github.com/muhlba91/onyx-client/commit/8188fd536052bf8828ff5a85b990806e27a36e69))
+* **deps:** update actions/checkout digest to 93cb6ef ([9cb230b](https://github.com/muhlba91/onyx-client/commit/9cb230b82e01a96ba0f89ceb9117cdb05e1b316a))
+* **deps:** update actions/setup-python action to v6.1.0 ([6ae0cda](https://github.com/muhlba91/onyx-client/commit/6ae0cdafd6e27f14bbd0d4d0f97a2b96188e5cd1))
+* **deps:** update dependency coverage to v7.12.0 ([57f6b31](https://github.com/muhlba91/onyx-client/commit/57f6b31cd6198cdbe7bd77a952d085a2e6a92749))
+* **deps:** update dependency pre-commit to v4.5.0 ([43a793f](https://github.com/muhlba91/onyx-client/commit/43a793f23561a7652df33f5c01de3bc3f1d6b647))
+* **deps:** update dependency ruff to v0.14.6 ([f29f922](https://github.com/muhlba91/onyx-client/commit/f29f92221685c7e43ab0d39cb5814311aa135aad))
+* **deps:** update dependency ruff to v0.14.7 ([269eeaf](https://github.com/muhlba91/onyx-client/commit/269eeafccdc818508e8d7ffba6ee3d494140d198))
+* **deps:** update github/codeql-action action to v4.31.4 ([2fb110c](https://github.com/muhlba91/onyx-client/commit/2fb110c6381e51fce9ba5fd2bcb03b3b5ecda84b))
+* **deps:** update github/codeql-action action to v4.31.5 ([03505ec](https://github.com/muhlba91/onyx-client/commit/03505ece5175690b5f2a626ece1fa2a9b256a481))
+
 ## [10.1.1](https://github.com/muhlba91/onyx-client/compare/v10.1.0...v10.1.1) (2025-11-14)
 
 
