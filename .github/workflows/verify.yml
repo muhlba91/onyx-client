@@ -28,12 +28,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  test:
+  checks:
     runs-on: ubuntu-latest
-    name: Check the Codebase
-    permissions:
-      checks: write # for coverallsapp/github-action to create new checks
-      contents: read # for actions/checkout to fetch code
+    name: Run Checks
     strategy:
       max-parallel: 4
       matrix:
@@ -49,12 +46,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Set up Poetry ${{ matrix.poetry-version }}
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
@@ -64,6 +59,37 @@ jobs:
       - run: |
           poetry check
           poetry run ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+    permissions:
+      checks: write
+      contents: read
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.13"]
+        poetry-version: [2.2.1]
+
+    steps:
+      - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - run: |
+          poetry install
 
       - run: |
           poetry run pytest
@@ -90,8 +116,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: ${{ matrix.python-version }}
 
