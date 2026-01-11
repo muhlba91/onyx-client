@@ -30,7 +30,7 @@ jobs:
 
   checks:
     runs-on: ubuntu-latest
-    name: Run Checks
+    name: Checks
     strategy:
       max-parallel: 4
       matrix:
@@ -62,7 +62,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: Run Tests
+    name: Tests
     permissions:
       checks: write
       contents: read
