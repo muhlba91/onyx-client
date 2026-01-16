@@ -1,6 +1,20 @@
 # Changelog
 
 
+## [10.1.3](https://github.com/muhlba91/onyx-client/compare/v10.1.2...v10.1.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* do not update values if they are None ([4dbfb71](https://github.com/muhlba91/onyx-client/commit/4dbfb718c0854ef25e09c6961e2f3d04997b6cca))
+
+
+### Miscellaneous Chores
+
+* **ci:** separate tests from checks ([4e6da9c](https://github.com/muhlba91/onyx-client/commit/4e6da9cfa9d9619cc5794f7ad29c004b7bea06df))
+* **ci:** separate tests from checks ([9f3981a](https://github.com/muhlba91/onyx-client/commit/9f3981accbe62806fe175690103f558d420ad564))
+* **deps:** update github/codeql-action action to v4.31.10 ([70f8e76](https://github.com/muhlba91/onyx-client/commit/70f8e76cca2ace5bace4ddbb9d8e9a806bfe46d8))
+
 ## [10.1.2](https://github.com/muhlba91/onyx-client/compare/v10.1.1...v10.1.2) (2026-01-11)
 
 
