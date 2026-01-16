@@ -51,7 +51,9 @@ class UrlHelper:
         path: the URL path
         with_api: append the API version to the URL"""
         async with self.client_session.get(
-            self._url(path, with_api=with_api), headers=self._headers, ssl=not self.config.is_local
+            self._url(path, with_api=with_api),
+            headers=self._headers,
+            ssl=not self.config.is_local,
         ) as response:
             if not check(response):
                 return None
@@ -74,7 +76,10 @@ class UrlHelper:
         path: the URL path
         data: the data to POST to the API"""
         async with self.client_session.post(
-            self._url(path), json=data, headers=self._headers, ssl=not self.config.is_local
+            self._url(path),
+            json=data,
+            headers=self._headers,
+            ssl=not self.config.is_local,
         ) as response:
             if not check(response):
                 return None

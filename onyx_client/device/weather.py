@@ -56,12 +56,30 @@ class Weather(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.wind_peak.update_with(update.wind_peak)
-        self.sun_brightness_peak.update_with(update.sun_brightness_peak)
-        self.sun_brightness_sink.update_with(update.sun_brightness_sink)
-        self.air_pressure.update_with(update.air_pressure)
-        self.humidity.update_with(update.humidity)
-        self.temperature.update_with(update.temperature)
+        if self.wind_peak is not None:
+            self.wind_peak.update_with(update.wind_peak)
+        else:
+            self.wind_peak = update.wind_peak
+        if self.sun_brightness_peak is not None:
+            self.sun_brightness_peak.update_with(update.sun_brightness_peak)
+        else:
+            self.sun_brightness_peak = update.sun_brightness_peak
+        if self.sun_brightness_sink is not None:
+            self.sun_brightness_sink.update_with(update.sun_brightness_sink)
+        else:
+            self.sun_brightness_sink = update.sun_brightness_sink
+        if self.air_pressure is not None:
+            self.air_pressure.update_with(update.air_pressure)
+        else:
+            self.air_pressure = update.air_pressure
+        if self.humidity is not None:
+            self.humidity.update_with(update.humidity)
+        else:
+            self.humidity = update.humidity
+        if self.temperature is not None:
+            self.temperature.update_with(update.temperature)
+        else:
+            self.temperature = update.temperature
 
     @staticmethod
     def keys() -> list:

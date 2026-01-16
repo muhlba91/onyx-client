@@ -101,6 +101,60 @@ class TestLight:
         assert light.actual_brightness == value2
         assert light.dim_duration == value1
 
+    def test_update_with_no_data_update_none(self, device_mode):
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            None,
+            None,
+            None,
+        )
+        update = Light(
+            "id",
+            None,
+            None,
+            None,
+            None,
+        )
+        light.update_with(update)
+        assert light.name == "name"
+        assert light.target_brightness is None
+        assert light.actual_brightness is None
+        assert light.dim_duration is None
+
+    def test_update_with_no_data_update_data(self, device_mode):
+        value1 = NumericValue(1, 0, 10, False)
+        value2 = NumericValue(2, 0, 10, False)
+        value3 = NumericValue(3, 0, 10, False)
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            None,
+            None,
+            None,
+        )
+        update = Light(
+            "id",
+            None,
+            None,
+            None,
+            None,
+            value1,
+            value2,
+            value3,
+        )
+        light.update_with(update)
+        assert light.name == "name"
+        assert light.target_brightness == value1
+        assert light.actual_brightness == value2
+        assert light.dim_duration == value3
+
     def test_update_with_none(self, device_mode):
         value1 = NumericValue(1, 0, 10, False)
         value2 = NumericValue(2, 0, 10, False)

@@ -41,7 +41,10 @@ async def perform(fingerprint: str, access_token: str, local_address: str):
     # open session and create client
     session = LoggingClientSession()
     client = create(
-        fingerprint=fingerprint, access_token=access_token, client_session=session, local_address=local_address
+        fingerprint=fingerprint,
+        access_token=access_token,
+        client_session=session,
+        local_address=local_address,
     )
 
     # verify API
@@ -92,7 +95,9 @@ if __name__ == "__main__":
     finger = ""
     token = ""
     address = None
-    opts, args = getopt.getopt(argv[1:], "hf:t:a:", ["fingerprint=", "token=", "address="])
+    opts, args = getopt.getopt(
+        argv[1:], "hf:t:a:", ["fingerprint=", "token=", "address="]
+    )
     for opt, arg in opts:
         if opt in ("-f", "--fingerprint"):
             finger = arg

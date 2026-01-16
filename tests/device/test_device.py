@@ -50,6 +50,24 @@ class TestDevice:
         assert device.device_mode.mode == DeviceType.AWNING
         assert Action.STOP in device.actions
 
+    def test_update_with_no_data_update_none(self):
+        device = Device("id", None, None, None, None)
+        update = Device("id", None, None, None, None)
+        device.update_with(update)
+        assert device.name is None
+        assert device.device_type is None
+        assert device.device_mode is None
+        assert device.actions is None
+
+    def test_update_with_no_data_update_data(self, device_mode):
+        device = Device("id", None, None, None, None)
+        update = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        device.update_with(update)
+        assert device.name == "name"
+        assert device.device_type == DeviceType.AWNING
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.actions == list(Action)
+
     def test_update_with_none(self, device_mode):
         device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
         update = Device("id", None, None, None, None)

@@ -29,7 +29,9 @@ class TestUrlHelper:
 
     @pytest_asyncio.fixture
     def helper_local(self, session) -> UrlHelper:
-        yield UrlHelper(Configuration("finger", "token", local_address="localhost"), session)
+        yield UrlHelper(
+            Configuration("finger", "token", local_address="localhost"), session
+        )
 
     def test_headers(self, helper):
         headers = helper._headers
@@ -65,7 +67,9 @@ class TestUrlHelper:
         assert response is not None
 
     @pytest.mark.asyncio
-    async def test_perform_get_request_with_local_address(self, mock_response, helper_local):
+    async def test_perform_get_request_with_local_address(
+        self, mock_response, helper_local
+    ):
         mock_response.get(
             f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
         )
@@ -87,7 +91,9 @@ class TestUrlHelper:
         assert response is not None
 
     @pytest.mark.asyncio
-    async def test_perform_delete_request_with_local_address(self, mock_response, helper_local):
+    async def test_perform_delete_request_with_local_address(
+        self, mock_response, helper_local
+    ):
         mock_response.delete(
             f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
         )
@@ -109,7 +115,9 @@ class TestUrlHelper:
         assert response is not None
 
     @pytest.mark.asyncio
-    async def test_perform_post_request_with_local_address(self, mock_response, helper_local):
+    async def test_perform_post_request_with_local_address(
+        self, mock_response, helper_local
+    ):
         mock_response.post(
             f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
         )

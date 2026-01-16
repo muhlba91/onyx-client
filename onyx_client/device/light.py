@@ -50,8 +50,14 @@ class Light(Device):
             self.target_brightness.update_with(update.target_brightness)
         else:
             self.target_brightness = update.target_brightness
-        self.actual_brightness.update_with(update.actual_brightness)
-        self.dim_duration.update_with(update.dim_duration)
+        if self.actual_brightness is not None:
+            self.actual_brightness.update_with(update.actual_brightness)
+        else:
+            self.actual_brightness = update.actual_brightness
+        if self.dim_duration is not None:
+            self.dim_duration.update_with(update.dim_duration)
+        else:
+            self.dim_duration = update.dim_duration
 
     @staticmethod
     def keys() -> list:

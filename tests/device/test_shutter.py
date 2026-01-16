@@ -119,6 +119,70 @@ class TestShutter:
         assert shutter.actual_angle == value2
         assert shutter.actual_position == value1
 
+    def test_update_with_no_data_update_none(self, device_mode):
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            None,
+            None,
+            None,
+            None,
+        )
+        update = Shutter(
+            "id",
+            None,
+            None,
+            None,
+            None,
+        )
+        shutter.update_with(update)
+        assert shutter.name == "name"
+        assert shutter.target_position is None
+        assert shutter.target_angle is None
+        assert shutter.actual_angle is None
+        assert shutter.actual_position is None
+
+    def test_update_with_no_data_update_data(self, device_mode):
+        value1 = NumericValue(10, 0, 10, False)
+        value2 = NumericValue(
+            1,
+            0,
+            10,
+            False,
+            AnimationValue(10.4, 10, [AnimationKeyframe("linear", 0, 100.2, 10)]),
+        )
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.AWNING,
+            device_mode,
+            list(Action),
+            None,
+            None,
+            None,
+            None,
+        )
+        update = Shutter(
+            "id",
+            None,
+            None,
+            None,
+            None,
+            value1,
+            value2,
+            value1,
+            value2,
+        )
+        shutter.update_with(update)
+        assert shutter.name == "name"
+        assert shutter.target_position == value1
+        assert shutter.target_angle == value2
+        assert shutter.actual_angle == value1
+        assert shutter.actual_position == value2
+
     def test_update_with_none(self, device_mode):
         value1 = NumericValue(10, 0, 10, False)
         value2 = NumericValue(

@@ -44,7 +44,10 @@ def test_create_client(mock_session):
 @patch("aiohttp.ClientSession")
 def test_create_client_with_local_address(mock_session):
     client = create(
-        fingerprint="finger", access_token="token", client_session=mock_session, local_address="192.168.1.1"
+        fingerprint="finger",
+        access_token="token",
+        client_session=mock_session,
+        local_address="192.168.1.1",
     )
     assert client.url_helper.client_session == mock_session
     assert client.url_helper.config.fingerprint == "finger"
@@ -1284,7 +1287,7 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body="event: pulse\n" "data: 1730803627\n\n" "event: patch\n" "data: {  }",
+            body="event: pulse\ndata: 1730803627\n\nevent: patch\ndata: {  }",
         )
         index = 1
         async for device in client.events():
@@ -1296,7 +1299,7 @@ class TestOnyxClient:
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=500,
-            body="event: pulse\n" "data: 1730803627\n\n" "event: patch\n" "data: {  }",
+            body="event: pulse\ndata: 1730803627\n\nevent: patch\ndata: {  }",
         )
         index = 1
         async for device in client.events():
