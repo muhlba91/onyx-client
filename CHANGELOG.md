@@ -1,6 +1,63 @@
 # Changelog
 
 
+## [10.1.4](https://github.com/muhlba91/onyx-client/compare/v10.1.3...v10.1.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **ci:** ignore coveralls errors in pipeline ([d3a1cef](https://github.com/muhlba91/onyx-client/commit/d3a1cefc53632ae51a51b6d004b9aa9ed9b2afa5))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v6.0.2 ([11671e2](https://github.com/muhlba91/onyx-client/commit/11671e222708bf5c0e5be8744045bdc4464bf608))
+* **deps:** update actions/checkout digest to de0fac2 ([001a814](https://github.com/muhlba91/onyx-client/commit/001a8147f8cb619c536fe9ccea24177260332ccc))
+* **deps:** update actions/dependency-review-action action to v4.8.3 ([89c09ba](https://github.com/muhlba91/onyx-client/commit/89c09ba09b8da43d0986ec0d5fdeaa8a407afd59))
+* **deps:** update actions/dependency-review-action action to v4.9.0 ([6f1e26d](https://github.com/muhlba91/onyx-client/commit/6f1e26db5c48a8488b53d6cf7c0eb7920ea0cf56))
+* **deps:** update actions/setup-python action to v6.2.0 ([37a5275](https://github.com/muhlba91/onyx-client/commit/37a5275262759115edc4ec18ba8606e7ccf19225))
+* **deps:** update actions/upload-artifact action to v7 ([1cb46e1](https://github.com/muhlba91/onyx-client/commit/1cb46e12a9e1bfedfd46f806aecddf01a32d0043))
+* **deps:** update actions/upload-artifact action to v7.0.1 ([e0c2c2f](https://github.com/muhlba91/onyx-client/commit/e0c2c2ff598b590ba6242728570c320b3689646f))
+* **deps:** update dependency aiohttp to v3.13.4 ([08336e6](https://github.com/muhlba91/onyx-client/commit/08336e6e80b6c114b0440fb78cc53b645cfd4f00))
+* **deps:** update dependency aiohttp to v3.13.5 ([6ffb9ac](https://github.com/muhlba91/onyx-client/commit/6ffb9ace01b21f08cc2894055f34d0d366c8858a))
+* **deps:** update dependency coverage to v7.13.2 ([8ce41e9](https://github.com/muhlba91/onyx-client/commit/8ce41e91eef6a0e2108aff6d216bd9cacdc22a70))
+* **deps:** update dependency coverage to v7.13.3 ([ea2129f](https://github.com/muhlba91/onyx-client/commit/ea2129fe9a200ac4cadf61363016c8636946fca3))
+* **deps:** update dependency coverage to v7.13.4 ([9b7695e](https://github.com/muhlba91/onyx-client/commit/9b7695ef708ff54c7535b7af8bf91db09ecd2403))
+* **deps:** update dependency coverage to v7.13.5 ([f888a9f](https://github.com/muhlba91/onyx-client/commit/f888a9f990e8b4bf1194f04958b1aacf1d6f6d37))
+* **deps:** update dependency pytest to v9.0.3 ([b0fc35c](https://github.com/muhlba91/onyx-client/commit/b0fc35cf0b545a2066b589405855c04d86f5c03b))
+* **deps:** update dependency pytest-cov to v7.1.0 ([4f83228](https://github.com/muhlba91/onyx-client/commit/4f832280deddc8e6998777141d816edbf9a16ec8))
+* **deps:** update dependency ruff to ^0.15.0 ([334dc8e](https://github.com/muhlba91/onyx-client/commit/334dc8e2e2fac470ca2f2342d36f980574091ec9))
+* **deps:** update dependency ruff to v0.14.14 ([f179b82](https://github.com/muhlba91/onyx-client/commit/f179b82633264d37589c4cf3c5a26e267e044c47))
+* **deps:** update dependency ruff to v0.15.1 ([7587f81](https://github.com/muhlba91/onyx-client/commit/7587f810fc7f05e602d6b07e5468c7e0cc587f08))
+* **deps:** update dependency ruff to v0.15.10 ([51ec31e](https://github.com/muhlba91/onyx-client/commit/51ec31ed5009577a57c4b3b0f72298f05fdc5bff))
+* **deps:** update dependency ruff to v0.15.2 ([2684065](https://github.com/muhlba91/onyx-client/commit/2684065ced3f4c736dc8d8d3dbd3ff0d1293de2c))
+* **deps:** update dependency ruff to v0.15.3 ([602b16b](https://github.com/muhlba91/onyx-client/commit/602b16b7244ba37f9b50303162379ed45a6348d9))
+* **deps:** update dependency ruff to v0.15.4 ([a89370b](https://github.com/muhlba91/onyx-client/commit/a89370b9abc2fa00326d429aae3c87cb5892a94e))
+* **deps:** update dependency ruff to v0.15.5 ([2079ec7](https://github.com/muhlba91/onyx-client/commit/2079ec7627caef18d795c715603ca7565e3faeae))
+* **deps:** update dependency ruff to v0.15.6 ([dc46117](https://github.com/muhlba91/onyx-client/commit/dc46117ad7ec55c56a94ae5189ce4fed1dbe9701))
+* **deps:** update dependency ruff to v0.15.7 ([81a08b9](https://github.com/muhlba91/onyx-client/commit/81a08b9dadf22758b9ae31a073898ec18c4b040b))
+* **deps:** update dependency ruff to v0.15.8 ([7a7fe53](https://github.com/muhlba91/onyx-client/commit/7a7fe53a81d43a191a6313b47910d56058a2634c))
+* **deps:** update dependency ruff to v0.15.9 ([b37b120](https://github.com/muhlba91/onyx-client/commit/b37b120948d4782178a0c504af880c6194d91cda))
+* **deps:** update github/codeql-action action to v4.31.11 ([948b7f9](https://github.com/muhlba91/onyx-client/commit/948b7f97bb8981973325f5efb2063a73b894f9f7))
+* **deps:** update github/codeql-action action to v4.32.0 ([2465637](https://github.com/muhlba91/onyx-client/commit/246563723da3f2ef30f36fd0c5873446c5739fe1))
+* **deps:** update github/codeql-action action to v4.32.1 ([867b35a](https://github.com/muhlba91/onyx-client/commit/867b35ab768149e319d3761e4a2b6e675861047f))
+* **deps:** update github/codeql-action action to v4.32.2 ([b059cc6](https://github.com/muhlba91/onyx-client/commit/b059cc6ed93e40c91ef39c631f26805cc4d64886))
+* **deps:** update github/codeql-action action to v4.32.3 ([34d159c](https://github.com/muhlba91/onyx-client/commit/34d159c89669bf4d35590e6335dc32e80202b9a4))
+* **deps:** update github/codeql-action action to v4.32.4 ([d10f160](https://github.com/muhlba91/onyx-client/commit/d10f160f7709a50e701371b2b25450020e3fbc19))
+* **deps:** update github/codeql-action action to v4.32.5 ([152d30c](https://github.com/muhlba91/onyx-client/commit/152d30ccbbda97ffcca10a419e1df6dbe15edcc7))
+* **deps:** update github/codeql-action action to v4.32.6 ([5267614](https://github.com/muhlba91/onyx-client/commit/5267614b3fbee4d01b9526aa32a733f187400764))
+* **deps:** update github/codeql-action action to v4.33.0 ([63cd475](https://github.com/muhlba91/onyx-client/commit/63cd475fb0859267c757d300cb8259d785630c7b))
+* **deps:** update github/codeql-action action to v4.35.1 ([232309c](https://github.com/muhlba91/onyx-client/commit/232309ccb6df83ffde252f4c51cb3157526142e2))
+* **deps:** update pypa/gh-action-pypi-publish digest to cef2210 ([c61385b](https://github.com/muhlba91/onyx-client/commit/c61385b36fc2d60305260a296ce1539faec81eb3))
+* **deps:** update pypa/gh-action-pypi-publish digest to ed0c539 ([d9805e4](https://github.com/muhlba91/onyx-client/commit/d9805e49b126299cc388862e041acdb5cd058896))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([de6c45a](https://github.com/muhlba91/onyx-client/commit/de6c45ab959e9c9d50d377f25600caab01d7819d))
+* **deps:** update step-security/harden-runner action to v2.14.2 ([8d2ade0](https://github.com/muhlba91/onyx-client/commit/8d2ade0ec7994f406b1a039a5cd6c83f5a59a8e1))
+* **deps:** update step-security/harden-runner action to v2.15.0 ([c9f6e4a](https://github.com/muhlba91/onyx-client/commit/c9f6e4a4c68010abaf02bd3d323f4b47e9b82404))
+* **deps:** update step-security/harden-runner action to v2.15.1 ([da1d9c7](https://github.com/muhlba91/onyx-client/commit/da1d9c764115aa447f381404a5f4cc3ef73f8de1))
+* **deps:** update step-security/harden-runner action to v2.16.0 ([fdaee52](https://github.com/muhlba91/onyx-client/commit/fdaee523e14589e452110a500e47279391e13ade))
+* **deps:** update step-security/harden-runner action to v2.16.1 ([12ff99d](https://github.com/muhlba91/onyx-client/commit/12ff99df4c21a150990ce7a8b83b10b6f42b2c4e))
+* **deps:** update step-security/harden-runner action to v2.17.0 ([9f4aa49](https://github.com/muhlba91/onyx-client/commit/9f4aa49c05204c2e86c467f71dbe5d59fb9f0849))
+
 ## [10.1.3](https://github.com/muhlba91/onyx-client/compare/v10.1.2...v10.1.3) (2026-01-16)
 
 
