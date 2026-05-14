@@ -25,7 +25,7 @@ class DeviceCommand:
         ):
             raise InvalidCommandException("COMMAND_NO_PROPERTIES_OR_ACTION")
 
-        self.properties = properties
+        self.properties = {**properties} if properties is not None else None
         self.action = action
         self.valid_from = valid_from
         self.best_before = best_before

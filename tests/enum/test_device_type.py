@@ -29,3 +29,10 @@ class TestDeviceType:
     def test_is_light(self):
         assert DeviceType.BASIC_LIGHT.is_light()
         assert DeviceType.DIMMABLE_LIGHT.is_light()
+
+    def test_convert_none_returns_none(self):
+        assert DeviceType.convert(None) is None
+
+    def test_is_shutter_false_for_non_shutter(self):
+        assert not DeviceType.BASIC_LIGHT.is_shutter()
+        assert not DeviceType.DIMMABLE_LIGHT.is_shutter()

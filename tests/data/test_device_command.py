@@ -39,3 +39,16 @@ class TestDeviceCommand:
         assert (
             str(command) == "DeviceCommand(data={'action': 'stop', 'valid_from': 10})"
         )
+
+    def test_empty_properties_and_internal_copy(self):
+        props = {}
+        cmd = DeviceCommand(properties=props)
+        assert cmd.data() == {"properties": {}}
+        props["x"] = 1
+        assert cmd.data() == {"properties": {}}
+
+    def test_properties_original_mutation_does_not_affect_data(self):
+        props = {"a": 1}
+        cmd = DeviceCommand(properties=props)
+        props["a"] = 2
+        assert cmd.data()["properties"]["a"] == 1
