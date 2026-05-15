@@ -101,6 +101,9 @@ class UrlHelper:
                 yield None
                 return
             async for message in response.content:
-                cleaned_message = str(message.strip(), "UTF-8").strip()
+                try:
+                    cleaned_message = message.strip().decode("utf-8").strip()
+                except Exception:
+                    cleaned_message = str(message).strip()
                 if len(cleaned_message) > 0:
                     yield cleaned_message

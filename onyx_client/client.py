@@ -5,7 +5,7 @@ import logging
 import aiohttp
 import asyncio
 
-from typing import Optional
+from typing import Optional, AsyncGenerator
 from random import uniform
 
 from .configuration.configuration import Configuration
@@ -35,7 +35,7 @@ class OnyxClient:
         self,
         config: Configuration,
         client_session: aiohttp.ClientSession,
-        event_loop=asyncio.get_event_loop(),
+        event_loop: Optional[asyncio.AbstractEventLoop] = None,
     ):
         """Initialize the API client.
 
@@ -46,7 +46,7 @@ class OnyxClient:
         self.url_helper = UrlHelper(config, client_session)
         self._shutdown = True
         self._read_loop_task = None
-        self._event_loop = event_loop
+        self._event_loop = event_loop or asyncio.get_event_loop()
         self._active_tasks = set()
         self._event_callback = None
 
@@ -241,7 +241,9 @@ class OnyxClient:
             )
         return data is not None
 
-    async def events(self, include_details: bool = False) -> Device:
+    async def events(
+        self, include_details: bool = False
+    ) -> AsyncGenerator[Optional[Device], None]:
         """Stream events continuously.
 
         include_details: ensures all device details are queried
@@ -303,6 +305,7 @@ class OnyxClient:
         task = self._event_loop.create_task(coro, name=name)
         task.add_done_callback(self._complete_internal_task)
         self._active_tasks.add(task)
+        return task
 
     async def _read_handler(self, include_details: bool = False, backoff_time: int = 1):
         """Handle rerunning the task in the background.
@@ -326,11 +329,14 @@ class OnyxClient:
         """Remove an internal task that was running in the background.
 
         task: the task to remove"""
-        self._active_tasks.remove(task)
+        self._active_tasks.discard(task)
         if not task.cancelled():
             ex = task.exception()
-            _LOGGER.error("Unexpected exception: %r. Completing task.", ex)
-            raise ex
+            if ex is not None:
+                _LOGGER.error("Unexpected exception: %r. Completing task.", ex)
+                raise ex
+            else:
+                _LOGGER.debug("Internal task completed without exception: %s", task)
 
     async def _read_loop(self, include_details: bool = False):
         """Streams data from the ONYX API endpoint and emits device updates.
@@ -370,5 +376,5 @@ def create(
     if config is None:
         config = Configuration(fingerprint, access_token, local_address=local_address)
     session = client_session if client_session is not None else aiohttp.ClientSession()
-    event_loop = event_loop if event_loop is not None else asyncio.get_event_loop()
+    event_loop = event_loop
     return OnyxClient(config, session, event_loop)

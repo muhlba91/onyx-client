@@ -180,3 +180,19 @@ class TestUrlHelper:
             assert data is None
             index += 1
         assert index == 2
+
+    @pytest.mark.asyncio
+    async def test_start_stream_fallback_decoding(self, mock_response, helper):
+        # Using something that is NOT valid UTF-8 to trigger the except block in UrlHelper.start_stream
+        # 0xFF is invalid in UTF-8
+        invalid_utf8 = b"\xff\n"
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body=invalid_utf8,
+        )
+        index = 1
+        async for data in helper.start_stream("/events"):
+            assert data == "b'\\xff\\n'"
+            index += 1
+        assert index == 2
