@@ -1148,11 +1148,10 @@ class TestOnyxClient:
             if device.identifier == "device3":
                 client.stop()
 
-        async def check_index(task):
+        def check_index(task):
             assert task in client._active_tasks
             assert client._shutdown
             assert len(client._active_tasks) == 0
-            await task
 
         mock__complete_internal_task.side_effect = check_index
         client.set_event_callback(callback)
@@ -1161,6 +1160,20 @@ class TestOnyxClient:
         assert not client._shutdown
         for task in client._active_tasks.copy():
             await task
+
+    @pytest.mark.asyncio
+    async def test_read_handler_exception(self, mock_response, client):
+        client._shutdown = False
+        with (
+            patch.object(
+                client,
+                "_read_loop",
+                side_effect=[Exception("test error"), asyncio.CancelledError()],
+            ),
+            patch("asyncio.sleep", return_value=None),
+            pytest.raises(asyncio.CancelledError),
+        ):
+            await client._read_handler()
 
     @pytest.mark.asyncio
     async def test_start_break(self, mock_response, client):
