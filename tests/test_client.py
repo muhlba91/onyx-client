@@ -1,14 +1,14 @@
 """Tests for the Onyx Client."""
 
+import asyncio
+from unittest.mock import patch
+
 import aiohttp
 import pytest
 import pytest_asyncio
-import asyncio
-
-from unittest.mock import patch
 from aioresponses import aioresponses
 
-from onyx_client.client import create, OnyxClient
+from onyx_client.client import OnyxClient, create
 from onyx_client.configuration.configuration import Configuration
 from onyx_client.data.animation_keyframe import AnimationKeyframe
 from onyx_client.data.animation_value import AnimationValue
@@ -135,13 +135,13 @@ class TestOnyxClient:
                 return False
 
             def exception(self):
-                raise Exception("error")
+                return Exception("error")
 
         callback = Task()
         client._active_tasks.add(callback)
         assert len(client._active_tasks) == 1
         assert callback in client._active_tasks
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             client._complete_internal_task(callback)
         assert len(client._active_tasks) == 0
 

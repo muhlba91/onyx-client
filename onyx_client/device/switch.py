@@ -16,12 +16,12 @@ class Switch(Device):
         identifier: the device identifier
         name: the device name
         device_type: the device type"""
-        super(Switch, self).__init__(
+        super().__init__(
             identifier,
             name,
             device_type,
             DeviceMode(device_type),
-            list(),
+            [],
         )
 
     def update_with(self, update: Optional["Switch"]):

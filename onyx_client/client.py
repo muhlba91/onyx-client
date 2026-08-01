@@ -1,12 +1,12 @@
 """Onyx Client API class."""
 
+import asyncio
 import json
 import logging
-import aiohttp
-import asyncio
-
-from typing import Optional, AsyncGenerator
+from collections.abc import AsyncGenerator
 from random import uniform
+
+import aiohttp
 
 from .configuration.configuration import Configuration
 from .data.date_information import DateInformation
@@ -35,7 +35,7 @@ class OnyxClient:
         self,
         config: Configuration,
         client_session: aiohttp.ClientSession,
-        event_loop: Optional[asyncio.AbstractEventLoop] = None,
+        event_loop: asyncio.AbstractEventLoop | None = None,
     ):
         """Initialize the API client.
 
@@ -46,11 +46,16 @@ class OnyxClient:
         self.url_helper = UrlHelper(config, client_session)
         self._shutdown = True
         self._read_loop_task = None
-        self._event_loop = event_loop or asyncio.get_event_loop()
+        try:
+            self._event_loop = (
+                event_loop or asyncio.get_event_loop_policy().get_event_loop()
+            )
+        except RuntimeError:
+            self._event_loop = asyncio.new_event_loop()
         self._active_tasks = set()
         self._event_callback = None
 
-    async def supported_versions(self) -> Optional[SupportedVersions]:
+    async def supported_versions(self) -> SupportedVersions | None:
         """Get all supported versions by the ONYX.CENTER."""
         data = await self.url_helper.perform_get_request("/versions", with_api=False)
         if data is None:
@@ -60,7 +65,7 @@ class OnyxClient:
             )
             return None
 
-        return SupportedVersions(data.get("versions", list()))
+        return SupportedVersions(data.get("versions", []))
 
     async def verify(self) -> bool:
         """Check if the ONYX.CENTER supports the version
@@ -68,7 +73,7 @@ class OnyxClient:
         versions = await self.supported_versions()
         return versions.supports(API_VERSION) if versions is not None else False
 
-    async def date_information(self) -> Optional[DateInformation]:
+    async def date_information(self) -> DateInformation | None:
         """Get all date related information of the ONYX.CENTER."""
         data = await self.url_helper.perform_get_request("/clock")
         if data is None:
@@ -84,7 +89,7 @@ class OnyxClient:
             int(data.get("zone_offset", "0")),
         )
 
-    async def devices(self, include_details: bool = False) -> Optional[list]:
+    async def devices(self, include_details: bool = False) -> list | None:
         """Get all devices controlled by the ONYX.CENTER.
 
         include_details: ensures all device details are queried
@@ -113,7 +118,7 @@ class OnyxClient:
                 for key, value in data.items()
             ]
 
-    async def device(self, identifier: str) -> Optional[Device]:
+    async def device(self, identifier: str) -> Device | None:
         """Get the device properties for a provided ID.
 
         identifier: the identifier of the device to query"""
@@ -126,7 +131,7 @@ class OnyxClient:
             )
             return None
 
-        actions = [Action.convert(action) for action in data.get("actions", list())]
+        actions = [Action.convert(action) for action in data.get("actions", [])]
         return init_device(
             identifier,
             data.get("name", None),
@@ -167,7 +172,7 @@ class OnyxClient:
             )
         return data is not None
 
-    async def groups(self) -> Optional[list]:
+    async def groups(self) -> list | None:
         """Get all groups controlled by the ONYX.CENTER."""
         data = await self.url_helper.perform_get_request("/groups")
         if data is None:
@@ -178,11 +183,11 @@ class OnyxClient:
             return None
 
         return [
-            Group(key, value.get("name", None), value.get("devices", list()))
+            Group(key, value.get("name", None), value.get("devices", []))
             for key, value in data.items()
         ]
 
-    async def group(self, identifier: str) -> Optional[Group]:
+    async def group(self, identifier: str) -> Group | None:
         """Get the group properties for a provided ID.
 
         identifier: the group identifier to query"""
@@ -195,7 +200,7 @@ class OnyxClient:
             )
             return None
 
-        return Group(identifier, data.get("name", None), data.get("devices", list()))
+        return Group(identifier, data.get("name", None), data.get("devices", []))
 
     async def send_group_command(self, identifier: str, command: DeviceCommand) -> bool:
         """Send a command to the group with the provided ID.
@@ -215,7 +220,7 @@ class OnyxClient:
 
         unsuccessful = [
             key
-            for (key, value) in data.get("results", dict()).items()
+            for (key, value) in data.get("results", {}).items()
             if value.get("status_code", 501) != 200
         ]
         if len(unsuccessful) > 0:
@@ -243,7 +248,7 @@ class OnyxClient:
 
     async def events(
         self, include_details: bool = False
-    ) -> AsyncGenerator[Optional[Device], None]:
+    ) -> AsyncGenerator[Device | None, None]:
         """Stream events continuously.
 
         include_details: ensures all device details are queried
@@ -255,7 +260,7 @@ class OnyxClient:
                     event = message[len("event:") :].strip()
                 elif message.startswith("data:") and event in ["snapshot", "patch"]:
                     data = json.loads(message[len("data:") :].strip())
-                    for key, value in data.get("devices", dict()).items():
+                    for key, value in data.get("devices", {}).items():
                         try:
                             if value is not None:
                                 device = (
@@ -318,7 +323,7 @@ class OnyxClient:
                 await self._read_loop(include_details)
             except asyncio.CancelledError:
                 raise
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 backoff = int(uniform(0, backoff_time) * 60)
                 _LOGGER.error(
                     "Unexpected exception: %r. Retrying with backoff %ds.", ex, backoff
@@ -357,9 +362,9 @@ class OnyxClient:
 
 def create(
     config: Configuration = None,
-    fingerprint: str = None,
-    access_token: str = None,
-    local_address: str = None,
+    fingerprint: str | None = None,
+    access_token: str | None = None,
+    local_address: str | None = None,
     client_session: aiohttp.ClientSession = None,
     event_loop=None,
 ) -> OnyxClient:
@@ -376,5 +381,4 @@ def create(
     if config is None:
         config = Configuration(fingerprint, access_token, local_address=local_address)
     session = client_session if client_session is not None else aiohttp.ClientSession()
-    event_loop = event_loop
     return OnyxClient(config, session, event_loop)

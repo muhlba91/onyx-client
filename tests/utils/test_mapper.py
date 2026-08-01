@@ -10,7 +10,7 @@ from onyx_client.device.switch import Switch
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.mapper import numeric_value, boolean_value, init_device
+from onyx_client.utils.mapper import boolean_value, init_device, numeric_value
 
 
 def test_numeric_value():

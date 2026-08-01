@@ -1,6 +1,6 @@
 import asyncio
 import getopt
-from sys import argv
+from sys import argv, exit
 
 import aiohttp
 

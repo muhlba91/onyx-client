@@ -9,10 +9,10 @@ class DeviceCommand:
 
     def __init__(
         self,
-        properties: dict = None,
+        properties: dict | None = None,
         action: Action = None,
-        valid_from: int = None,
-        best_before: int = None,
+        valid_from: int | None = None,
+        best_before: int | None = None,
     ):
         """Initialize the command.
 

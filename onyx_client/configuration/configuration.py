@@ -4,7 +4,9 @@
 class Configuration:
     """The API connection configuration."""
 
-    def __init__(self, fingerprint: str, access_token: str, local_address: str = None):
+    def __init__(
+        self, fingerprint: str, access_token: str, local_address: str | None = None
+    ):
         """Initialize the configuration.
 
         fingerprint: the ONYX.CENTER device fingerprint

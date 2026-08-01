@@ -13,13 +13,13 @@ from ..enum.device_type import DeviceType
 from ..utils.device_type import (
     is_click,
     is_light,
-    is_weather,
     is_shutter,
     is_switch,
+    is_weather,
 )
 
 
-def numeric_value(key: str, properties: dict = None):
+def numeric_value(key: str, properties: dict | None = None):
     """Create a new numeric value.
 
     key: the key value
@@ -31,7 +31,7 @@ def numeric_value(key: str, properties: dict = None):
     )
 
 
-def boolean_value(key: str, properties: dict = None):
+def boolean_value(key: str, properties: dict | None = None):
     """Create a new boolean value.
 
     key: the key value
@@ -45,11 +45,11 @@ def boolean_value(key: str, properties: dict = None):
 
 def init_device(
     identifier: str,
-    name: str = None,
+    name: str | None = None,
     device_type: DeviceType = None,
-    properties: dict = None,
-    actions: list = None,
-    data: dict = None,
+    properties: dict | None = None,
+    actions: list | None = None,
+    data: dict | None = None,
 ) -> Device:
     """Initialize the device correctly.
 
@@ -60,14 +60,14 @@ def init_device(
     actions: a list of actions the device supports
     data: the data map of the device"""
     device_mode_value = (
-        DeviceType.convert(properties.get("device_type", dict()).get("type", None))
+        DeviceType.convert(properties.get("device_type", {}).get("type", None))
         if properties is not None
         else device_type
     )
     device_mode_values = (
         [
             DeviceType.convert(value)
-            for value in properties.get("device_type", dict()).get("values", list())
+            for value in properties.get("device_type", {}).get("values", [])
         ]
         if properties is not None
         else None

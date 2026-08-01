@@ -68,7 +68,7 @@ class TestAnimationValue:
         )
 
     def test_not_eq(self):
-        assert AnimationValue(10, 10, list()) != 10
+        assert AnimationValue(10, 10, []) != 10
 
     def test_update_with(self):
         value1 = AnimationValue(1.0, 1, [AnimationKeyframe("linear", 0, 1.0, 1)])

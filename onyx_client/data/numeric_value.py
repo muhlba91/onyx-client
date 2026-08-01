@@ -14,7 +14,7 @@ class NumericValue:
         minimum: int,
         maximum: int,
         read_only: bool,
-        animation: Optional[AnimationValue] = None,
+        animation: AnimationValue | None = None,
     ):
         """Initialize the numeric value.
 

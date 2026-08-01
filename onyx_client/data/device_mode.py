@@ -6,7 +6,7 @@ from ..enum.device_type import DeviceType
 class DeviceMode:
     """The device mode for the device."""
 
-    def __init__(self, mode: DeviceType, values: list = None):
+    def __init__(self, mode: DeviceType, values: list | None = None):
         """Initialize the device mode.
 
         mode: the device type

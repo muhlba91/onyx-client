@@ -3,7 +3,6 @@
 import aiohttp
 import pytest
 import pytest_asyncio
-
 from aioresponses import aioresponses
 
 from onyx_client.configuration.configuration import Configuration

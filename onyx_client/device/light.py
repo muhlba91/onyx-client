@@ -32,7 +32,7 @@ class Light(Device):
         target_brightness: the target brightness of the light
         actual_brightness: the actual brightness of the light
         dim_duration: the duration it takes to dim"""
-        super(Light, self).__init__(identifier, name, device_type, device_mode, actions)
+        super().__init__(identifier, name, device_type, device_mode, actions)
         self.target_brightness = target_brightness
         self.actual_brightness = actual_brightness
         self.dim_duration = dim_duration

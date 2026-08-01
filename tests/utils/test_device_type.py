@@ -2,12 +2,12 @@
 
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.utils.device_type import (
-    is_shutter,
-    is_light,
-    is_weather,
-    is_click,
-    is_switch,
     _in_keys,
+    is_click,
+    is_light,
+    is_shutter,
+    is_switch,
+    is_weather,
 )
 
 

@@ -34,7 +34,7 @@ class AnimationValue:
             properties.get("current_value"),
             [
                 AnimationKeyframe.create(keyframe)
-                for keyframe in properties.get("keyframes", list())
+                for keyframe in properties.get("keyframes", [])
             ],
         )
 

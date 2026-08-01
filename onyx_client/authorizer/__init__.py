@@ -1,21 +1,22 @@
 """Onyx Client authorizer."""
 
 import logging
-import aiohttp
 
-from typing import Optional
+import aiohttp
 
 from ..client import OnyxClient
 from ..configuration.configuration import Configuration
-from ..utils.const import API_URL, API_HEADERS, API_VERSION
+from ..utils.const import API_HEADERS, API_URL, API_VERSION
 from ..utils.response import check
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def exchange_code(
-    code: str, client_session: aiohttp.ClientSession = None, local_address: str = None
-) -> Optional[Configuration]:
+    code: str,
+    client_session: aiohttp.ClientSession = None,
+    local_address: str | None = None,
+) -> Configuration | None:
     """Exchange an API code for an access token and fingerprint.
 
     code: the access code
@@ -29,8 +30,8 @@ async def exchange_code(
 
 
 async def authorize(
-    code: str, client_session: aiohttp.ClientSession, local_address: str = None
-) -> Optional[Configuration]:
+    code: str, client_session: aiohttp.ClientSession, local_address: str | None = None
+) -> Configuration | None:
     """Authorize the client using an API code.
 
     code: the access code
@@ -53,7 +54,7 @@ async def authorize(
         )
 
 
-def _api_url(local_address: str = None) -> str:
+def _api_url(local_address: str | None = None) -> str:
     """Get the base API URL.
 
     local_address: local address to use for the request (default: None)"""

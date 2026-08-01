@@ -1,6 +1,7 @@
 """Onyx Client response utils."""
 
 import logging
+
 import aiohttp
 
 _LOGGER = logging.getLogger(__name__)

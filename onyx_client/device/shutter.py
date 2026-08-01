@@ -48,9 +48,7 @@ class Shutter(Device):
         target_angle: the target angle of the shutter
         actual_position: the actual position of the shutter
         actual_angle: the actual angle of the shutter"""
-        super(Shutter, self).__init__(
-            identifier, name, device_type, device_mode, actions
-        )
+        super().__init__(identifier, name, device_type, device_mode, actions)
         self.target_position = target_position
         self.target_angle = target_angle
         self.actual_angle = actual_angle

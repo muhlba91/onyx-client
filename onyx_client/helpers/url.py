@@ -1,11 +1,11 @@
 """Onyx Client URL helper."""
 
+from typing import Any
+
 import aiohttp
 
-from typing import Optional, Any
-
 from ..configuration.configuration import Configuration
-from ..utils.const import API_URL, API_HEADERS, API_VERSION
+from ..utils.const import API_HEADERS, API_URL, API_VERSION
 from ..utils.response import check
 
 
@@ -43,9 +43,7 @@ class UrlHelper:
         with_api: append the API version to the URL"""
         return f"{self._base_url(with_api=with_api)}{path}"
 
-    async def perform_get_request(
-        self, path: str, with_api: bool = True
-    ) -> Optional[Any]:
+    async def perform_get_request(self, path: str, with_api: bool = True) -> Any | None:
         """Perform a GET request.
 
         path: the URL path
@@ -59,7 +57,7 @@ class UrlHelper:
                 return None
             return await response.json()
 
-    async def perform_delete_request(self, path: str) -> Optional[Any]:
+    async def perform_delete_request(self, path: str) -> Any | None:
         """Perform a DELETE request.
 
         path: the URL path"""
@@ -70,7 +68,7 @@ class UrlHelper:
                 return None
             return await response.json()
 
-    async def perform_post_request(self, path: str, data: dict) -> Optional[Any]:
+    async def perform_post_request(self, path: str, data: dict) -> Any | None:
         """Perform a POST request.
 
         path: the URL path
@@ -103,7 +101,7 @@ class UrlHelper:
             async for message in response.content:
                 try:
                     cleaned_message = message.strip().decode("utf-8").strip()
-                except Exception:
+                except Exception:  # noqa: BLE001
                     cleaned_message = str(message).strip()
                 if len(cleaned_message) > 0:
                     yield cleaned_message

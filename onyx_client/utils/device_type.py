@@ -1,7 +1,5 @@
 """Onyx Client device type utils."""
 
-from typing import Optional
-
 from ..device.click import Click
 from ..device.light import Light
 from ..device.shutter import Shutter
@@ -60,13 +58,13 @@ def is_switch(device_type: DeviceType, data: dict) -> bool:
     return _in_keys(data, Switch.keys())
 
 
-def _in_keys(data: Optional[dict], keys: list) -> bool:
+def _in_keys(data: dict | None, keys: list) -> bool:
     """Check if any key in data is listed in the keys list.
 
     data: the data map to check
     keys: the keys to check for"""
     if data is not None:
-        for key in data.keys():
+        for key in data:
             if key in keys:
                 return True
     return False

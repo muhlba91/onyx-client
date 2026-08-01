@@ -37,9 +37,7 @@ class Weather(Device):
         air_pressure: the absolute air pressure
         humidity: the relative humidity
         temperature: the temperature of the station"""
-        super(Weather, self).__init__(
-            identifier, name, device_type, device_mode, actions
-        )
+        super().__init__(identifier, name, device_type, device_mode, actions)
         self.wind_peak = wind_peak
         self.sun_brightness_peak = sun_brightness_peak
         self.sun_brightness_sink = sun_brightness_sink

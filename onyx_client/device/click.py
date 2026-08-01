@@ -17,12 +17,12 @@ class Click(Device):
         name: the device name
         device_type: the device type
         offline: set if the device is offline"""
-        super(Click, self).__init__(
+        super().__init__(
             identifier,
             name,
             device_type,
             DeviceMode(device_type),
-            list(),
+            [],
         )
         self.offline = offline
 
