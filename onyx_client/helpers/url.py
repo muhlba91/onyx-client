@@ -99,9 +99,8 @@ class UrlHelper:
                 yield None
                 return
             async for message in response.content:
-                try:
-                    cleaned_message = message.strip().decode("utf-8").strip()
-                except Exception:  # noqa: BLE001
-                    cleaned_message = str(message).strip()
+                cleaned_message = (
+                    message.strip().decode("utf-8", errors="replace").strip()
+                )
                 if len(cleaned_message) > 0:
                     yield cleaned_message

@@ -43,17 +43,38 @@ class OnyxClient:
         client_session: the aiohttp session to use
         event_loop: the event loop to use for background events"""
         self.config = config
+        self.client_session = client_session
         self.url_helper = UrlHelper(config, client_session)
         self._shutdown = True
         self._read_loop_task = None
-        try:
-            self._event_loop = (
-                event_loop or asyncio.get_event_loop_policy().get_event_loop()
-            )
-        except RuntimeError:
-            self._event_loop = asyncio.new_event_loop()
+        self._close_session = False
+        if event_loop is not None:
+            self._event_loop = event_loop
+        else:
+            try:
+                self._event_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                self._event_loop = None
         self._active_tasks = set()
         self._event_callback = None
+
+    async def __aenter__(self):
+        """Enter async context manager."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Exit async context manager and close resources."""
+        await self.close()
+
+    async def close(self):
+        """Close client connections and cancel any background tasks."""
+        self.stop()
+        if (
+            self._close_session
+            and self.client_session is not None
+            and not self.client_session.closed
+        ):
+            await self.client_session.close()
 
     async def supported_versions(self) -> SupportedVersions | None:
         """Get all supported versions by the ONYX.CENTER."""
@@ -295,6 +316,9 @@ class OnyxClient:
     def stop(self):
         """Stop the event stream via callback."""
         self._shutdown = True
+        if self._read_loop_task is not None and not self._read_loop_task.done():
+            self._read_loop_task.cancel()
+            self._read_loop_task = None
 
     def set_event_callback(self, callback):
         """Set the event stream callback.
@@ -307,7 +331,8 @@ class OnyxClient:
 
         coro: the coroutine to run
         name: the event loop name"""
-        task = self._event_loop.create_task(coro, name=name)
+        loop = self._event_loop or asyncio.get_running_loop()
+        task = loop.create_task(coro, name=name)
         task.add_done_callback(self._complete_internal_task)
         self._active_tasks.add(task)
         return task
@@ -381,4 +406,6 @@ def create(
     if config is None:
         config = Configuration(fingerprint, access_token, local_address=local_address)
     session = client_session if client_session is not None else aiohttp.ClientSession()
-    return OnyxClient(config, session, event_loop)
+    client = OnyxClient(config, session, event_loop)
+    client._close_session = client_session is None
+    return client

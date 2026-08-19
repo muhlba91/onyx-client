@@ -36,7 +36,7 @@ def test_create_client(mock_session):
     assert client.url_helper.config.access_token == "token"
     assert client._shutdown
     assert client._read_loop_task is None
-    assert client._event_loop is not None
+    assert not client._close_session
     assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
@@ -55,7 +55,7 @@ def test_create_client_with_local_address(mock_session):
     assert client.url_helper.config.local_address == "192.168.1.1"
     assert client._shutdown
     assert client._read_loop_task is None
-    assert client._event_loop is not None
+    assert not client._close_session
     assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
@@ -74,7 +74,7 @@ def test_create_client_with_config(mock_session):
     assert client.config.access_token == "token"
     assert client._shutdown
     assert client._read_loop_task is None
-    assert client._event_loop is not None
+    assert not client._close_session
     assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
@@ -89,7 +89,7 @@ def test_create_client_without_session(mock_session):
     assert client.config.access_token == "token"
     assert client._shutdown
     assert client._read_loop_task is None
-    assert client._event_loop is not None
+    assert client._close_session
     assert len(client._active_tasks) == 0
     assert client._event_callback is None
 
@@ -1159,7 +1159,10 @@ class TestOnyxClient:
         assert len(client._active_tasks) == 1
         assert not client._shutdown
         for task in client._active_tasks.copy():
-            await task
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
     @pytest.mark.asyncio
     async def test_read_handler_exception(self, mock_response, client):
@@ -1198,7 +1201,10 @@ class TestOnyxClient:
         assert len(client._active_tasks) == 1
         assert not client._shutdown
         for task in client._active_tasks.copy():
-            await task
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
     @pytest.mark.asyncio
     async def test_start_without_callback(self, mock_response, client):
@@ -1385,3 +1391,56 @@ class TestOnyxClient:
             assert device.identifier == f"device{index}"
             index += 1
         assert index == 4
+
+    @pytest.mark.asyncio
+    async def test_async_context_manager(self, session):
+        config = Configuration("finger", "token")
+        async with OnyxClient(config, session) as client:
+            assert client is not None
+            assert not client._close_session
+
+    @pytest.mark.asyncio
+    async def test_close_owned_session(self):
+        client = create(fingerprint="finger", access_token="token")
+        assert client._close_session
+        assert not client.client_session.closed
+        await client.close()
+        assert client.client_session.closed
+
+    @pytest.mark.asyncio
+    async def test_close_unowned_session(self, session):
+        config = Configuration("finger", "token")
+        client = OnyxClient(config, session)
+        assert not client._close_session
+        await client.close()
+        assert not session.closed
+
+    @pytest.mark.asyncio
+    async def test_stop_cancels_read_loop_task(self, client):
+        async def dummy_coro():
+            await asyncio.sleep(10)
+
+        task = client._create_internal_task(dummy_coro())
+        client._read_loop_task = task
+        assert not task.done()
+        client.stop()
+        assert client._shutdown
+        assert task.cancelling() > 0 or task.cancelled()
+        assert client._read_loop_task is None
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_create_internal_task_running_loop_fallback(self, session):
+        config = Configuration("finger", "token")
+        client = OnyxClient(config, session, event_loop=None)
+        client._event_loop = None
+
+        async def dummy_coro():
+            pass
+
+        task = client._create_internal_task(dummy_coro())
+        assert task is not None
+        await task

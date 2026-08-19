@@ -26,5 +26,5 @@ class Action(Enum):
         lower: the lower case action identifier"""
         try:
             return Action[lower.upper()]
-        except KeyError:
+        except (KeyError, AttributeError):
             return None

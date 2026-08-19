@@ -72,16 +72,26 @@ from onyx_client.authorizer import exchange_code
 client = create(fingerprint="fingerprint", access_token="access_token")
 
 # by providing the fingerprint, access token and aiohttp client session
-client = create(fingerprint="fingerprint", access_token="access_token", client_session=aiohttp.ClientSession())
+client = create(
+    fingerprint="fingerprint",
+    access_token="access_token",
+    client_session=aiohttp.ClientSession(),
+)
 
 # by providing the fingerprint, access token and local API address
-client = create(fingerprint="fingerprint", access_token="access_token", local_address="localhost")
+client = create(
+    fingerprint="fingerprint", access_token="access_token", local_address="localhost"
+)
 
 # by providing the configuration object
 client_session = aiohttp.ClientSession()
 # e.g. by exchanging the code first
 config = exchange_code("code", client_session)
-client = create(config=config, client_session=client_session) if client_session is not None else None
+client = (
+    create(config=config, client_session=client_session)
+    if client_session is not None
+    else None
+)
 ```
 
 ### Events
@@ -91,8 +101,10 @@ You can register a event callback which will be triggered if the client receives
 ```python
 # all imports and a client exists...
 
+
 def received_update(device):
     print(device)
+
 
 client.set_event_callback(received_update)
 client.start()

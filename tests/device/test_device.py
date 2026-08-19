@@ -89,7 +89,7 @@ class TestDevice:
         with pytest.raises(UpdateException):
             device.update_with(update)
 
-    def test_update_with_empty_actions_keeps_original(device_mode):
+    def test_update_with_empty_actions_keeps_original(self, device_mode):
         original_actions = [Action.STOP]
         device = Device(
             "id", "name", DeviceType.AWNING, device_mode, original_actions.copy()
