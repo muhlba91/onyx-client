@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [11.0.1](https://github.com/muhlba91/onyx-client/compare/v11.0.0...v11.0.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* fix minor issues after refactoring ([fb4b405](https://github.com/muhlba91/onyx-client/commit/fb4b405a6ce7423d93aeecd13bbf30c0aca2edaf))
+
 ## [11.0.0](https://github.com/muhlba91/onyx-client/compare/v10.1.3...v11.0.0) (2026-08-15)
 
 
