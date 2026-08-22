@@ -292,6 +292,10 @@ class OnyxClient:
                                         value.get("name", None),
                                         DeviceType.convert(value.get("type", None)),
                                         value.get("properties", None),
+                                        [
+                                            Action.convert(action)
+                                            for action in value.get("actions", [])
+                                        ],
                                         value,
                                     )
                                 )

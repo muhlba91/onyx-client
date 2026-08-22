@@ -1393,6 +1393,54 @@ class TestOnyxClient:
         assert index == 4
 
     @pytest.mark.asyncio
+    async def test_events_click_device(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: patch\n"
+            'data: { "devices": { "device1":'
+            '{ "type": "click", "offline": false } } }',
+        )
+        async for device in client.events():
+            assert device.identifier == "device1"
+            assert isinstance(device, Click)
+            assert device.device_type == DeviceType.CLICK
+            # Click always has empty actions by design
+            assert device.actions == []
+
+    @pytest.mark.asyncio
+    async def test_events_switch_device(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body='event: patch\ndata: { "devices": { "sw1":{ "type": "switch" } } }',
+        )
+        async for device in client.events():
+            assert device.identifier == "sw1"
+            assert isinstance(device, Switch)
+            assert device.device_type == DeviceType.SWITCH
+            # Switch always has empty actions by design
+            assert device.actions == []
+
+    @pytest.mark.asyncio
+    async def test_events_shutter_actions_preserved(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: patch\n"
+            'data: { "devices": { "device1":'
+            '{ "name": "device1", "type": "rollershutter",'
+            ' "actions": ["open", "close", "stop", "wink"] } } }',
+        )
+        async for device in client.events():
+            assert device.identifier == "device1"
+            assert isinstance(device, Shutter)
+            assert Action.OPEN in device.actions
+            assert Action.CLOSE in device.actions
+            assert Action.STOP in device.actions
+            assert Action.WINK in device.actions
+
+    @pytest.mark.asyncio
     async def test_async_context_manager(self, session):
         config = Configuration("finger", "token")
         async with OnyxClient(config, session) as client:

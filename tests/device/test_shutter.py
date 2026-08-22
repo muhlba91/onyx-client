@@ -7,6 +7,7 @@ from onyx_client.data.animation_keyframe import AnimationKeyframe
 from onyx_client.data.animation_value import AnimationValue
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
+from onyx_client.device.device import Device
 from onyx_client.device.shutter import Shutter
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
@@ -317,3 +318,32 @@ class TestShutter:
         assert shutter.target_angle == value2
         assert shutter.actual_angle == value3
         assert shutter.actual_position == value4
+
+    def test_update_with_base_device_patch(self, device_mode):
+        value1 = NumericValue(10, 0, 100, False)
+        value2 = NumericValue(90, 0, 360, False)
+        shutter = Shutter(
+            "id",
+            "name",
+            DeviceType.ROLLERSHUTTER,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            value2,
+            value1,
+        )
+        update = Device(
+            "id",
+            "patched_name",
+            DeviceType.UNKNOWN,
+            DeviceMode(DeviceType.UNKNOWN),
+            [],
+        )
+        shutter.update_with(update)
+        assert shutter.name == "patched_name"
+        assert shutter.device_type == DeviceType.ROLLERSHUTTER
+        assert shutter.target_position == value1
+        assert shutter.target_angle == value2
+        assert shutter.actual_angle == value2
+        assert shutter.actual_position == value1

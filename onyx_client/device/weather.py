@@ -54,30 +54,36 @@ class Weather(Device):
         update: the update patch"""
         super().update_with(update)
 
+        wind_peak = getattr(update, "wind_peak", None)
         if self.wind_peak is not None:
-            self.wind_peak.update_with(update.wind_peak)
+            self.wind_peak.update_with(wind_peak)
         else:
-            self.wind_peak = update.wind_peak
+            self.wind_peak = wind_peak
+        sun_brightness_peak = getattr(update, "sun_brightness_peak", None)
         if self.sun_brightness_peak is not None:
-            self.sun_brightness_peak.update_with(update.sun_brightness_peak)
+            self.sun_brightness_peak.update_with(sun_brightness_peak)
         else:
-            self.sun_brightness_peak = update.sun_brightness_peak
+            self.sun_brightness_peak = sun_brightness_peak
+        sun_brightness_sink = getattr(update, "sun_brightness_sink", None)
         if self.sun_brightness_sink is not None:
-            self.sun_brightness_sink.update_with(update.sun_brightness_sink)
+            self.sun_brightness_sink.update_with(sun_brightness_sink)
         else:
-            self.sun_brightness_sink = update.sun_brightness_sink
+            self.sun_brightness_sink = sun_brightness_sink
+        air_pressure = getattr(update, "air_pressure", None)
         if self.air_pressure is not None:
-            self.air_pressure.update_with(update.air_pressure)
+            self.air_pressure.update_with(air_pressure)
         else:
-            self.air_pressure = update.air_pressure
+            self.air_pressure = air_pressure
+        humidity = getattr(update, "humidity", None)
         if self.humidity is not None:
-            self.humidity.update_with(update.humidity)
+            self.humidity.update_with(humidity)
         else:
-            self.humidity = update.humidity
+            self.humidity = humidity
+        temperature = getattr(update, "temperature", None)
         if self.temperature is not None:
-            self.temperature.update_with(update.temperature)
+            self.temperature.update_with(temperature)
         else:
-            self.temperature = update.temperature
+            self.temperature = temperature
 
     @staticmethod
     def keys() -> list:

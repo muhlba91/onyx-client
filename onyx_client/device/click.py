@@ -35,7 +35,8 @@ class Click(Device):
         update: the update patch"""
         super().update_with(update)
 
-        self.offline = self.offline if update.offline is None else update.offline
+        offline = getattr(update, "offline", None)
+        self.offline = self.offline if offline is None else offline
 
     @staticmethod
     def keys() -> list:

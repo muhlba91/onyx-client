@@ -5,6 +5,7 @@ import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.click import Click
+from onyx_client.device.device import Device
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.exception.update_exception import UpdateException
 
@@ -88,3 +89,18 @@ class TestClick:
         )
         with pytest.raises(UpdateException):
             click.update_with(update)
+
+    def test_update_with_base_device_patch(self, device_mode):
+        click = Click("id", "name", DeviceType.CLICK, False)
+        update = Device(
+            "id",
+            "patched_name",
+            DeviceType.UNKNOWN,
+            DeviceMode(DeviceType.UNKNOWN),
+            [],
+        )
+        click.update_with(update)
+        assert click.name == "patched_name"
+        assert click.device_type == DeviceType.CLICK
+        # offline has no attribute on base Device; getattr returns None, so offline keeps original
+        assert not click.offline

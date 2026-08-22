@@ -44,14 +44,22 @@ class Device:
         """Update the device with an update patch.
 
         update: the update patch"""
-        if not self == update:
+        if update is None or self.identifier != getattr(update, "identifier", None):
             raise UpdateException("ID_NOT_EQUAL")
         self.name = self.name if update.name is None else update.name
+        update_device_type = update.device_type
         self.device_type = (
-            self.device_type if update.device_type is None else update.device_type
+            self.device_type
+            if update_device_type is None or update_device_type == DeviceType.UNKNOWN
+            else update_device_type
         )
+        update_device_mode = update.device_mode
         self.device_mode = (
-            self.device_mode if update.device_mode is None else update.device_mode
+            self.device_mode
+            if update_device_mode is None
+            or update_device_mode.mode is None
+            or update_device_mode.mode == DeviceType.UNKNOWN
+            else update_device_mode
         )
         self.actions = (
             self.actions

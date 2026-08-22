@@ -5,6 +5,7 @@ import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.data.numeric_value import NumericValue
+from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
@@ -264,6 +265,34 @@ class TestLight:
         )
         light.update_with(update)
         assert light.name == "name1"
+        assert light.target_brightness == value1
+        assert light.actual_brightness == value2
+        assert light.dim_duration == value3
+
+    def test_update_with_base_device_patch(self, device_mode):
+        value1 = NumericValue(100, 0, 255, False)
+        value2 = NumericValue(80, 0, 255, False)
+        value3 = NumericValue(5, 0, 60, False)
+        light = Light(
+            "id",
+            "name",
+            DeviceType.BASIC_LIGHT,
+            device_mode,
+            list(Action),
+            value1,
+            value2,
+            value3,
+        )
+        update = Device(
+            "id",
+            "patched_name",
+            DeviceType.UNKNOWN,
+            DeviceMode(DeviceType.UNKNOWN),
+            [],
+        )
+        light.update_with(update)
+        assert light.name == "patched_name"
+        assert light.device_type == DeviceType.BASIC_LIGHT
         assert light.target_brightness == value1
         assert light.actual_brightness == value2
         assert light.dim_duration == value3

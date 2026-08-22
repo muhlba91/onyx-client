@@ -5,6 +5,7 @@ import pytest_asyncio
 
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.device import Device
+from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
 from onyx_client.exception.update_exception import UpdateException
@@ -97,3 +98,34 @@ class TestDevice:
         update = Device("id", None, None, None, [])
         device.update_with(update)
         assert device.actions == original_actions
+
+    def test_update_with_unknown_device_type_preserved(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        update = Device(
+            "id",
+            None,
+            DeviceType.UNKNOWN,
+            DeviceMode(DeviceType.UNKNOWN),
+            [],
+        )
+        device.update_with(update)
+        assert device.device_type == DeviceType.AWNING
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+
+    def test_update_with_none_raises_exception(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        with pytest.raises(UpdateException):
+            device.update_with(None)
+
+    def test_update_with_cross_type_subclass(self, device_mode):
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+        update = Weather(
+            "id",
+            "name_updated",
+            DeviceType.WEATHER,
+            DeviceMode(DeviceType.WEATHER),
+            [Action.STOP],
+        )
+        device.update_with(update)
+        assert device.name == "name_updated"
+        assert device.device_type == DeviceType.WEATHER
