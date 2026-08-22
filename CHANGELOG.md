@@ -1,6 +1,24 @@
 # Changelog
 
 
+## [11.1.0](https://github.com/muhlba91/onyx-client/compare/v11.0.1...v11.1.0) (2026-08-22)
+
+
+### Features
+
+* add mutmut testing ([63843cd](https://github.com/muhlba91/onyx-client/commit/63843cd6b1c8aea9482ab65df6420f1f5b27c2ef))
+
+
+### Bug Fixes
+
+* when updating devices check for attributes before accessing them ([3146295](https://github.com/muhlba91/onyx-client/commit/3146295110307f6cf5d53b0b8382922d9d9a8158))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency ruff to v0.16.4 ([e53f0d1](https://github.com/muhlba91/onyx-client/commit/e53f0d1ef9b6bede44e1226adf60cc599499bc1a))
+* **deps:** update github/codeql-action action to v4.37.8 ([8137379](https://github.com/muhlba91/onyx-client/commit/813737964e03d47802d00b9fe835eae4f4bb36be))
+
 ## [11.0.1](https://github.com/muhlba91/onyx-client/compare/v11.0.0...v11.0.1) (2026-08-19)
 
 
