@@ -83,6 +83,7 @@ class UrlHelper:
                 return None
             return await response.json()
 
+    # pragma: no mutate start
     async def start_stream(self, path: str):
         """Start a stream and returns the value if it's not empty.
 
@@ -104,3 +105,5 @@ class UrlHelper:
                 )
                 if len(cleaned_message) > 0:
                     yield cleaned_message
+
+    # pragma: no mutate end

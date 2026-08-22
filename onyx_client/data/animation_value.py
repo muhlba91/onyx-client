@@ -30,7 +30,7 @@ class AnimationValue:
             return None
 
         return AnimationValue(
-            properties.get("start", None),
+            properties.get("start"),
             properties.get("current_value"),
             [
                 AnimationKeyframe.create(keyframe)

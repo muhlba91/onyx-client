@@ -25,10 +25,10 @@ class AnimationKeyframe:
             return None
 
         return AnimationKeyframe(
-            properties.get("interpolation", None),
-            properties.get("delay", None),
-            properties.get("duration", None),
-            properties.get("value", None),
+            properties.get("interpolation"),
+            properties.get("delay"),
+            properties.get("duration"),
+            properties.get("value"),
         )
 
     def __str__(self) -> str:

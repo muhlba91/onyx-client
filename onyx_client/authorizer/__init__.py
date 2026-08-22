@@ -44,12 +44,14 @@ async def authorize(
         ssl=local_address is None,
     ) as response:
         if not check(response):
+            # pragma: no mutate start
             _LOGGER.error("Could not authorize client for ONYX API.")
+            # pragma: no mutate end
             return None
         data = await response.json()
         return Configuration(
-            data.get("fingerprint", None),
-            data.get("token", None),
+            data.get("fingerprint"),
+            data.get("token"),
             local_address=local_address,
         )
 

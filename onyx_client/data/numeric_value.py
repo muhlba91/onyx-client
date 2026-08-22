@@ -41,11 +41,11 @@ class NumericValue:
             return None
 
         return NumericValue(
-            properties.get("value", None),
-            properties.get("minimum", None),
-            properties.get("maximum", None),
+            properties.get("value"),
+            properties.get("minimum"),
+            properties.get("maximum"),
             properties.get("read_only", False),
-            AnimationValue.create(properties.get("animation", None)),
+            AnimationValue.create(properties.get("animation")),
         )
 
     def update_with(self, other: Optional["NumericValue"]):

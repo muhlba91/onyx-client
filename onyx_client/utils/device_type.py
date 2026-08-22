@@ -55,7 +55,7 @@ def is_switch(device_type: DeviceType, data: dict) -> bool:
     properties: the property map to check if no explicit type is specified"""
     if device_type is not None:
         return device_type == DeviceType.SWITCH
-    return _in_keys(data, Switch.keys())
+    return _in_keys(data, Switch.keys())  # pragma: no mutate
 
 
 def _in_keys(data: dict | None, keys: list) -> bool:

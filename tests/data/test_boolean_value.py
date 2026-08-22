@@ -40,6 +40,8 @@ class TestBooleanValue:
 
     def test_not_eq(self):
         assert BooleanValue(True, True) != 10
+        assert BooleanValue(True, True) != BooleanValue(True, False)
+        assert BooleanValue(True, True) != BooleanValue(False, True)
 
     def test_update_with_true(self):
         value1 = BooleanValue(False, False)

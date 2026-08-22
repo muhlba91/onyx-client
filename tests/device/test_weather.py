@@ -38,8 +38,10 @@ class TestWeather:
             value6,
         )
         assert weather.identifier == "id"
+        assert weather.name == "name"
         assert weather.device_type == DeviceType.WEATHER
         assert weather.device_mode.mode == DeviceType.WEATHER
+        assert weather.actions == list(Action)
         assert weather.wind_peak == value1
         assert weather.sun_brightness_peak == value2
         assert weather.sun_brightness_sink == value3
@@ -81,8 +83,10 @@ class TestWeather:
             list(Action),
         )
         assert weather.identifier == "id"
+        assert weather.name == "name"
         assert weather.device_type == DeviceType.WEATHER
         assert weather.device_mode.mode == DeviceType.WEATHER
+        assert weather.actions == list(Action)
         assert weather.wind_peak is None
         assert weather.sun_brightness_peak is None
         assert weather.sun_brightness_sink is None
@@ -362,3 +366,13 @@ class TestWeather:
         assert weather.air_pressure == value4
         assert weather.humidity == value5
         assert weather.temperature == value6
+
+    def test_keys(self):
+        assert Weather.keys() == [
+            "wind_peak",
+            "sun_brightness_peak",
+            "sun_brightness_sink",
+            "air_pressure",
+            "humidity",
+            "temperature",
+        ]

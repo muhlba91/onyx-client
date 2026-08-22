@@ -6,26 +6,27 @@ from onyx_client.data.animation_value import AnimationValue
 
 class TestAnimationValue:
     def test_create(self):
-        expected = AnimationValue(
-            1637499108.0069883, 90, [AnimationKeyframe("linear", 0, 0.791666666, 33)]
+        kf = AnimationKeyframe("linear", 0, 0.791666666, 33)
+        expected = AnimationValue(1637499108.0069883, 90, [kf])
+        val = AnimationValue.create(
+            {
+                "start": 1637499108.0069883,
+                "current_value": 90,
+                "keyframes": [
+                    {
+                        "interpolation": "linear",
+                        "delay": 0,
+                        "duration": 0.791666666,
+                        "value": 33,
+                    }
+                ],
+            }
         )
-        assert (
-            AnimationValue.create(
-                {
-                    "start": 1637499108.0069883,
-                    "current_value": 90,
-                    "keyframes": [
-                        {
-                            "interpolation": "linear",
-                            "delay": 0,
-                            "duration": 0.791666666,
-                            "value": 33,
-                        }
-                    ],
-                }
-            )
-            == expected
-        )
+        assert val == expected
+        assert val.keyframes[0].interpolation == "linear"
+        assert val.keyframes[0].delay == 0
+        assert val.keyframes[0].duration == 0.791666666
+        assert val.keyframes[0].value == 33
 
     def test_create_no_keyframe(self):
         expected = AnimationValue(1637499108.0069883, 90, [])
@@ -68,7 +69,10 @@ class TestAnimationValue:
         )
 
     def test_not_eq(self):
-        assert AnimationValue(10, 10, []) != 10
+        val = AnimationValue(10.0, 10, [AnimationKeyframe("linear", 0, 1.0, 1)])
+        assert val != 10
+        assert val != AnimationValue(99.0, 10, [AnimationKeyframe("linear", 0, 1.0, 1)])
+        assert val != AnimationValue(10.0, 99, [AnimationKeyframe("linear", 0, 1.0, 1)])
 
     def test_update_with(self):
         value1 = AnimationValue(1.0, 1, [AnimationKeyframe("linear", 0, 1.0, 1)])

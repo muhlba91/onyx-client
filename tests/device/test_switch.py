@@ -21,8 +21,10 @@ class TestSwitch:
             DeviceType.SWITCH,
         )
         assert switch.identifier == "id"
+        assert switch.name == "name"
         assert switch.device_type == DeviceType.SWITCH
         assert switch.device_mode.mode == DeviceType.SWITCH
+        assert switch.actions == []
 
     def test_str(self):
         assert (
@@ -77,3 +79,6 @@ class TestSwitch:
         )
         with pytest.raises(UpdateException):
             switch.update_with(update)
+
+    def test_keys(self):
+        assert Switch.keys() == []

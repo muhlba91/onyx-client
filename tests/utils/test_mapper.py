@@ -51,6 +51,7 @@ def test_init_device_click():
     device = init_device("id", "name", DeviceType.CLICK)
     assert isinstance(device, Click)
     assert device.identifier == "id"
+    assert device.name == "name"
     assert device.device_mode.mode == DeviceType.CLICK
     assert device.device_mode.values is None
     assert device.offline
@@ -62,8 +63,70 @@ def test_init_device_click_full():
     )
     assert isinstance(device, Click)
     assert device.identifier == "id"
+    assert device.name == "name"
     assert device.device_mode.mode == DeviceType.CLICK
     assert device.device_mode.values is None
+    assert not device.offline
+
+
+def test_init_device_shutter_none_type_properties_fallback():
+    """Verify shutter is detected via properties when device_type is None."""
+    device = init_device(
+        "id",
+        "name",
+        None,
+        {"target_position": {"value": 50, "minimum": 0, "maximum": 100}},
+    )
+    assert isinstance(device, Shutter)
+    assert device.identifier == "id"
+    assert device.name == "name"
+    assert device.target_position is not None
+    assert device.target_position.value == 50
+
+
+def test_init_device_weather_none_type_properties_fallback():
+    """Verify weather is detected via properties when device_type is None."""
+    device = init_device(
+        "id",
+        "name",
+        None,
+        {"sun_brightness_sink": {"value": 100, "minimum": 0, "maximum": 150000}},
+    )
+    assert isinstance(device, Weather)
+    assert device.identifier == "id"
+    assert device.name == "name"
+    assert device.sun_brightness_sink is not None
+    assert device.sun_brightness_sink.value == 100
+
+
+def test_init_device_light_none_type_properties_fallback():
+    """Verify light is detected via properties when device_type is None."""
+    device = init_device(
+        "id",
+        "name",
+        None,
+        {"target_brightness": {"value": 200, "minimum": 0, "maximum": 65535}},
+    )
+    assert isinstance(device, Light)
+    assert device.identifier == "id"
+    assert device.name == "name"
+    assert device.target_brightness is not None
+    assert device.target_brightness.value == 200
+
+
+def test_init_device_click_none_type_data_fallback():
+    """Verify click is detected via data when device_type is None."""
+    device = init_device(
+        "id",
+        "name",
+        None,
+        None,
+        [],
+        {"offline": False},
+    )
+    assert isinstance(device, Click)
+    assert device.identifier == "id"
+    assert device.name == "name"
     assert not device.offline
 
 
@@ -76,11 +139,14 @@ def test_init_device_switch():
 
 
 def test_init_device_switch_full():
-    device = init_device("id", "name", DeviceType.CLICK, None, list(Action))
-    assert isinstance(device, Click)
+    device = init_device("id", "name", DeviceType.SWITCH, None, list(Action))
+    assert isinstance(device, Switch)
     assert device.identifier == "id"
-    assert device.device_mode.mode == DeviceType.CLICK
+    assert device.name == "name"
+    assert device.device_type == DeviceType.SWITCH
+    assert device.device_mode.mode == DeviceType.SWITCH
     assert device.device_mode.values is None
+    assert device.actions == []
 
 
 def test_init_device_weather():

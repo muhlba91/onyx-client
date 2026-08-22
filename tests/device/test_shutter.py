@@ -40,8 +40,10 @@ class TestShutter:
             value2,
         )
         assert shutter.identifier == "id"
+        assert shutter.name == "name"
         assert shutter.device_type == DeviceType.AWNING
         assert shutter.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert shutter.actions == list(Action)
         assert shutter.target_position == value1
         assert shutter.target_angle == value2
         assert shutter.actual_angle == value1
@@ -75,8 +77,10 @@ class TestShutter:
     def test_init_no_additional_values(self, device_mode):
         shutter = Shutter("id", "name", DeviceType.AWNING, device_mode, [])
         assert shutter.identifier == "id"
+        assert shutter.name == "name"
         assert shutter.device_type == DeviceType.AWNING
         assert shutter.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert shutter.actions == []
         assert shutter.target_position is None
         assert shutter.target_angle is None
         assert shutter.actual_angle is None
@@ -256,7 +260,7 @@ class TestShutter:
         value5 = NumericValue(10, None, None, False)
         value6 = NumericValue(None, 10, None, False)
         value7 = NumericValue(None, None, 100, False)
-        value8 = NumericValue(None, None, None, False)
+        value8 = NumericValue(50, None, None, False)
         shutter = Shutter(
             "id",
             "name",
@@ -284,7 +288,7 @@ class TestShutter:
         assert shutter.target_position == NumericValue(10, 0, 10, False)
         assert shutter.target_angle == NumericValue(2, 10, 10, False)
         assert shutter.actual_angle == NumericValue(3, 0, 100, False)
-        assert shutter.actual_position == NumericValue(4, 0, 10, False)
+        assert shutter.actual_position == NumericValue(50, 0, 10, False)
 
         value1 = NumericValue(1, 0, 10, False)
         value2 = NumericValue(2, 0, 10, False)
@@ -347,3 +351,11 @@ class TestShutter:
         assert shutter.target_angle == value2
         assert shutter.actual_angle == value2
         assert shutter.actual_position == value1
+
+    def test_keys(self):
+        assert Shutter.keys() == [
+            "target_position",
+            "target_angle",
+            "actual_angle",
+            "actual_position",
+        ]
