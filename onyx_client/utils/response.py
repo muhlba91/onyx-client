@@ -15,10 +15,14 @@ def check(response: aiohttp.ClientResponse) -> bool:
 
     response: the response to check"""
     if response.status == 200:
+        # pragma: no mutate start
         _LOGGER.debug("Received HTTP response from ONYX API: %s", response.status)
+        # pragma: no mutate end
         return True
     else:
+        # pragma: no mutate start
         _LOGGER.error(
             "Received erroneous HTTP response from ONYX API: %s", response.status
         )
+        # pragma: no mutate end
         return False

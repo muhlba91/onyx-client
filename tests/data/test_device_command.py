@@ -17,11 +17,15 @@ class TestDeviceCommand:
         assert command.data() == {"properties": {"property": 10}}
 
     def test_data_action_and_properties(self):
-        with pytest.raises(InvalidCommandException):
+        with pytest.raises(
+            InvalidCommandException, match=r"^COMMAND_NO_PROPERTIES_OR_ACTION$"
+        ):
             DeviceCommand(action=Action.STOP, properties={"property": 10})
 
     def test_data_no_action_and_properties(self):
-        with pytest.raises(InvalidCommandException):
+        with pytest.raises(
+            InvalidCommandException, match=r"^COMMAND_NO_PROPERTIES_OR_ACTION$"
+        ):
             DeviceCommand()
 
     def test_data_valid_from(self):

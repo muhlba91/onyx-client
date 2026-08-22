@@ -41,4 +41,9 @@ class TestAnimationKeyframe:
         )
 
     def test_not_eq(self):
-        assert AnimationKeyframe("linear", 0, 0, 0) != 10
+        kf = AnimationKeyframe("linear", 0, 1.0, 10)
+        assert kf != 10
+        assert kf != AnimationKeyframe("bezier", 0, 1.0, 10)
+        assert kf != AnimationKeyframe("linear", 9, 1.0, 10)
+        assert kf != AnimationKeyframe("linear", 0, 9.0, 10)
+        assert kf != AnimationKeyframe("linear", 0, 1.0, 99)

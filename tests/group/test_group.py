@@ -14,3 +14,4 @@ class TestGroup:
 
     def test_not_eq(self):
         assert Group("id", "name", ["device"]) != 10
+        assert Group("id", "name", ["device"]) != Group("other_id", "name", ["device"])

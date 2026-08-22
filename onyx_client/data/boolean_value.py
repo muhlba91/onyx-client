@@ -23,8 +23,8 @@ class BooleanValue:
             return None
 
         return BooleanValue(
-            properties.get("value", "false") == "true",
-            properties.get("read_only", "false") == "true",
+            properties.get("value") == "true",
+            properties.get("read_only") == "true",
         )
 
     def update_with(self, other: Optional["BooleanValue"]):

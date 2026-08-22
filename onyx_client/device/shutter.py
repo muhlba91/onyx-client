@@ -68,16 +68,19 @@ class Shutter(Device):
             self.target_position.update_with(target_position)
         else:
             self.target_position = target_position
+
         target_angle = getattr(update, "target_angle", None)
         if self.target_angle is not None:
             self.target_angle.update_with(target_angle)
         else:
             self.target_angle = target_angle
+
         actual_position = getattr(update, "actual_position", None)
         if self.actual_position is not None:
             self.actual_position.update_with(actual_position)
         else:
             self.actual_position = actual_position
+
         actual_angle = getattr(update, "actual_angle", None)
         if self.actual_angle is not None:
             self.actual_angle.update_with(actual_angle)

@@ -32,8 +32,10 @@ class TestLight:
             value3,
         )
         assert light.identifier == "id"
+        assert light.name == "name"
         assert light.device_type == DeviceType.BASIC_LIGHT
         assert light.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert light.actions == list(Action)
         assert light.target_brightness == value1
         assert light.actual_brightness == value2
         assert light.dim_duration == value3
@@ -268,6 +270,13 @@ class TestLight:
         assert light.target_brightness == value1
         assert light.actual_brightness == value2
         assert light.dim_duration == value3
+
+    def test_keys(self):
+        assert Light.keys() == [
+            "target_brightness",
+            "actual_brightness",
+            "dim_duration",
+        ]
 
     def test_update_with_base_device_patch(self, device_mode):
         value1 = NumericValue(100, 0, 255, False)

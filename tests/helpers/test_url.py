@@ -1,5 +1,7 @@
 """Tests for the Onyx Client URL helper."""
 
+from unittest.mock import patch
+
 import aiohttp
 import pytest
 import pytest_asyncio
@@ -57,23 +59,43 @@ class TestUrlHelper:
     def test_url_without_version(self, helper):
         assert helper._url("/path", with_api=False) == f"{API_URL}/box/finger/api/path"
 
+    def test_url_default_params(self, helper):
+        assert helper._url() == f"{API_URL}/box/finger/api/{API_VERSION}"
+        assert helper._url(with_api=False) == f"{API_URL}/box/finger/api"
+
     @pytest.mark.asyncio
     async def test_perform_get_request(self, mock_response, helper):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper.perform_get_request("/path")
-        assert response is not None
+        with patch.object(
+            helper.client_session, "get", wraps=helper.client_session.get
+        ) as mock_get:
+            mock_response.get(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
+            )
+            response = await helper.perform_get_request("/path")
+            assert response is not None
+            mock_get.assert_called_once_with(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path",
+                headers=helper._headers,
+                ssl=True,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_get_request_with_local_address(
         self, mock_response, helper_local
     ):
-        mock_response.get(
-            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper_local.perform_get_request("/path")
-        assert response is not None
+        with patch.object(
+            helper_local.client_session, "get", wraps=helper_local.client_session.get
+        ) as mock_get:
+            mock_response.get(
+                f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+            )
+            response = await helper_local.perform_get_request("/path")
+            assert response is not None
+            mock_get.assert_called_once_with(
+                f"https://localhost/api/{API_VERSION}/path",
+                headers=helper_local._headers,
+                ssl=False,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_get_request_error(self, mock_response, helper):
@@ -83,21 +105,39 @@ class TestUrlHelper:
 
     @pytest.mark.asyncio
     async def test_perform_delete_request(self, mock_response, helper):
-        mock_response.delete(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper.perform_delete_request("/path")
-        assert response is not None
+        with patch.object(
+            helper.client_session, "delete", wraps=helper.client_session.delete
+        ) as mock_delete:
+            mock_response.delete(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
+            )
+            response = await helper.perform_delete_request("/path")
+            assert response is not None
+            mock_delete.assert_called_once_with(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path",
+                headers=helper._headers,
+                ssl=True,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_delete_request_with_local_address(
         self, mock_response, helper_local
     ):
-        mock_response.delete(
-            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper_local.perform_delete_request("/path")
-        assert response is not None
+        with patch.object(
+            helper_local.client_session,
+            "delete",
+            wraps=helper_local.client_session.delete,
+        ) as mock_delete:
+            mock_response.delete(
+                f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+            )
+            response = await helper_local.perform_delete_request("/path")
+            assert response is not None
+            mock_delete.assert_called_once_with(
+                f"https://localhost/api/{API_VERSION}/path",
+                headers=helper_local._headers,
+                ssl=False,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_delete_request_error(self, mock_response, helper):
@@ -107,21 +147,41 @@ class TestUrlHelper:
 
     @pytest.mark.asyncio
     async def test_perform_post_request(self, mock_response, helper):
-        mock_response.post(
-            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper.perform_post_request("/path", {})
-        assert response is not None
+        with patch.object(
+            helper.client_session, "post", wraps=helper.client_session.post
+        ) as mock_post:
+            mock_response.post(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
+            )
+            payload = {"test": 1}
+            response = await helper.perform_post_request("/path", payload)
+            assert response is not None
+            mock_post.assert_called_once_with(
+                f"{API_URL}/box/finger/api/{API_VERSION}/path",
+                json=payload,
+                headers=helper._headers,
+                ssl=True,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_post_request_with_local_address(
         self, mock_response, helper_local
     ):
-        mock_response.post(
-            f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
-        )
-        response = await helper_local.perform_post_request("/path", {})
-        assert response is not None
+        with patch.object(
+            helper_local.client_session, "post", wraps=helper_local.client_session.post
+        ) as mock_post:
+            mock_response.post(
+                f"https://localhost/api/{API_VERSION}/path", status=200, payload={}
+            )
+            payload = {"test": 1}
+            response = await helper_local.perform_post_request("/path", payload)
+            assert response is not None
+            mock_post.assert_called_once_with(
+                f"https://localhost/api/{API_VERSION}/path",
+                json=payload,
+                headers=helper_local._headers,
+                ssl=False,
+            )
 
     @pytest.mark.asyncio
     async def test_perform_post_request_error(self, mock_response, helper):
@@ -131,29 +191,51 @@ class TestUrlHelper:
 
     @pytest.mark.asyncio
     async def test_start_stream(self, mock_response, helper):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="data: {  }",
-        )
-        index = 1
-        async for data in helper.start_stream("/events"):
-            assert len(data) > 0
-            index += 1
-        assert index == 2
+        with patch.object(
+            helper.client_session, "get", wraps=helper.client_session.get
+        ) as mock_get:
+            mock_response.get(
+                f"{API_URL}/box/finger/api/{API_VERSION}/events",
+                status=200,
+                body="data: {  }",
+            )
+            index = 1
+            async for data in helper.start_stream("/events"):
+                assert len(data) > 0
+                index += 1
+            assert index == 2
+            mock_get.assert_called_once_with(
+                f"{API_URL}/box/finger/api/{API_VERSION}/events",
+                headers=helper._headers,
+                timeout=aiohttp.ClientTimeout(
+                    total=0, connect=0, sock_connect=0, sock_read=0
+                ),
+                ssl=True,
+            )
 
     @pytest.mark.asyncio
     async def test_start_stream_with_local_address(self, mock_response, helper_local):
-        mock_response.get(
-            f"https://localhost/api/{API_VERSION}/events",
-            status=200,
-            body="data: {  }",
-        )
-        index = 1
-        async for data in helper_local.start_stream("/events"):
-            assert len(data) > 0
-            index += 1
-        assert index == 2
+        with patch.object(
+            helper_local.client_session, "get", wraps=helper_local.client_session.get
+        ) as mock_get:
+            mock_response.get(
+                f"https://localhost/api/{API_VERSION}/events",
+                status=200,
+                body="data: {  }",
+            )
+            index = 1
+            async for data in helper_local.start_stream("/events"):
+                assert len(data) > 0
+                index += 1
+            assert index == 2
+            mock_get.assert_called_once_with(
+                f"https://localhost/api/{API_VERSION}/events",
+                headers=helper_local._headers,
+                timeout=aiohttp.ClientTimeout(
+                    total=0, connect=0, sock_connect=0, sock_read=0
+                ),
+                ssl=False,
+            )
 
     @pytest.mark.asyncio
     async def test_start_stream_none(self, mock_response, helper):

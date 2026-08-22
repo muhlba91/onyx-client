@@ -35,6 +35,9 @@ class TestDevice:
 
     def test_not_eq(self, device_mode):
         assert Device("id", "name", DeviceType.AWNING, device_mode, list(Action)) != 10
+        assert Device(
+            "id", "name", DeviceType.AWNING, device_mode, list(Action)
+        ) != Device("other_id", "name", DeviceType.AWNING, device_mode, list(Action))
 
     def test_update_with(self, device_mode):
         device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
@@ -87,7 +90,7 @@ class TestDevice:
             DeviceMode(DeviceType.AWNING),
             [Action.STOP],
         )
-        with pytest.raises(UpdateException):
+        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
             device.update_with(update)
 
     def test_update_with_empty_actions_keeps_original(self, device_mode):
@@ -114,8 +117,22 @@ class TestDevice:
 
     def test_update_with_none_raises_exception(self, device_mode):
         device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        with pytest.raises(UpdateException):
+        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
             device.update_with(None)
+
+    def test_update_with_object_without_identifier_raises_exception(self, device_mode):
+        """Updating with an object lacking 'identifier' must raise UpdateException."""
+        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
+
+        class NoIdentifier:
+            def __init__(self):
+                self.name = None
+                self.device_type = None
+                self.device_mode = None
+                self.actions = []
+
+        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
+            device.update_with(NoIdentifier())
 
     def test_update_with_cross_type_subclass(self, device_mode):
         device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))

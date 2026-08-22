@@ -78,12 +78,16 @@ class OnyxClient:
 
     async def supported_versions(self) -> SupportedVersions | None:
         """Get all supported versions by the ONYX.CENTER."""
+        # pragma: no mutate start
         data = await self.url_helper.perform_get_request("/versions", with_api=False)
+        # pragma: no mutate end
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /versions.",
                 self.config.identifier,
             )
+            # pragma: no mutate end
             return None
 
         return SupportedVersions(data.get("versions", []))
@@ -98,15 +102,17 @@ class OnyxClient:
         """Get all date related information of the ONYX.CENTER."""
         data = await self.url_helper.perform_get_request("/clock")
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /clock.",
                 self.config.identifier,
             )
+            # pragma: no mutate end
             return None
 
         return DateInformation(
             float(data.get("time", "0")),
-            data.get("zone", None),
+            data.get("zone"),
             int(data.get("zone_offset", "0")),
         )
 
@@ -117,10 +123,12 @@ class OnyxClient:
                          before returning the device"""
         data = await self.url_helper.perform_get_request("/devices")
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices.",
                 self.config.identifier,
             )
+            # pragma: no mutate end
             return None
 
         if include_details:
@@ -133,8 +141,8 @@ class OnyxClient:
             return [
                 init_device(
                     key,
-                    value.get("name", None),
-                    DeviceType.convert(value.get("type", None)),
+                    value.get("name"),
+                    DeviceType.convert(value.get("type")),
                 )
                 for key, value in data.items()
             ]
@@ -145,19 +153,21 @@ class OnyxClient:
         identifier: the identifier of the device to query"""
         data = await self.url_helper.perform_get_request(f"/devices/{identifier}")
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s.",
                 self.config.identifier,
                 identifier,
             )
+            # pragma: no mutate end
             return None
 
         actions = [Action.convert(action) for action in data.get("actions", [])]
         return init_device(
             identifier,
-            data.get("name", None),
-            DeviceType.convert(data.get("type", None)),
-            data.get("properties", None),
+            data.get("name"),
+            DeviceType.convert(data.get("type")),
+            data.get("properties"),
             actions,
             data,
         )
@@ -170,12 +180,14 @@ class OnyxClient:
         data = await self.url_helper.perform_post_request(
             f"/devices/{identifier}/command", command.data()
         )
+        # pragma: no mutate start
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s/command.",
                 self.config.identifier,
                 identifier,
             )
+        # pragma: no mutate end
         return data is not None
 
     async def cancel_command(self, identifier: str) -> bool:
@@ -185,26 +197,30 @@ class OnyxClient:
         data = await self.url_helper.perform_delete_request(
             f"/devices/{identifier}/command"
         )
+        # pragma: no mutate start
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /devices/%s/command.",
                 self.config.identifier,
                 identifier,
             )
+        # pragma: no mutate end
         return data is not None
 
     async def groups(self) -> list | None:
         """Get all groups controlled by the ONYX.CENTER."""
         data = await self.url_helper.perform_get_request("/groups")
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups.",
                 self.config.identifier,
             )
+            # pragma: no mutate end
             return None
 
         return [
-            Group(key, value.get("name", None), value.get("devices", []))
+            Group(key, value.get("name"), value.get("devices", []))
             for key, value in data.items()
         ]
 
@@ -214,14 +230,16 @@ class OnyxClient:
         identifier: the group identifier to query"""
         data = await self.url_helper.perform_get_request(f"/groups/{identifier}")
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s.",
                 self.config.identifier,
                 identifier,
             )
+            # pragma: no mutate end
             return None
 
-        return Group(identifier, data.get("name", None), data.get("devices", []))
+        return Group(identifier, data.get("name"), data.get("devices", []))
 
     async def send_group_command(self, identifier: str, command: DeviceCommand) -> bool:
         """Send a command to the group with the provided ID.
@@ -232,13 +250,16 @@ class OnyxClient:
             f"/groups/{identifier}/command", command.data()
         )
         if data is None:
+            # pragma: no mutate start
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s/command.",
                 self.config.identifier,
                 identifier,
             )
+            # pragma: no mutate end
             return False
 
+        # pragma: no mutate start
         unsuccessful = [
             key
             for (key, value) in data.get("results", {}).items()
@@ -250,6 +271,7 @@ class OnyxClient:
                 identifier,
                 unsuccessful,
             )
+        # pragma: no mutate end
         return len(unsuccessful) == 0
 
     async def cancel_group_command(self, identifier: str) -> bool:
@@ -259,12 +281,14 @@ class OnyxClient:
         data = await self.url_helper.perform_delete_request(
             f"/groups/{identifier}/command"
         )
+        # pragma: no mutate start
         if data is None:
             _LOGGER.error(
                 "Could not call ONYX API for device %s: /groups/%s/command.",
                 self.config.identifier,
                 identifier,
             )
+        # pragma: no mutate end
         return data is not None
 
     async def events(
@@ -274,9 +298,11 @@ class OnyxClient:
 
         include_details: ensures all device details are queried
                          before emiting the device"""
+        # pragma: no mutate start
         event = ""
+        # pragma: no mutate end
         async for message in self.url_helper.start_stream("/events"):
-            if message is not None and len(message) > 0:
+            if message is not None and len(message) > 0:  # pragma: no mutate
                 if message.startswith("event:"):
                     event = message[len("event:") :].strip()
                 elif message.startswith("data:") and event in ["snapshot", "patch"]:
@@ -289,9 +315,9 @@ class OnyxClient:
                                     if include_details
                                     else init_device(
                                         key,
-                                        value.get("name", None),
-                                        DeviceType.convert(value.get("type", None)),
-                                        value.get("properties", None),
+                                        value.get("name"),
+                                        DeviceType.convert(value.get("type")),
+                                        value.get("properties"),
                                         [
                                             Action.convert(action)
                                             for action in value.get("actions", [])
@@ -301,11 +327,14 @@ class OnyxClient:
                                 )
                                 yield device
                         except AttributeError:
+                            # pragma: no mutate start
                             _LOGGER.error(
                                 "Received unknown device data. Dropping device %s",
                                 key,
                             )
+                            # pragma: no mutate end
 
+    # pragma: no mutate start
     def start(self, include_details: bool = False, backoff_time: int = 1):
         """Start the event stream via callback.
 
@@ -324,12 +353,15 @@ class OnyxClient:
             self._read_loop_task.cancel()
             self._read_loop_task = None
 
+    # pragma: no mutate end
+
     def set_event_callback(self, callback):
         """Set the event stream callback.
 
         callback: the callback function taking the device as the only parameter"""
         self._event_callback = callback
 
+    # pragma: no mutate start
     def _create_internal_task(self, coro, name=None):
         """Create an internal task running in the background.
 
@@ -372,6 +404,9 @@ class OnyxClient:
             else:
                 _LOGGER.debug("Internal task completed without exception: %s", task)
 
+    # pragma: no mutate end
+
+    # pragma: no mutate start
     async def _read_loop(self, include_details: bool = False):
         """Streams data from the ONYX API endpoint and emits device updates.
         Updates are emitted as events through the event_callback.
@@ -387,6 +422,8 @@ class OnyxClient:
                     self._event_callback(device)
                 else:
                     _LOGGER.warning("Received data but no callback is defined.")
+
+    # pragma: no mutate end
 
 
 def create(

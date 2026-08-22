@@ -42,6 +42,22 @@ def test_create_client(mock_session):
 
 
 @patch("aiohttp.ClientSession")
+def test_create_client_with_event_loop(mock_session):
+    """Verify create() forwards event_loop to OnyxClient."""
+    loop = asyncio.new_event_loop()
+    try:
+        client = create(
+            fingerprint="finger",
+            access_token="token",
+            client_session=mock_session,
+            event_loop=loop,
+        )
+        assert client._event_loop is loop
+    finally:
+        loop.close()
+
+
+@patch("aiohttp.ClientSession")
 def test_create_client_with_local_address(mock_session):
     client = create(
         fingerprint="finger",
@@ -111,6 +127,39 @@ class TestOnyxClient:
         yield OnyxClient(
             Configuration("finger", "token"), session, asyncio.get_event_loop()
         )
+
+    def test_init_defaults(self, session):
+        config = Configuration("finger", "token")
+        client = OnyxClient(config, session)
+        assert client._event_loop is None
+        assert client._shutdown is True
+        assert client._read_loop_task is None
+        assert client._close_session is False
+
+    def test_init_with_event_loop(self, session):
+        """Explicit event_loop is stored."""
+        config = Configuration("finger", "token")
+        loop = asyncio.new_event_loop()
+        try:
+            client = OnyxClient(config, session, event_loop=loop)
+            assert client._event_loop is loop
+        finally:
+            loop.close()
+
+    def test_init_defaults_runtime_error(self, session):
+        config = Configuration("finger", "token")
+        with patch("asyncio.get_running_loop", side_effect=RuntimeError):
+            client = OnyxClient(config, session)
+            assert client._event_loop is None
+
+    @pytest.mark.asyncio
+    async def test_init_defaults_in_running_loop(self, session):
+        config = Configuration("finger", "token")
+        client = OnyxClient(config, session)
+        assert client._event_loop == asyncio.get_running_loop()
+        assert client._shutdown is True
+        assert client._read_loop_task is None
+        assert client._close_session is False
 
     def test_set_event_callback(self, client):
         callback = 0
@@ -269,17 +318,24 @@ class TestOnyxClient:
                 "device2": {"name": "device2", "type": "weather"},
             },
         )
-        mock_device.return_value = Device(
-            "id",
-            "name",
-            DeviceType.AWNING,
-            DeviceMode(DeviceType.ROLLERSHUTTER),
-            list(Action),
-        )
+
+        def create_device(key):
+            if key is None:
+                return None
+            return Device(
+                key,
+                "name",
+                DeviceType.AWNING,
+                DeviceMode(DeviceType.ROLLERSHUTTER),
+                list(Action),
+            )
+
+        mock_device.side_effect = create_device
         devices = await client.devices(True)
         assert mock_device.called
         assert devices is not None
         assert len(devices) == 2
+        assert {d.identifier for d in devices} == {"device1", "device2"}
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
@@ -835,17 +891,37 @@ class TestOnyxClient:
             f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
             status=200,
             payload={
-                "name": "device",
+                "name": "my-click",
                 "type": "click",
             },
         )
         device = await client.device("device")
         assert isinstance(device, Click)
+        assert device.identifier == "device"
+        assert device.name == "my-click"
         assert device.device_type == DeviceType.CLICK
         assert device.device_mode.mode == DeviceType.CLICK
         assert device.device_mode.values is None
         assert len(device.actions) == 0
         assert device.offline
+
+    @pytest.mark.asyncio
+    async def test_device_click_offline_false(self, mock_response, client):
+        """offline=False from data must be propagated."""
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
+            status=200,
+            payload={
+                "name": "clicker",
+                "type": "click",
+                "offline": False,
+            },
+        )
+        device = await client.device("device")
+        assert isinstance(device, Click)
+        assert device.identifier == "device"
+        assert device.name == "clicker"
+        assert not device.offline
 
     @pytest.mark.asyncio
     async def test_device_switch(self, mock_response, client):
@@ -909,30 +985,53 @@ class TestOnyxClient:
 
     @pytest.mark.asyncio
     async def test_send_command(self, mock_response, client):
-        mock_response.post(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command",
-            status=200,
-            payload={},
-        )
-        assert await client.send_command("device", DeviceCommand(action=Action.STOP))
+        with patch.object(
+            client.url_helper,
+            "perform_post_request",
+            wraps=client.url_helper.perform_post_request,
+        ) as mock_post:
+            mock_response.post(
+                f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command",
+                status=200,
+                payload={},
+            )
+            cmd = DeviceCommand(action=Action.STOP)
+            assert await client.send_command("device", cmd)
+            mock_post.assert_called_once_with(
+                "/devices/device/command", {"action": "stop"}
+            )
 
     @pytest.mark.asyncio
     async def test_send_command_error(self, mock_response, client):
-        mock_response.post(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command", status=401
-        )
-        assert not await client.send_command(
-            "device", DeviceCommand(action=Action.STOP)
-        )
+        with patch.object(
+            client.url_helper,
+            "perform_post_request",
+            wraps=client.url_helper.perform_post_request,
+        ) as mock_post:
+            mock_response.post(
+                f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command",
+                status=401,
+            )
+            cmd = DeviceCommand(action=Action.STOP)
+            assert not await client.send_command("device", cmd)
+            mock_post.assert_called_once_with(
+                "/devices/device/command", {"action": "stop"}
+            )
 
     @pytest.mark.asyncio
     async def test_cancel_command(self, mock_response, client):
-        mock_response.delete(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command",
-            status=200,
-            payload={},
-        )
-        assert await client.cancel_command("device")
+        with patch.object(
+            client.url_helper,
+            "perform_delete_request",
+            wraps=client.url_helper.perform_delete_request,
+        ) as mock_delete:
+            mock_response.delete(
+                f"{API_URL}/box/finger/api/{API_VERSION}/devices/device/command",
+                status=200,
+                payload={},
+            )
+            assert await client.cancel_command("device")
+            mock_delete.assert_called_once_with("/devices/device/command")
 
     @pytest.mark.asyncio
     async def test_cancel_command_error(self, mock_response, client):
@@ -1002,6 +1101,7 @@ class TestOnyxClient:
         )
         group = await client.group("group")
         assert group is not None
+        assert group.identifier == "group"
         assert group.name == "group"
         assert group.devices == ["device"]
 
@@ -1027,14 +1127,21 @@ class TestOnyxClient:
 
     @pytest.mark.asyncio
     async def test_send_group_command(self, mock_response, client):
-        mock_response.post(
-            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
-            status=200,
-            payload={"results": {"device": {"status_code": 200}}},
-        )
-        assert await client.send_group_command(
-            "group", DeviceCommand(action=Action.STOP)
-        )
+        with patch.object(
+            client.url_helper,
+            "perform_post_request",
+            wraps=client.url_helper.perform_post_request,
+        ) as mock_post:
+            mock_response.post(
+                f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+                status=200,
+                payload={"results": {"device": {"status_code": 200}}},
+            )
+            cmd = DeviceCommand(action=Action.STOP)
+            assert await client.send_group_command("group", cmd)
+            mock_post.assert_called_once_with(
+                "/groups/group/command", {"action": "stop"}
+            )
 
     @pytest.mark.asyncio
     async def test_send_group_command_no_results(self, mock_response, client):
@@ -1086,6 +1193,37 @@ class TestOnyxClient:
         )
 
     @pytest.mark.asyncio
+    async def test_send_group_command_single_device_error(self, mock_response, client):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+            status=200,
+            payload={
+                "results": {
+                    "device": {"status_code": 401},
+                }
+            },
+        )
+        assert not await client.send_group_command(
+            "group", DeviceCommand(action=Action.STOP)
+        )
+
+    @pytest.mark.asyncio
+    async def test_send_group_command_all_devices_success(self, mock_response, client):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+            status=200,
+            payload={
+                "results": {
+                    "device": {"status_code": 200},
+                    "other": {"status_code": 200},
+                }
+            },
+        )
+        assert await client.send_group_command(
+            "group", DeviceCommand(action=Action.STOP)
+        )
+
+    @pytest.mark.asyncio
     async def test_send_group_command_error(self, mock_response, client):
         mock_response.post(
             f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command", status=401
@@ -1096,12 +1234,18 @@ class TestOnyxClient:
 
     @pytest.mark.asyncio
     async def test_cancel_group_command(self, mock_response, client):
-        mock_response.delete(
-            f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
-            status=200,
-            payload={},
-        )
-        assert await client.cancel_group_command("group")
+        with patch.object(
+            client.url_helper,
+            "perform_delete_request",
+            wraps=client.url_helper.perform_delete_request,
+        ) as mock_delete:
+            mock_response.delete(
+                f"{API_URL}/box/finger/api/{API_VERSION}/groups/group/command",
+                status=200,
+                payload={},
+            )
+            assert await client.cancel_group_command("group")
+            mock_delete.assert_called_once_with("/groups/group/command")
 
     @pytest.mark.asyncio
     async def test_cancel_group_command_error(self, mock_response, client):
@@ -1128,6 +1272,21 @@ class TestOnyxClient:
             assert device.identifier == f"device{index}"
             index += 1
         assert index == 4
+
+    @pytest.mark.asyncio
+    async def test_events_patch_event(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: patch\n"
+            'data: { "devices": { "device1": { "name": "patched", "type": "basic_light" } } }\n\n',
+        )
+        devices = []
+        async for device in client.events():
+            devices.append(device)
+        assert len(devices) == 1
+        assert devices[0].identifier == "device1"
+        assert devices[0].name == "patched"
 
     @patch("onyx_client.client.OnyxClient._complete_internal_task")
     @pytest.mark.asyncio
@@ -1160,7 +1319,7 @@ class TestOnyxClient:
         assert not client._shutdown
         for task in client._active_tasks.copy():
             try:
-                await task
+                await asyncio.wait_for(task, timeout=1.0)
             except asyncio.CancelledError:
                 pass
 
@@ -1202,7 +1361,7 @@ class TestOnyxClient:
         assert not client._shutdown
         for task in client._active_tasks.copy():
             try:
-                await task
+                await asyncio.wait_for(task, timeout=1.0)
             except asyncio.CancelledError:
                 pass
 
@@ -1215,14 +1374,20 @@ class TestOnyxClient:
             "data: 1730803627\n\n"
             "event: snapshot\n"
             'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
+            '{ "name": "device1", "type": "rollershutter" } } }',
         )
 
-        client.start()
-        assert not client._shutdown
-        assert len(client._active_tasks) == 1
+        orig_events = client.events
+
+        async def events_and_shutdown(*args, **kwargs):
+            async for dev in orig_events(*args, **kwargs):
+                yield dev
+            client._shutdown = True
+
+        client._shutdown = False
+        with patch.object(client, "events", side_effect=events_and_shutdown):
+            await client._read_loop()
+        assert client._shutdown
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
@@ -1249,6 +1414,7 @@ class TestOnyxClient:
             index += 1
         assert index == 2
         assert mock_device.called
+        mock_device.assert_called_with("device")
 
     @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
@@ -1439,6 +1605,41 @@ class TestOnyxClient:
             assert Action.CLOSE in device.actions
             assert Action.STOP in device.actions
             assert Action.WINK in device.actions
+
+    @pytest.mark.asyncio
+    async def test_events_shutter_properties_from_stream(self, mock_response, client):
+        """Properties from SSE data must reach the device."""
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: patch\n"
+            'data: { "devices": { "dev1":'
+            '{ "name": "dev1", "type": "rollershutter",'
+            ' "properties": { "target_position": { "value": 42, "minimum": 0, "maximum": 100 } },'
+            ' "actions": ["stop"] } } }',
+        )
+        async for device in client.events():
+            assert device.identifier == "dev1"
+            assert isinstance(device, Shutter)
+            assert device.target_position is not None
+            assert device.target_position.value == 42
+            assert device.target_position.minimum == 0
+            assert device.target_position.maximum == 100
+
+    @pytest.mark.asyncio
+    async def test_events_click_offline_from_stream(self, mock_response, client):
+        """offline=False from SSE data is propagated."""
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="event: patch\n"
+            'data: { "devices": { "clk1":'
+            '{ "type": "click", "offline": false } } }',
+        )
+        async for device in client.events():
+            assert isinstance(device, Click)
+            assert device.identifier == "clk1"
+            assert not device.offline
 
     @pytest.mark.asyncio
     async def test_async_context_manager(self, session):

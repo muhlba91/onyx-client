@@ -146,4 +146,11 @@ class TestNumericValue:
         assert value == expected
 
     def test_not_eq(self):
-        assert NumericValue(10, 10, 100, True) != 10
+        val = NumericValue(10, 10, 100, True, AnimationValue(1, 1, []))
+        assert val != 10
+        assert val != NumericValue(99, 10, 100, True, AnimationValue(1, 1, []))
+        assert val != NumericValue(10, 99, 100, True, AnimationValue(1, 1, []))
+        assert val != NumericValue(10, 10, 999, True, AnimationValue(1, 1, []))
+        assert val != NumericValue(10, 10, 100, False, AnimationValue(1, 1, []))
+        assert val != NumericValue(10, 10, 100, True, AnimationValue(2, 1, []))
+        assert val != NumericValue(10, 10, 100, True, None)

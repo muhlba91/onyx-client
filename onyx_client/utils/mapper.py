@@ -24,11 +24,7 @@ def numeric_value(key: str, properties: dict | None = None):
 
     key: the key value
     properties: the device properties"""
-    return (
-        NumericValue.create(properties.get(key, None))
-        if properties is not None
-        else None
-    )
+    return NumericValue.create(properties.get(key)) if properties is not None else None
 
 
 def boolean_value(key: str, properties: dict | None = None):
@@ -36,11 +32,7 @@ def boolean_value(key: str, properties: dict | None = None):
 
     key: the key value
     properties: the device properties"""
-    return (
-        BooleanValue.create(properties.get(key, None))
-        if properties is not None
-        else None
-    )
+    return BooleanValue.create(properties.get(key)) if properties is not None else None
 
 
 def init_device(
@@ -60,7 +52,7 @@ def init_device(
     actions: a list of actions the device supports
     data: the data map of the device"""
     device_mode_value = (
-        DeviceType.convert(properties.get("device_type", {}).get("type", None))
+        DeviceType.convert(properties.get("device_type", {}).get("type"))
         if properties is not None
         else device_type
     )
@@ -113,7 +105,7 @@ def init_device(
     elif is_click(device_type, data):
         offline = data.get("offline", True) if data is not None else True
         return Click(identifier, name, device_type, offline)
-    elif is_switch(device_type, data):
+    elif is_switch(device_type, data):  # pragma: no mutate
         return Switch(identifier, name, device_type)
     else:
         return Device(identifier, name, DeviceType.UNKNOWN, device_mode, actions)

@@ -17,3 +17,12 @@ def test_check_error():
     mock_response = MagicMock(spec=ClientResponse)
     mock_response.status = 401
     assert not check(mock_response)
+
+    mock_response.status = 201
+    assert not check(mock_response)
+
+    mock_response.status = 199
+    assert not check(mock_response)
+
+    mock_response.status = 500
+    assert not check(mock_response)

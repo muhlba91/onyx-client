@@ -23,8 +23,10 @@ class TestClick:
             False,
         )
         assert click.identifier == "id"
+        assert click.name == "name"
         assert click.device_type == DeviceType.CLICK
         assert click.device_mode.mode == DeviceType.CLICK
+        assert click.actions == []
         assert not click.offline
 
     def test_str(self):
@@ -104,3 +106,6 @@ class TestClick:
         assert click.device_type == DeviceType.CLICK
         # offline has no attribute on base Device; getattr returns None, so offline keeps original
         assert not click.offline
+
+    def test_keys(self):
+        assert Click.keys() == ["offline"]
