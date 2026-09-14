@@ -1,6 +1,21 @@
 # Changelog
 
 
+## [11.1.1](https://github.com/muhlba91/onyx-client/compare/v11.1.0...v11.1.1) (2026-09-14)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverage to v7.16.0 ([b21d12d](https://github.com/muhlba91/onyx-client/commit/b21d12d757ebd1910666187f29e3151a0c194e37))
+* **deps:** update dependency coverage to v7.16.1 ([a2b90a6](https://github.com/muhlba91/onyx-client/commit/a2b90a663b7d7e0253db54a557a7a56a1cfcfdec))
+* **deps:** update dependency mutmut to v3.8.0 ([049622f](https://github.com/muhlba91/onyx-client/commit/049622f4a7d5e207f12cb02193a8307e28396ba9))
+* **deps:** update dependency ruff to v0.16.5 ([5c6ba7c](https://github.com/muhlba91/onyx-client/commit/5c6ba7c208b51197284097fc4745213ae28a2d16))
+* **deps:** update dependency ruff to v0.16.6 ([58be4f9](https://github.com/muhlba91/onyx-client/commit/58be4f95a39614d28d031a8285d2d403ceb32a53))
+* **deps:** update dependency ruff to v0.16.7 ([2e7b697](https://github.com/muhlba91/onyx-client/commit/2e7b69728c36f43bde13e1d18b358d4df380f499))
+* **deps:** update github/codeql-action action to v4.37.9 ([0dc99f5](https://github.com/muhlba91/onyx-client/commit/0dc99f5717955dde26b5e3556467ae0c950ae976))
+* **deps:** update github/codeql-action action to v4.38.0 ([d2e9a84](https://github.com/muhlba91/onyx-client/commit/d2e9a84211f5469e7c7d53899fbc1111bf6ebaf4))
+* **deps:** update step-security/harden-runner action to v2.21.1 ([323993f](https://github.com/muhlba91/onyx-client/commit/323993fc84508c261003d51731f28d5e378e211f))
+
 ## [11.1.0](https://github.com/muhlba91/onyx-client/compare/v11.0.1...v11.1.0) (2026-08-22)
 
 
