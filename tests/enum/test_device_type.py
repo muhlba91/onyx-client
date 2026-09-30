@@ -30,6 +30,17 @@ class TestDeviceType:
         assert DeviceType.BASIC_LIGHT.is_light()
         assert DeviceType.DIMMABLE_LIGHT.is_light()
 
+    def test_is_tag(self):
+        assert DeviceType.TAG_SUN.is_tag()
+        assert DeviceType.TAG_TEMPERATURE.is_tag()
+        assert not DeviceType.WEATHER.is_tag()
+        assert not DeviceType.TAG_SUN.is_shutter()
+        assert not DeviceType.TAG_SUN.is_light()
+
+    def test_convert_tags(self):
+        assert DeviceType.convert("tag_sun") == DeviceType.TAG_SUN
+        assert DeviceType.convert("tag_temperature") == DeviceType.TAG_TEMPERATURE
+
     def test_convert_none_returns_none(self):
         assert DeviceType.convert(None) is None
 

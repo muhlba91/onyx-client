@@ -7,6 +7,8 @@ from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
 from onyx_client.device.switch import Switch
+from onyx_client.device.tag_sun import TagSun
+from onyx_client.device.tag_temperature import TagTemperature
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
@@ -343,3 +345,77 @@ def test_init_device_no_data():
     assert device.name is None
     assert device.device_type == DeviceType.UNKNOWN
     assert device.device_mode.mode is None
+
+
+def test_init_device_tag_sun():
+    device = init_device(
+        "id",
+        "TAG sun",
+        DeviceType.TAG_SUN,
+        {
+            "sun_brightness": {"value": 1000, "minimum": 0, "maximum": 150000},
+            "sun_brightness_peak": {"value": 2000, "minimum": 0, "maximum": 150000},
+            "sun_brightness_sink": {"value": 500, "minimum": 0, "maximum": 150000},
+        },
+        [],
+    )
+    assert isinstance(device, TagSun)
+    assert device.identifier == "id"
+    assert device.name == "TAG sun"
+    assert device.device_type == DeviceType.TAG_SUN
+    assert device.sun_brightness == NumericValue(1000, 0, 150000, False)
+    assert device.sun_brightness_peak == NumericValue(2000, 0, 150000, False)
+    assert device.sun_brightness_sink == NumericValue(500, 0, 150000, False)
+
+
+def test_init_device_tag_sun_minimal():
+    device = init_device("id", None, DeviceType.TAG_SUN)
+    assert isinstance(device, TagSun)
+    assert device.sun_brightness is None
+
+
+def test_init_device_tag_sun_none_type_properties_fallback():
+    """A patch with only the current brightness is detected as sun tag."""
+    device = init_device("id", None, None, {"sun_brightness": {"value": 1234}})
+    assert isinstance(device, TagSun)
+    assert device.sun_brightness.value == 1234
+
+
+def test_init_device_weather_with_brightness_none_type():
+    """A weather patch with brightness and wind stays a weather station."""
+    device = init_device(
+        "id", None, None, {"sun_brightness": {"value": 1}, "wind_peak": {"value": 2}}
+    )
+    assert isinstance(device, Weather)
+    assert device.wind_peak.value == 2
+
+
+def test_init_device_tag_temperature():
+    device = init_device(
+        "id",
+        "TAG temperature",
+        DeviceType.TAG_TEMPERATURE,
+        {
+            "temperature": {"value": 214, "minimum": -400, "maximum": 1000},
+            "humidity": {"value": 53, "minimum": 0, "maximum": 100},
+        },
+        [],
+    )
+    assert isinstance(device, TagTemperature)
+    assert device.device_type == DeviceType.TAG_TEMPERATURE
+    assert device.temperature == NumericValue(214, -400, 1000, False)
+    assert device.humidity == NumericValue(53, 0, 100, False)
+
+
+def test_init_device_tag_temperature_none_type_patch_updates_tag():
+    """Untyped temperature patches map to a weather station, which updates a tag."""
+    tag = init_device(
+        "id", "TAG", DeviceType.TAG_TEMPERATURE, {"temperature": {"value": 200}}
+    )
+    patch = init_device(
+        "id", None, None, {"temperature": {"value": 214}, "humidity": {"value": 53}}
+    )
+    assert isinstance(patch, Weather)
+    tag.update_with(patch)
+    assert tag.temperature.value == 214
+    assert tag.humidity.value == 53
