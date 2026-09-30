@@ -8,6 +8,8 @@ from ..device.device import Device
 from ..device.light import Light
 from ..device.shutter import Shutter
 from ..device.switch import Switch
+from ..device.tag_sun import TagSun
+from ..device.tag_temperature import TagTemperature
 from ..device.weather import Weather
 from ..enum.device_type import DeviceType
 from ..utils.device_type import (
@@ -15,6 +17,8 @@ from ..utils.device_type import (
     is_light,
     is_shutter,
     is_switch,
+    is_tag_sun,
+    is_tag_temperature,
     is_weather,
 )
 
@@ -76,6 +80,27 @@ def init_device(
             numeric_value("target_angle", properties),
             numeric_value("actual_angle", properties),
             numeric_value("actual_position", properties),
+        )
+    elif is_tag_sun(device_type, properties):
+        return TagSun(
+            identifier,
+            name,
+            device_type,
+            device_mode,
+            actions,
+            numeric_value("sun_brightness", properties),
+            numeric_value("sun_brightness_peak", properties),
+            numeric_value("sun_brightness_sink", properties),
+        )
+    elif is_tag_temperature(device_type, properties):
+        return TagTemperature(
+            identifier,
+            name,
+            device_type,
+            device_mode,
+            actions,
+            numeric_value("temperature", properties),
+            numeric_value("humidity", properties),
         )
     elif is_weather(device_type, properties):
         return Weather(

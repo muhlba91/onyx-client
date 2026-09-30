@@ -7,6 +7,8 @@ from onyx_client.utils.device_type import (
     is_light,
     is_shutter,
     is_switch,
+    is_tag_sun,
+    is_tag_temperature,
     is_weather,
 )
 
@@ -70,3 +72,22 @@ def test__in_keys():
     assert not _in_keys({}, ["key"])
     assert not _in_keys(None, ["key"])
     assert not _in_keys(None, [])
+
+
+def test_is_tag_sun():
+    assert is_tag_sun(DeviceType.TAG_SUN, {})
+    assert not is_tag_sun(DeviceType.WEATHER, {"sun_brightness": 10})
+    assert not is_tag_sun(None, None)
+    assert not is_tag_sun(None, {})
+    assert is_tag_sun(None, {"sun_brightness": 10})
+    assert is_tag_sun(None, {"sun_brightness": 10, "sun_brightness_peak": 20})
+    # weather station patches also carry the brightness, but other values as well
+    assert not is_tag_sun(None, {"sun_brightness": 10, "wind_peak": 5})
+    # without the current brightness it could be either -> weather (carries peak/sink)
+    assert not is_tag_sun(None, {"sun_brightness_peak": 20})
+
+
+def test_is_tag_temperature():
+    assert is_tag_temperature(DeviceType.TAG_TEMPERATURE, {})
+    assert not is_tag_temperature(DeviceType.WEATHER, {})
+    assert not is_tag_temperature(None, {"temperature": 214, "humidity": 53})

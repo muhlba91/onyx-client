@@ -19,6 +19,8 @@ class DeviceType(Enum):
     PERGOLA_SIDE = auto()
     PERGOLA_SLAT_ROOF = auto()
     DIMMABLE_LIGHT = auto()
+    TAG_SUN = auto()
+    TAG_TEMPERATURE = auto()
     UNKNOWN = 9999
 
     def string(self) -> str:
@@ -43,6 +45,13 @@ class DeviceType(Enum):
         return self in [
             self.BASIC_LIGHT,
             self.DIMMABLE_LIGHT,
+        ]
+
+    def is_tag(self) -> bool:
+        """Check if the type corresponds to any kind of tag."""
+        return self in [
+            self.TAG_SUN,
+            self.TAG_TEMPERATURE,
         ]
 
     @staticmethod
