@@ -213,6 +213,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://muehlbachler.io/"><img src="https://avatars.githubusercontent.com/u/653739?v=4?s=100" width="100px;" alt="Daniel Mühlbachler-Pietrzykowski"/><br /><sub><b>Daniel Mühlbachler-Pietrzykowski</b></sub></a><br /><a href="#maintenance-muhlba91" title="Maintenance">🚧</a> <a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=muhlba91" title="Code">💻</a> <a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=muhlba91" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/MitterdorferMathias"><img src="https://avatars.githubusercontent.com/u/32190212?v=4?s=100" width="100px;" alt="Mathias Mitterdorfer"/><br /><sub><b>Mathias Mitterdorfer</b></sub></a><br /><a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=MitterdorferMathias" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/robertweitl"><img src="https://avatars.githubusercontent.com/u/121123263?v=4?s=100" width="100px;" alt="Robert Weitlaner"/><br /><sub><b>Robert Weitlaner</b></sub></a><br /><a href="https://github.com/muhlba91/pulumi-proxmoxve/commits?author=robertweitl" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
