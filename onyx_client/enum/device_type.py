@@ -8,6 +8,7 @@ class DeviceType(Enum):
 
     ROLLERSHUTTER = auto()
     AWNING = auto()
+    SCREEN = auto()
     RAFFSTORE_90 = auto()
     RAFFSTORE_180 = auto()
     WEATHER = auto()
@@ -30,6 +31,7 @@ class DeviceType(Enum):
         return self in [
             self.ROLLERSHUTTER,
             self.AWNING,
+            self.SCREEN,
             self.RAFFSTORE_90,
             self.RAFFSTORE_180,
             self.VENEER,

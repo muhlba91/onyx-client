@@ -9,6 +9,9 @@ class TestDeviceType:
     def test_convert(self):
         assert DeviceType.convert(DeviceType.AWNING.name.lower()) == DeviceType.AWNING
 
+    def test_convert_screen(self):
+        assert DeviceType.convert("screen") == DeviceType.SCREEN
+
     def test_convert_invalid(self):
         assert not DeviceType.convert("foo")
 
@@ -18,6 +21,7 @@ class TestDeviceType:
 
     def test_is_shutter(self):
         assert DeviceType.AWNING.is_shutter()
+        assert DeviceType.SCREEN.is_shutter()
         assert DeviceType.ROLLERSHUTTER.is_shutter()
         assert DeviceType.RAFFSTORE_90.is_shutter()
         assert DeviceType.RAFFSTORE_180.is_shutter()
