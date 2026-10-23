@@ -1,6 +1,30 @@
 # Changelog
 
 
+## [11.2.1](https://github.com/muhlba91/onyx-client/compare/v11.2.0...v11.2.1) (2026-10-23)
+
+
+### Miscellaneous Chores
+
+* **ci:** fix github workflow concurrency ([c4c94fd](https://github.com/muhlba91/onyx-client/commit/c4c94fde99a4a0a7ae863a317c592fd8534ecc26))
+* **deps:** update actions/setup-python action to v7.1.0 ([b764305](https://github.com/muhlba91/onyx-client/commit/b764305a5be2b35519fee23e6336252c02063583))
+* **deps:** update actions/upload-artifact action to v7.0.2 ([73ab0fd](https://github.com/muhlba91/onyx-client/commit/73ab0fd4d8cf8f19200c5042ac4555ee1a9a2133))
+* **deps:** update dependency aiohttp to v3.14.4 ([2ff5ee8](https://github.com/muhlba91/onyx-client/commit/2ff5ee8aa0c723e61843294776d5463f3698078c))
+* **deps:** update dependency aiohttp to v3.14.5 ([3cb0d8a](https://github.com/muhlba91/onyx-client/commit/3cb0d8af45da45bde5fd4138a54330f18b0d6a0e))
+* **deps:** update dependency coverage to v7.17.0 ([6ebf84f](https://github.com/muhlba91/onyx-client/commit/6ebf84fa0df07962987f8394c431cb4570172400))
+* **deps:** update dependency pre-commit to v4.7.0 ([b1befb4](https://github.com/muhlba91/onyx-client/commit/b1befb440b81ae666839dd8bd95c133ff175c70f))
+* **deps:** update dependency ruff to ^0.17.0 ([f4d7592](https://github.com/muhlba91/onyx-client/commit/f4d7592f26cc5db1b4d5f1e9544be9df73f7bfdf))
+* **deps:** update dependency ruff to v0.17.1 ([4b1a03e](https://github.com/muhlba91/onyx-client/commit/4b1a03e84cb1033030c5a0a0ed78488ed06d742a))
+* **deps:** update dependency ruff to v0.17.2 ([2c50fa4](https://github.com/muhlba91/onyx-client/commit/2c50fa4486aaf82e3b483337fd09c12aa9c17fc8))
+* **deps:** update github/codeql-action action to v4.38.3 ([8bdafe5](https://github.com/muhlba91/onyx-client/commit/8bdafe56c7de0521dd3475f007f7e67f27d0eb7e))
+* **deps:** update github/codeql-action action to v4.39.0 ([7175196](https://github.com/muhlba91/onyx-client/commit/7175196b17f69e1aa1dc8296d433720f17bcdfc7))
+* **deps:** update github/codeql-action action to v4.39.1 ([d708a57](https://github.com/muhlba91/onyx-client/commit/d708a573dfb10a0392b977f46c3204b8819af708))
+* **deps:** update ossf/scorecard-action action to v2.5.0 ([8b986d3](https://github.com/muhlba91/onyx-client/commit/8b986d3bf4c58cfeb41ca78154db8dae85f09d22))
+* **deps:** update pypa/gh-action-pypi-publish digest to 7245906 ([7d35e1e](https://github.com/muhlba91/onyx-client/commit/7d35e1e39aaa6aa972fec9e0d1c57c0d7bd92a1d))
+* **deps:** update step-security/harden-runner action to v2.22.0 ([3e35e92](https://github.com/muhlba91/onyx-client/commit/3e35e925ee40ba7c10c2b35862473a63ff914353))
+* **deps:** update step-security/harden-runner action to v2.22.1 ([3205ebf](https://github.com/muhlba91/onyx-client/commit/3205ebff901707ede925e9baf809aa4f44c79ca7))
+* **deps:** update step-security/harden-runner action to v2.22.2 ([2e99759](https://github.com/muhlba91/onyx-client/commit/2e99759e208837e209f4fe377acab2a788c62571))
+
 ## [11.2.0](https://github.com/muhlba91/onyx-client/compare/v11.1.0...v11.2.0) (2026-10-01)
 
 
