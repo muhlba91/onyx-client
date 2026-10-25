@@ -498,3 +498,6 @@ tests/test_write.yml
 .ruff_cache/
 node_modules/
 mutants/
+
+# mise
+mise.local.toml

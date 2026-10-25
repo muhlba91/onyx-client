@@ -9,6 +9,7 @@
         "github-actions",
         "pre-commit",
         "poetry",
-        "npm"
+        "npm",
+        "mise"
     ]
 }
