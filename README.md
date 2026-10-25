@@ -137,10 +137,9 @@ The following examples are available in the [`examples`](examples/) directory:
 
 ## Development
 
-The project uses [poetry](https://poetry.eustace.io/) and to install all dependencies and the build environment, run:
+The project uses [poetry](https://poetry.eustace.io/). Tool versions (Python, uv, Poetry) are managed with [mise](https://mise.jdx.dev): run `mise trust` and `mise install` once, then install all dependencies and the build environment:
 
 ```bash
-pip install poetry
 poetry install
 ```
 

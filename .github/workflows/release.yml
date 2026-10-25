@@ -42,10 +42,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: ["3.14"]
 
     steps:
       - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
@@ -56,9 +52,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
         with:
-          python-version: ${{ matrix.python-version }}
+          cache: false
 
       - run: |
           python -m pip install build
