@@ -1,6 +1,51 @@
 # Changelog
 
 
+## [11.2.1](https://github.com/muhlba91/onyx-client/compare/v11.2.0...v11.2.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* match renovate mise rules by dependency name ([21c5eaa](https://github.com/muhlba91/onyx-client/commit/21c5eaa0922db4b841748178a2fa5d504e303d9e))
+* **renovate:** hold the pyproject Python constraint below 3.15 too ([659f2ef](https://github.com/muhlba91/onyx-client/commit/659f2ef840d0509452fdeadbbf4f0629ee386dbc))
+* restore poetry lock for mise ([6b84899](https://github.com/muhlba91/onyx-client/commit/6b848994d7dc4668f8cb9ede9f5c548210887093))
+
+
+### Miscellaneous Chores
+
+* **ci:** fix github workflow concurrency ([c4c94fd](https://github.com/muhlba91/onyx-client/commit/c4c94fde99a4a0a7ae863a317c592fd8534ecc26))
+* **deps:** update actions/setup-python action to v7.1.0 ([b764305](https://github.com/muhlba91/onyx-client/commit/b764305a5be2b35519fee23e6336252c02063583))
+* **deps:** update actions/upload-artifact action to v7.0.2 ([73ab0fd](https://github.com/muhlba91/onyx-client/commit/73ab0fd4d8cf8f19200c5042ac4555ee1a9a2133))
+* **deps:** update dependency aiohttp to v3.14.4 ([2ff5ee8](https://github.com/muhlba91/onyx-client/commit/2ff5ee8aa0c723e61843294776d5463f3698078c))
+* **deps:** update dependency aiohttp to v3.14.5 ([3cb0d8a](https://github.com/muhlba91/onyx-client/commit/3cb0d8af45da45bde5fd4138a54330f18b0d6a0e))
+* **deps:** update dependency all-contributors-cli to v7 ([9de4dfc](https://github.com/muhlba91/onyx-client/commit/9de4dfcffa76cb8862a5e74579b065f5aa5c8828))
+* **deps:** update dependency coverage to v7.17.0 ([6ebf84f](https://github.com/muhlba91/onyx-client/commit/6ebf84fa0df07962987f8394c431cb4570172400))
+* **deps:** update dependency mutmut to v3.8.1 ([6bf7b7b](https://github.com/muhlba91/onyx-client/commit/6bf7b7b12a034de3000eabd74b9fea77e0bd7855))
+* **deps:** update dependency poetry to v2.5.1 ([33796a0](https://github.com/muhlba91/onyx-client/commit/33796a0b7fcf3c07f2a344989cde0ab56d31735b))
+* **deps:** update dependency pre-commit to v4.7.0 ([b1befb4](https://github.com/muhlba91/onyx-client/commit/b1befb440b81ae666839dd8bd95c133ff175c70f))
+* **deps:** update dependency pytest to v9.2.0 ([605717d](https://github.com/muhlba91/onyx-client/commit/605717d6cef52ea4b62d9c94e1b4f238d1fc28c6))
+* **deps:** update dependency pytest-asyncio to v1.4.1 ([01118c0](https://github.com/muhlba91/onyx-client/commit/01118c06e29e78fb44692c1cb2cb907d5a873877))
+* **deps:** update dependency python to v3.14.10 ([f05061f](https://github.com/muhlba91/onyx-client/commit/f05061f2a90f8e4dbaf002e85f9d2939ca3b84fd))
+* **deps:** update dependency python to v3.14.9 ([ebd562e](https://github.com/muhlba91/onyx-client/commit/ebd562e45fc51fd8f7b70e55daa0ad078a43d0c1))
+* **deps:** update dependency ruff to ^0.17.0 ([f4d7592](https://github.com/muhlba91/onyx-client/commit/f4d7592f26cc5db1b4d5f1e9544be9df73f7bfdf))
+* **deps:** update dependency ruff to v0.17.1 ([4b1a03e](https://github.com/muhlba91/onyx-client/commit/4b1a03e84cb1033030c5a0a0ed78488ed06d742a))
+* **deps:** update dependency ruff to v0.17.2 ([2c50fa4](https://github.com/muhlba91/onyx-client/commit/2c50fa4486aaf82e3b483337fd09c12aa9c17fc8))
+* **deps:** update dependency ruff to v0.17.3 ([f24208b](https://github.com/muhlba91/onyx-client/commit/f24208bf844f226adc23e424bd09c5d682047d58))
+* **deps:** update github/codeql-action action to v4.38.3 ([8bdafe5](https://github.com/muhlba91/onyx-client/commit/8bdafe56c7de0521dd3475f007f7e67f27d0eb7e))
+* **deps:** update github/codeql-action action to v4.39.0 ([7175196](https://github.com/muhlba91/onyx-client/commit/7175196b17f69e1aa1dc8296d433720f17bcdfc7))
+* **deps:** update github/codeql-action action to v4.39.1 ([d708a57](https://github.com/muhlba91/onyx-client/commit/d708a573dfb10a0392b977f46c3204b8819af708))
+* **deps:** update jdx/mise-action action to v5.2.4 ([8915c14](https://github.com/muhlba91/onyx-client/commit/8915c143d60e3284105aa55c6496dc4fc38a16d5))
+* **deps:** update jdx/mise-action action to v5.2.5 ([9f87407](https://github.com/muhlba91/onyx-client/commit/9f874072aa241c31fbabd4351b0af3134093fb9a))
+* **deps:** update ossf/scorecard-action action to v2.5.0 ([8b986d3](https://github.com/muhlba91/onyx-client/commit/8b986d3bf4c58cfeb41ca78154db8dae85f09d22))
+* **deps:** update pypa/gh-action-pypi-publish digest to 7245906 ([7d35e1e](https://github.com/muhlba91/onyx-client/commit/7d35e1e39aaa6aa972fec9e0d1c57c0d7bd92a1d))
+* **deps:** update siderolabs/conform action to v0.1.0-alpha.32 ([d13533e](https://github.com/muhlba91/onyx-client/commit/d13533e06856e929c17aae3962d4c48c09d1a7ac))
+* **deps:** update step-security/harden-runner action to v2.22.0 ([3e35e92](https://github.com/muhlba91/onyx-client/commit/3e35e925ee40ba7c10c2b35862473a63ff914353))
+* **deps:** update step-security/harden-runner action to v2.22.1 ([3205ebf](https://github.com/muhlba91/onyx-client/commit/3205ebff901707ede925e9baf809aa4f44c79ca7))
+* **deps:** update step-security/harden-runner action to v2.22.2 ([2e99759](https://github.com/muhlba91/onyx-client/commit/2e99759e208837e209f4fe377acab2a788c62571))
+* **deps:** update step-security/harden-runner action to v2.22.3 ([fe82dc0](https://github.com/muhlba91/onyx-client/commit/fe82dc0a04579e8444c76faf4919835a125af851))
+* migrate to mise ([570b70e](https://github.com/muhlba91/onyx-client/commit/570b70e04b13cfd3a7a56fd06722412aef2ac3b3))
+* remove .python-version (mise.toml pins python) ([dd7d514](https://github.com/muhlba91/onyx-client/commit/dd7d5141b97f4dfe0e861bcb5ff2850d4be30552))
+
 ## [11.2.0](https://github.com/muhlba91/onyx-client/compare/v11.1.0...v11.2.0) (2026-10-01)
 
 
