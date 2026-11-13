@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [11.2.2](https://github.com/muhlba91/onyx-client/compare/v11.2.1...v11.2.2) (2026-11-13)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency all-contributors-cli to v7.0.2 ([a3a21c5](https://github.com/muhlba91/onyx-client/commit/a3a21c519d1698036b2becb89cd97a94cbfd7955))
+* **deps:** update dependency coverage to v7.17.3 ([7fbddee](https://github.com/muhlba91/onyx-client/commit/7fbddee189b33ac78a4800e67212ca549f0d2c12))
+* **deps:** update dependency pytest-asyncio to v1.5.0 ([0a2ba2b](https://github.com/muhlba91/onyx-client/commit/0a2ba2b7b4f774a686e796f1bbdc62e17848e161))
+* **deps:** update dependency ruff to v0.17.5 ([b980b09](https://github.com/muhlba91/onyx-client/commit/b980b09fec5b372256b097994c1ae9c45dbb2161))
+* **deps:** update jdx/mise-action action to v5.2.8 ([d2563f5](https://github.com/muhlba91/onyx-client/commit/d2563f598a589021bad4104514c12285c6c9a516))
+
 ## [11.2.1](https://github.com/muhlba91/onyx-client/compare/v11.2.0...v11.2.1) (2026-11-10)
 
 
