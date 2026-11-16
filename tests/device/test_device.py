@@ -1,14 +1,12 @@
 """Tests for the Base Device class."""
 
-import pytest
 import pytest_asyncio
 
+from onyx_client.data.active_command import ActiveCommand
 from onyx_client.data.device_mode import DeviceMode
 from onyx_client.device.device import Device
-from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.exception.update_exception import UpdateException
 
 
 class TestDevice:
@@ -19,8 +17,29 @@ class TestDevice:
     def test_init(self, device_mode):
         device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
         assert device.identifier == "id"
+        assert device.name == "name"
         assert device.device_type == DeviceType.AWNING
         assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.actions == list(Action)
+        assert device.raw_type is None
+        assert device.tint is None
+        assert device.active_command is None
+
+    def test_init_optional(self, device_mode):
+        command = ActiveCommand(None, Action.STOP, None, [], None, None, [])
+        device = Device(
+            "id",
+            "name",
+            DeviceType.UNKNOWN,
+            device_mode,
+            [],
+            raw_type="new_type",
+            tint="#FFFFFF",
+            active_command=command,
+        )
+        assert device.raw_type == "new_type"
+        assert device.tint == "#FFFFFF"
+        assert device.active_command == command
 
     def test_str(self, device_mode):
         assert (
@@ -38,111 +57,3 @@ class TestDevice:
         assert Device(
             "id", "name", DeviceType.AWNING, device_mode, list(Action)
         ) != Device("other_id", "name", DeviceType.AWNING, device_mode, list(Action))
-
-    def test_update_with(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        update = Device(
-            "id",
-            "name1",
-            DeviceType.ROLLERSHUTTER,
-            DeviceMode(DeviceType.AWNING),
-            [Action.STOP],
-        )
-        device.update_with(update)
-        assert device.name == "name1"
-        assert device.device_type == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.mode == DeviceType.AWNING
-        assert Action.STOP in device.actions
-
-    def test_update_with_no_data_update_none(self):
-        device = Device("id", None, None, None, None)
-        update = Device("id", None, None, None, None)
-        device.update_with(update)
-        assert device.name is None
-        assert device.device_type is None
-        assert device.device_mode is None
-        assert device.actions is None
-
-    def test_update_with_no_data_update_data(self, device_mode):
-        device = Device("id", None, None, None, None)
-        update = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        device.update_with(update)
-        assert device.name == "name"
-        assert device.device_type == DeviceType.AWNING
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-        assert device.actions == list(Action)
-
-    def test_update_with_none(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        update = Device("id", None, None, None, None)
-        device.update_with(update)
-        assert device.name == "name"
-        assert device.device_type == DeviceType.AWNING
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-        assert device.actions == list(Action)
-
-    def test_update_with_exception(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        update = Device(
-            "other",
-            "name1",
-            DeviceType.ROLLERSHUTTER,
-            DeviceMode(DeviceType.AWNING),
-            [Action.STOP],
-        )
-        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
-            device.update_with(update)
-
-    def test_update_with_empty_actions_keeps_original(self, device_mode):
-        original_actions = [Action.STOP]
-        device = Device(
-            "id", "name", DeviceType.AWNING, device_mode, original_actions.copy()
-        )
-        update = Device("id", None, None, None, [])
-        device.update_with(update)
-        assert device.actions == original_actions
-
-    def test_update_with_unknown_device_type_preserved(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        update = Device(
-            "id",
-            None,
-            DeviceType.UNKNOWN,
-            DeviceMode(DeviceType.UNKNOWN),
-            [],
-        )
-        device.update_with(update)
-        assert device.device_type == DeviceType.AWNING
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-
-    def test_update_with_none_raises_exception(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
-            device.update_with(None)
-
-    def test_update_with_object_without_identifier_raises_exception(self, device_mode):
-        """Updating with an object lacking 'identifier' must raise UpdateException."""
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-
-        class NoIdentifier:
-            def __init__(self):
-                self.name = None
-                self.device_type = None
-                self.device_mode = None
-                self.actions = []
-
-        with pytest.raises(UpdateException, match=r"^ID_NOT_EQUAL$"):
-            device.update_with(NoIdentifier())
-
-    def test_update_with_cross_type_subclass(self, device_mode):
-        device = Device("id", "name", DeviceType.AWNING, device_mode, list(Action))
-        update = Weather(
-            "id",
-            "name_updated",
-            DeviceType.WEATHER,
-            DeviceMode(DeviceType.WEATHER),
-            [Action.STOP],
-        )
-        device.update_with(update)
-        assert device.name == "name_updated"
-        assert device.device_type == DeviceType.WEATHER

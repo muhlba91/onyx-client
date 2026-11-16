@@ -1,29 +1,41 @@
 """Tests for the Onyx Client."""
 
-import asyncio
-from unittest.mock import patch
+import json
+from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
 import pytest_asyncio
 from aioresponses import aioresponses
+from yarl import URL as YarlURL
 
 from onyx_client.client import OnyxClient, create
 from onyx_client.configuration.configuration import Configuration
-from onyx_client.data.animation_keyframe import AnimationKeyframe
-from onyx_client.data.animation_value import AnimationValue
 from onyx_client.data.device_command import DeviceCommand
-from onyx_client.data.device_mode import DeviceMode
-from onyx_client.data.numeric_value import NumericValue
-from onyx_client.device.click import Click
-from onyx_client.device.device import Device
-from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
-from onyx_client.device.switch import Switch
-from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
+from onyx_client.enum.verify_result import VerifyResult
+from onyx_client.stream.events import (
+    DeviceChanged,
+    DeviceRemoved,
+    Pulse,
+    Resynced,
+    Snapshot,
+)
 from onyx_client.utils.const import API_URL, API_VERSION
+
+URL = f"{API_URL}/box/finger/api/{API_VERSION}"
+URL_EVENTS = YarlURL(f"{URL}/events")
+DEVICE = {"name": "Shutter", "type": "rollershutter"}
+
+
+def sse(event: str, data) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+class StopStream(Exception):
+    """Raised by the mocked backoff to end an endless stream."""
 
 
 @patch("aiohttp.ClientSession")
@@ -32,29 +44,11 @@ def test_create_client(mock_session):
         fingerprint="finger", access_token="token", client_session=mock_session
     )
     assert client.url_helper.client_session == mock_session
-    assert client.url_helper.config.fingerprint == "finger"
-    assert client.url_helper.config.access_token == "token"
-    assert client._shutdown
-    assert client._read_loop_task is None
+    assert client.config.fingerprint == "finger"
+    assert client.config.access_token == "token"
+    assert client.config.api_version == API_VERSION
+    assert client.clock_offset == 0
     assert not client._close_session
-    assert len(client._active_tasks) == 0
-    assert client._event_callback is None
-
-
-@patch("aiohttp.ClientSession")
-def test_create_client_with_event_loop(mock_session):
-    """Verify create() forwards event_loop to OnyxClient."""
-    loop = asyncio.new_event_loop()
-    try:
-        client = create(
-            fingerprint="finger",
-            access_token="token",
-            client_session=mock_session,
-            event_loop=loop,
-        )
-        assert client._event_loop is loop
-    finally:
-        loop.close()
 
 
 @patch("aiohttp.ClientSession")
@@ -65,49 +59,33 @@ def test_create_client_with_local_address(mock_session):
         client_session=mock_session,
         local_address="192.168.1.1",
     )
-    assert client.url_helper.client_session == mock_session
-    assert client.url_helper.config.fingerprint == "finger"
-    assert client.url_helper.config.access_token == "token"
-    assert client.url_helper.config.local_address == "192.168.1.1"
-    assert client._shutdown
-    assert client._read_loop_task is None
-    assert not client._close_session
-    assert len(client._active_tasks) == 0
-    assert client._event_callback is None
+    assert client.config.local_address == "192.168.1.1"
+
+
+@patch("aiohttp.ClientSession")
+def test_create_client_with_api_version(mock_session):
+    client = create(
+        fingerprint="finger",
+        access_token="token",
+        client_session=mock_session,
+        api_version="v3",
+    )
+    assert client.config.api_version == "v3"
 
 
 @patch("aiohttp.ClientSession")
 def test_create_client_with_config(mock_session):
-    client = create(
-        config=Configuration("finger", "token"), client_session=mock_session
-    )
-    assert client.url_helper.client_session == mock_session
-    assert client.url_helper.config is not None
-    assert client.url_helper.config.fingerprint == "finger"
-    assert client.url_helper.config.access_token == "token"
-    assert client.config is not None
-    assert client.config.fingerprint == "finger"
-    assert client.config.access_token == "token"
-    assert client._shutdown
-    assert client._read_loop_task is None
-    assert not client._close_session
-    assert len(client._active_tasks) == 0
-    assert client._event_callback is None
+    config = Configuration("finger", "token")
+    client = create(config=config, client_session=mock_session)
+    assert client.config is config
+    assert client.url_helper.config is config
 
 
 @patch("aiohttp.ClientSession")
 def test_create_client_without_session(mock_session):
     client = create(fingerprint="finger", access_token="token")
-    assert client.url_helper.client_session is not None
-    assert client.url_helper.config.fingerprint == "finger"
-    assert client.url_helper.config.access_token == "token"
-    assert client.config.fingerprint == "finger"
-    assert client.config.access_token == "token"
-    assert client._shutdown
-    assert client._read_loop_task is None
+    assert client.client_session is not None
     assert client._close_session
-    assert len(client._active_tasks) == 0
-    assert client._event_callback is None
 
 
 class TestOnyxClient:
@@ -124,101 +102,122 @@ class TestOnyxClient:
 
     @pytest_asyncio.fixture
     def client(self, session) -> OnyxClient:
-        yield OnyxClient(
-            Configuration("finger", "token"), session, asyncio.get_event_loop()
-        )
+        yield OnyxClient(Configuration("finger", "token"), session)
 
-    def test_init_defaults(self, session):
-        config = Configuration("finger", "token")
-        client = OnyxClient(config, session)
-        assert client._event_loop is None
-        assert client._shutdown is True
-        assert client._read_loop_task is None
-        assert client._close_session is False
+    @pytest_asyncio.fixture
+    def mock_sleep(self):
+        with patch("onyx_client.client.asyncio.sleep", new_callable=AsyncMock) as sleep:
+            yield sleep
 
-    def test_init_with_event_loop(self, session):
-        """Explicit event_loop is stored."""
-        config = Configuration("finger", "token")
-        loop = asyncio.new_event_loop()
-        try:
-            client = OnyxClient(config, session, event_loop=loop)
-            assert client._event_loop is loop
-        finally:
-            loop.close()
+    def test_init(self, session, caplog):
+        client = OnyxClient(Configuration("finger", "token"), session)
+        assert client.clock_offset == 0
+        assert not client._close_session
+        assert not client._resync_requested
+        assert "deprecated" not in caplog.text
 
-    def test_init_defaults_runtime_error(self, session):
-        config = Configuration("finger", "token")
-        with patch("asyncio.get_running_loop", side_effect=RuntimeError):
-            client = OnyxClient(config, session)
-            assert client._event_loop is None
-
-    @pytest.mark.asyncio
-    async def test_init_defaults_in_running_loop(self, session):
-        config = Configuration("finger", "token")
-        client = OnyxClient(config, session)
-        assert client._event_loop == asyncio.get_running_loop()
-        assert client._shutdown is True
-        assert client._read_loop_task is None
-        assert client._close_session is False
-
-    def test_set_event_callback(self, client):
-        callback = 0
-        client.set_event_callback(callback)
-        assert client._event_callback == callback
-
-    def test__complete_internal_task(self, client):
-        class Task:
-            def cancelled(self):
-                return True
-
-        callback = Task()
-        client._active_tasks.add(callback)
-        assert len(client._active_tasks) == 1
-        assert callback in client._active_tasks
-        client._complete_internal_task(callback)
-        assert len(client._active_tasks) == 0
-
-    def test__complete_internal_task_cancelled(self, client):
-        class Task:
-            def cancelled(self):
-                return False
-
-            def exception(self):
-                return Exception("error")
-
-        callback = Task()
-        client._active_tasks.add(callback)
-        assert len(client._active_tasks) == 1
-        assert callback in client._active_tasks
-        with pytest.raises(Exception):  # noqa: B017
-            client._complete_internal_task(callback)
-        assert len(client._active_tasks) == 0
-
-    def test_stop(self, client):
-        assert client._shutdown
+    def test_init_deprecated_api_version(self, session, caplog):
+        OnyxClient(Configuration("finger", "token", api_version="v3"), session)
+        assert "ONYX API v3 is deprecated" in caplog.text
 
     @pytest.mark.asyncio
     async def test_verify(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/versions",
             status=200,
-            payload={"versions": [API_VERSION, "v2"]},
+            payload={"versions": ["v3", API_VERSION]},
         )
-        assert await client.verify()
+        mock_response.get(f"{URL}/clock", status=200, payload={})
+        assert await client.verify() == VerifyResult.OK
 
     @pytest.mark.asyncio
-    async def test_verify_unknown_api_version(self, mock_response, client):
+    async def test_verify_unsupported_api_version(self, mock_response, client):
         mock_response.get(
             f"{API_URL}/box/finger/api/versions",
             status=200,
-            payload={"versions": ["v1"]},
+            payload={"versions": ["v1", "v3"]},
         )
-        assert not await client.verify()
+        assert await client.verify() == VerifyResult.VERSION_UNSUPPORTED
 
     @pytest.mark.asyncio
-    async def test_verify_error(self, mock_response, client):
-        mock_response.get(f"{API_URL}/box/finger/api/versions", status=401)
-        assert not await client.verify()
+    async def test_verify_deprecated_api_version(self, mock_response, session):
+        client = OnyxClient(Configuration("finger", "token", api_version="v3"), session)
+        mock_response.get(
+            f"{API_URL}/box/finger/api/versions",
+            status=200,
+            payload={"versions": ["v1", "v3"]},
+        )
+        mock_response.get(f"{API_URL}/box/finger/api/v3/clock", status=200)
+        assert await client.verify() == VerifyResult.OK
+
+    @pytest.mark.asyncio
+    async def test_verify_versions_error(self, mock_response, client):
+        mock_response.get(f"{API_URL}/box/finger/api/versions", status=500)
+        assert await client.verify() == VerifyResult.UNREACHABLE
+
+    @pytest.mark.asyncio
+    async def test_verify_connection_error(self, mock_response, client):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/versions",
+            exception=aiohttp.ClientConnectionError(),
+        )
+        assert await client.verify() == VerifyResult.UNREACHABLE
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("status", "expected"),
+        [
+            (401, VerifyResult.UNAUTHORIZED),
+            (403, VerifyResult.UNAUTHORIZED),
+            (500, VerifyResult.UNREACHABLE),
+        ],
+    )
+    async def test_verify_clock_status(self, mock_response, client, status, expected):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/versions",
+            status=200,
+            payload={"versions": [API_VERSION]},
+        )
+        mock_response.get(f"{URL}/clock", status=status)
+        assert await client.verify() == expected
+
+    @pytest.mark.asyncio
+    async def test_devices(self, mock_response, client, captured):
+        mock_response.get(
+            f"{URL}/devices",
+            status=200,
+            payload=json.loads(captured("devices-v6.json")),
+        )
+        devices = await client.devices()
+        assert len(devices) == 8
+        assert all(isinstance(device, Shutter) for device in devices)
+        assert devices[0].identifier == "00000000-0000-4000-8000-000000000001"
+        assert devices[0].tint == "#F3835D"
+
+    @pytest.mark.asyncio
+    async def test_devices_error(self, mock_response, client):
+        mock_response.get(f"{URL}/devices", status=401)
+        assert await client.devices() is None
+
+    @pytest.mark.asyncio
+    async def test_device(self, mock_response, client, captured):
+        identifier = "00000000-0000-4000-8000-000000000001"
+        mock_response.get(
+            f"{URL}/devices/{identifier}",
+            status=200,
+            payload=json.loads(captured(f"details/{identifier}.json")),
+        )
+        device = await client.device(identifier)
+        assert isinstance(device, Shutter)
+        assert device.identifier == identifier
+        assert device.device_type == DeviceType.RAFFSTORE_90
+        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
+        assert device.system_state.value == "ok"
+
+    @pytest.mark.asyncio
+    async def test_device_error(self, mock_response, client):
+        mock_response.get(f"{URL}/devices/device", status=401)
+        assert await client.device("device") is None
 
     @pytest.mark.asyncio
     async def test_supported_versions(self, mock_response, client):
@@ -280,708 +279,6 @@ class TestOnyxClient:
         mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/clock", status=401)
         date = await client.date_information()
         assert date is None
-
-    @pytest.mark.asyncio
-    async def test_devices(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices",
-            status=200,
-            payload={
-                "device1": {"name": "device1", "type": "rollershutter"},
-                "device2": {"name": "device2", "type": "weather"},
-            },
-        )
-        devices = await client.devices()
-        assert devices is not None
-        assert len(devices) == 2
-        devices1 = list(filter(lambda dev: dev.identifier == "device1", devices))
-        assert len(devices1) == 1
-        device1 = devices1[0]
-        assert device1 is not None
-        assert isinstance(device1, Shutter)
-        assert device1.name == "device1"
-        devices2 = list(filter(lambda dev: dev.identifier == "device2", devices))
-        assert len(devices2) == 1
-        device2 = devices2[0]
-        assert device2 is not None
-        assert isinstance(device2, Device)
-        assert device2.name == "device2"
-
-    @patch("onyx_client.client.OnyxClient.device")
-    @pytest.mark.asyncio
-    async def test_devices_all_details(self, mock_device, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices",
-            status=200,
-            payload={
-                "device1": {"name": "device1", "type": "rollershutter"},
-                "device2": {"name": "device2", "type": "weather"},
-            },
-        )
-
-        def create_device(key):
-            if key is None:
-                return None
-            return Device(
-                key,
-                "name",
-                DeviceType.AWNING,
-                DeviceMode(DeviceType.ROLLERSHUTTER),
-                list(Action),
-            )
-
-        mock_device.side_effect = create_device
-        devices = await client.devices(True)
-        assert mock_device.called
-        assert devices is not None
-        assert len(devices) == 2
-        assert {d.identifier for d in devices} == {"device1", "device2"}
-
-    @patch("onyx_client.client.OnyxClient.device")
-    @pytest.mark.asyncio
-    async def test_devices_all_details_none(self, mock_device, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices",
-            status=200,
-            payload={
-                "device1": {},
-            },
-        )
-        mock_device.return_value = Device(
-            "id",
-            "name",
-            DeviceType.AWNING,
-            DeviceMode(DeviceType.ROLLERSHUTTER),
-            list(Action),
-        )
-        devices = await client.devices(True)
-        assert mock_device.called
-        assert devices is not None
-        assert len(devices) == 1
-
-    @pytest.mark.asyncio
-    async def test_devices_error(self, mock_response, client):
-        mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/devices", status=401)
-        devices = await client.devices()
-        assert devices is None
-
-    @pytest.mark.asyncio
-    async def test_device_shutter(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "rollershutter",
-                "properties": {
-                    "device_type": {
-                        "type": "awning",
-                        "values": ["awning", "rollershutter"],
-                    },
-                    "target_position": {
-                        "maximum": 100,
-                        "value": 100,
-                        "type": "numeric",
-                    },
-                    "target_angle": {"maximum": 360, "type": "numeric", "value": 0},
-                    "actual_position": {
-                        "maximum": 100,
-                        "minimum": 0,
-                        "value": 100,
-                        "type": "numeric",
-                        "animation": {
-                            "start": 1637499009.158352,
-                            "current_value": 20,
-                            "keyframes": [
-                                {
-                                    "interpolation": "linear",
-                                    "delay": 0,
-                                    "duration": 42.0273,
-                                    "value": 90,
-                                }
-                            ],
-                        },
-                    },
-                    "actual_angle": {
-                        "maximum": 360,
-                        "minimum": 0,
-                        "type": "numeric",
-                        "value": 0,
-                        "animation": {
-                            "start": 1637499108.0069883,
-                            "current_value": 90,
-                            "keyframes": [
-                                {
-                                    "interpolation": "linear",
-                                    "delay": 0,
-                                    "duration": 0.791666666,
-                                    "value": 33,
-                                }
-                            ],
-                        },
-                    },
-                },
-                "actions": ["stop"],
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Shutter)
-        assert device.device_type == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.mode == DeviceType.AWNING
-        assert device.device_mode.values == [
-            DeviceType.AWNING,
-            DeviceType.ROLLERSHUTTER,
-        ]
-        assert device.actions == [Action.STOP]
-        assert device.target_position == NumericValue(100, None, 100, False)
-        assert device.target_angle == NumericValue(0, None, 360, False)
-        assert device.actual_position == NumericValue(
-            100,
-            0,
-            100,
-            False,
-            AnimationValue(
-                1637499009.158352, 20, [AnimationKeyframe("linear", 0, 42.0273, 90)]
-            ),
-        )
-        assert device.actual_angle == NumericValue(
-            0,
-            0,
-            360,
-            False,
-            AnimationValue(
-                1637499108.0069883,
-                90,
-                [AnimationKeyframe("linear", 0, 0.791666666, 33)],
-            ),
-        )
-
-    @pytest.mark.asyncio
-    async def test_device_shutter_no_data(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "type": "rollershutter",
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Shutter)
-        assert device.device_type == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.target_position is None
-        assert device.target_angle is None
-        assert device.actual_position is None
-        assert device.actual_angle is None
-
-    @pytest.mark.asyncio
-    async def test_device_pergola_awning_roof(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "pergola_awning_roof",
-                "actions": ["close", "open", "stop", "wink"],
-                "properties": {
-                    "actual_angle": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 360,
-                        "value": 0,
-                        "readonly": True,
-                    },
-                    "actual_position": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100,
-                        "value": 100,
-                        "readonly": True,
-                    },
-                    "system_state": {
-                        "type": "enumeration",
-                        "value": "ok",
-                        "values": [
-                            "collision",
-                            "collision_not_calibrated",
-                            "not_calibrated",
-                            "ok",
-                        ],
-                        "readonly": True,
-                    },
-                    "target_angle": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 360,
-                        "value": 0,
-                        "readonly": False,
-                    },
-                    "target_position": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100,
-                        "value": 100,
-                        "readonly": False,
-                    },
-                },
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Shutter)
-        assert device.device_type == DeviceType.PERGOLA_AWNING_ROOF
-        assert device.device_mode.mode is None
-        assert len(device.device_mode.values) == 0
-        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
-        assert device.target_position == NumericValue(100, 0, 100, False)
-        assert device.target_angle == NumericValue(0, 0, 360, False)
-        assert device.actual_position == NumericValue(
-            100,
-            0,
-            100,
-            False,
-        )
-        assert device.actual_angle == NumericValue(
-            0,
-            0,
-            360,
-            False,
-        )
-
-    @pytest.mark.asyncio
-    async def test_device_awning(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "awning",
-                "actions": ["close", "open", "stop", "wink"],
-                "properties": {
-                    "actual_angle": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 360,
-                        "value": 0,
-                        "readonly": True,
-                    },
-                    "actual_position": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100,
-                        "value": 0,
-                        "readonly": True,
-                    },
-                    "system_state": {
-                        "type": "enumeration",
-                        "value": "ok",
-                        "values": [
-                            "collision",
-                            "collision_not_calibrated",
-                            "not_calibrated",
-                            "ok",
-                        ],
-                        "readonly": True,
-                    },
-                    "target_angle": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 360,
-                        "value": 0,
-                        "readonly": False,
-                    },
-                    "target_position": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100,
-                        "value": 0,
-                        "readonly": False,
-                    },
-                },
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Shutter)
-        assert device.device_type == DeviceType.AWNING
-        assert device.device_mode.mode is None
-        assert len(device.device_mode.values) == 0
-        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
-        assert device.target_position == NumericValue(0, 0, 100, False)
-        assert device.target_angle == NumericValue(0, 0, 360, False)
-        assert device.actual_position == NumericValue(
-            0,
-            0,
-            100,
-            False,
-        )
-        assert device.actual_angle == NumericValue(
-            0,
-            0,
-            360,
-            False,
-        )
-
-    @pytest.mark.asyncio
-    async def test_device_weather(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "weather",
-                "actions": ["wink"],
-                "properties": {
-                    "air_pressure": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 150000,
-                        "value": 90374,
-                        "readonly": True,
-                    },
-                    "humidity": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100,
-                        "value": 78,
-                        "readonly": True,
-                    },
-                    "sun_brightness_peak": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 150000,
-                        "value": 53710,
-                        "readonly": True,
-                    },
-                    "sun_brightness_sink": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 150001,
-                        "value": 20966,
-                        "readonly": True,
-                    },
-                    "temperature": {
-                        "type": "numeric",
-                        "minimum": -400,
-                        "maximum": 1500,
-                        "value": 72,
-                        "readonly": True,
-                    },
-                    "wind_peak": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 100000,
-                        "value": 2501,
-                        "readonly": True,
-                    },
-                },
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Weather)
-        assert device.device_type == DeviceType.WEATHER
-        assert device.device_mode.mode is None
-        assert device.device_mode.values == []
-        assert device.actions == [Action.WINK]
-        assert device.wind_peak is not None
-        assert device.wind_peak.minimum == 0
-        assert device.wind_peak.maximum == 100000
-        assert device.wind_peak.value == 2501
-        assert device.sun_brightness_peak is not None
-        assert device.sun_brightness_peak.minimum == 0
-        assert device.sun_brightness_peak.maximum == 150000
-        assert device.sun_brightness_peak.value == 53710
-        assert device.sun_brightness_sink is not None
-        assert device.sun_brightness_sink.minimum == 0
-        assert device.sun_brightness_sink.maximum == 150001
-        assert device.sun_brightness_sink.value == 20966
-        assert device.air_pressure is not None
-        assert device.air_pressure.minimum == 0
-        assert device.air_pressure.maximum == 150000
-        assert device.air_pressure.value == 90374
-        assert device.humidity is not None
-        assert device.humidity.minimum == 0
-        assert device.humidity.maximum == 100
-        assert device.humidity.value == 78
-        assert device.temperature is not None
-        assert device.temperature.minimum == -400
-        assert device.temperature.maximum == 1500
-        assert device.temperature.value == 72
-
-    @pytest.mark.asyncio
-    async def test_device_weather_no_data(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "type": "weather",
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Weather)
-        assert device.device_type == DeviceType.WEATHER
-        assert device.device_mode.mode == DeviceType.WEATHER
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.wind_peak is None
-        assert device.sun_brightness_peak is None
-        assert device.sun_brightness_sink is None
-        assert device.air_pressure is None
-        assert device.humidity is None
-        assert device.temperature is None
-
-    @pytest.mark.asyncio
-    async def test_device_light(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "basic_light",
-                "properties": {
-                    "device_type": {
-                        "type": "basic_light",
-                        "values": ["basic_light"],
-                    },
-                    "target_brightness": {"value": 1, "minimum": 10},
-                    "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
-                    "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
-                },
-                "actions": ["stop"],
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Light)
-        assert device.device_type == DeviceType.BASIC_LIGHT
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert device.device_mode.values == [DeviceType.BASIC_LIGHT]
-        assert device.actions == [Action.STOP]
-        assert device.target_brightness is not None
-        assert device.actual_brightness is not None
-        assert device.dim_duration is not None
-
-    @pytest.mark.asyncio
-    async def test_device_light_no_data(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "type": "basic_light",
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Light)
-        assert device.device_type == DeviceType.BASIC_LIGHT
-        assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.target_brightness is None
-        assert device.actual_brightness is None
-        assert device.dim_duration is None
-
-    @pytest.mark.asyncio
-    async def test_device_dimmable_light(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "dimmable_light",
-                "properties": {
-                    "target_brightness": {"value": 1, "minimum": 10},
-                    "actual_brightness": {"value": 2, "minimum": 1, "maximum": 10},
-                    "dim_duration": {"value": 3, "minimum": 1, "maximum": 10},
-                },
-                "actions": ["stop"],
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Light)
-        assert device.device_type == DeviceType.DIMMABLE_LIGHT
-        assert device.device_mode.mode is None
-        assert len(device.device_mode.values) == 0
-        assert device.actions == [Action.STOP]
-        assert device.target_brightness is not None
-        assert device.actual_brightness is not None
-        assert device.dim_duration is not None
-
-    @pytest.mark.asyncio
-    async def test_device_dimmable_light_animation(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "dimmable_light",
-                "actions": ["light_off", "light_on", "stop", "wink"],
-                "properties": {
-                    "actual_brightness": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 65535,
-                        "value": 33153,
-                        "readonly": True,
-                        "animation": {
-                            "current_value": 0,
-                            "keyframes": [
-                                {
-                                    "delay": 0,
-                                    "duration": 0.267689021,
-                                    "interpolation": "linear",
-                                    "value": 35086,
-                                }
-                            ],
-                            "start": 1702300612.2786393,
-                        },
-                    },
-                    "dim_duration": {
-                        "type": "numeric",
-                        "minimum": 20,
-                        "maximum": 3600000,
-                        "value": 6000,
-                        "readonly": False,
-                    },
-                    "target_brightness": {
-                        "type": "numeric",
-                        "minimum": 0,
-                        "maximum": 65535,
-                        "value": 33153,
-                        "readonly": False,
-                    },
-                },
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Light)
-        assert device.device_type == DeviceType.DIMMABLE_LIGHT
-        assert device.device_mode.mode is None
-        assert len(device.device_mode.values) == 0
-        assert device.actions == [
-            Action.LIGHT_OFF,
-            Action.LIGHT_ON,
-            Action.STOP,
-            Action.WINK,
-        ]
-        assert device.target_brightness is not None
-        assert device.actual_brightness is not None
-        assert device.actual_brightness.animation is not None
-        assert device.dim_duration is not None
-
-    @pytest.mark.asyncio
-    async def test_device_click(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "type": "click",
-                "offline": True,
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Click)
-        assert device.device_type == DeviceType.CLICK
-        assert device.device_mode.mode == DeviceType.CLICK
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.offline
-
-    @pytest.mark.asyncio
-    async def test_device_click_no_data(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "my-click",
-                "type": "click",
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Click)
-        assert device.identifier == "device"
-        assert device.name == "my-click"
-        assert device.device_type == DeviceType.CLICK
-        assert device.device_mode.mode == DeviceType.CLICK
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.offline
-
-    @pytest.mark.asyncio
-    async def test_device_click_offline_false(self, mock_response, client):
-        """offline=False from data must be propagated."""
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "clicker",
-                "type": "click",
-                "offline": False,
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Click)
-        assert device.identifier == "device"
-        assert device.name == "clicker"
-        assert not device.offline
-
-    @pytest.mark.asyncio
-    async def test_device_switch(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "type": "switch",
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Switch)
-        assert device.device_type == DeviceType.SWITCH
-        assert device.device_mode.mode == DeviceType.SWITCH
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-
-    @pytest.mark.asyncio
-    async def test_device_no_properties(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={
-                "name": "device",
-                "type": "rollershutter",
-                "offline": True,
-            },
-        )
-        device = await client.device("device")
-        assert isinstance(device, Shutter)
-        assert device.device_type == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-        assert device.target_position is None
-        assert device.target_angle is None
-        assert device.actual_position is None
-        assert device.actual_angle is None
-
-    @pytest.mark.asyncio
-    async def test_device_no_data(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device",
-            status=200,
-            payload={},
-        )
-        device = await client.device("device")
-        assert isinstance(device, Device)
-        assert device.device_type == DeviceType.UNKNOWN
-        assert device.device_mode.mode is None
-        assert device.device_mode.values is None
-        assert len(device.actions) == 0
-
-    @pytest.mark.asyncio
-    async def test_device_error(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/devices/device", status=401
-        )
-        device = await client.device("device")
-        assert device is None
 
     @pytest.mark.asyncio
     async def test_send_command(self, mock_response, client):
@@ -1255,441 +552,381 @@ class TestOnyxClient:
         assert not await client.cancel_group_command("group")
 
     @pytest.mark.asyncio
-    async def test_events(self, mock_response, client):
+    async def test_automations(self, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/automations",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: snapshot\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
+            payload=[
+                {"id": "a1", "name": "Wind", "type": "wind", "enabled": True},
+                {"id": "a2", "enabled": False},
+            ],
         )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
+        automations = await client.automations()
+        assert [automation.identifier for automation in automations] == ["a1", "a2"]
+        assert automations[0].enabled
+        assert not automations[1].enabled
 
     @pytest.mark.asyncio
-    async def test_events_patch_event(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: patch\n"
-            'data: { "devices": { "device1": { "name": "patched", "type": "basic_light" } } }\n\n',
-        )
-        devices = []
-        async for device in client.events():
-            devices.append(device)
-        assert len(devices) == 1
-        assert devices[0].identifier == "device1"
-        assert devices[0].name == "patched"
+    async def test_automations_error(self, mock_response, client):
+        mock_response.get(f"{URL}/automations", status=404)
+        assert await client.automations() is None
 
-    @patch("onyx_client.client.OnyxClient._complete_internal_task")
     @pytest.mark.asyncio
-    async def test_start(self, mock__complete_internal_task, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+    async def test_enable_automation(self, mock_response, client):
+        mock_response.post(
+            f"{URL}/automations/a1/enable",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: snapshot\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
+            payload={"id": "a1", "enabled": True},
         )
+        automation = await client.enable_automation("a1")
+        assert automation.identifier == "a1"
+        assert automation.enabled
 
-        def callback(device):
-            if device.identifier == "device3":
-                client.stop()
+    @pytest.mark.asyncio
+    async def test_disable_automation_encodes_identifier(self, mock_response, client):
+        identifier = "http://o.hella.info/d/1ff1014/scenarios?type=info.hella.onyx.wind"
+        mock_response.post(
+            f"{URL}/automations/http%3A%2F%2Fo.hella.info%2Fd%2F1ff1014%2Fscenarios%3Ftype%3Dinfo.hella.onyx.wind/disable",
+            status=200,
+            payload={"id": identifier, "enabled": False},
+        )
+        automation = await client.disable_automation(identifier)
+        assert automation.identifier == identifier
+        assert not automation.enabled
 
-        def check_index(task):
-            assert task in client._active_tasks
-            assert client._shutdown
-            assert len(client._active_tasks) == 0
+    @pytest.mark.asyncio
+    async def test_enable_automation_error(self, mock_response, client):
+        mock_response.post(f"{URL}/automations/a1/enable", status=404)
+        assert await client.enable_automation("a1") is None
 
-        mock__complete_internal_task.side_effect = check_index
-        client.set_event_callback(callback)
-        client.start()
-        assert len(client._active_tasks) == 1
-        assert not client._shutdown
-        for task in client._active_tasks.copy():
-            try:
-                await asyncio.wait_for(task, timeout=1.0)
-            except asyncio.CancelledError:
+    @pytest.mark.asyncio
+    async def test_update_status(self, mock_response, client, captured):
+        mock_response.get(
+            f"{URL}/update", status=200, payload=json.loads(captured("update.json"))
+        )
+        status = await client.update_status()
+        assert status.current == "2.13.4-0-geb8e366"
+        assert status.available_version is None
+
+    @pytest.mark.asyncio
+    async def test_update_status_error(self, mock_response, client):
+        mock_response.get(f"{URL}/update", status=404)
+        assert await client.update_status() is None
+
+    @pytest.mark.asyncio
+    async def test_check_for_update(self, mock_response, client):
+        mock_response.post(
+            f"{URL}/update/check",
+            status=200,
+            payload={"current": "2.13.0", "available": {"version": "2.14.0"}},
+        )
+        status = await client.check_for_update()
+        assert status.available_version == "2.14.0"
+
+    @pytest.mark.asyncio
+    async def test_check_for_update_error(self, mock_response, client):
+        mock_response.post(f"{URL}/update/check", status=500)
+        assert await client.check_for_update() is None
+
+    @pytest.mark.asyncio
+    async def test_install_update(self, mock_response, client):
+        mock_response.post(
+            f"{URL}/update/install",
+            status=200,
+            payload={"current": "2.13.0", "available": {"version": "2.14.0"}},
+        )
+        status = await client.install_update()
+        assert status.current == "2.13.0"
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("status", "expected"), [(204, True), (401, True), (503, False)]
+    )
+    async def test_logout(self, mock_response, client, status, expected):
+        mock_response.post(f"{URL}/logout", status=status)
+        assert await client.logout() == expected
+
+    def test_now(self, client):
+        client.clock_offset = 0.25
+        with patch("onyx_client.client.time") as mock_time:
+            mock_time.time.return_value = 100.0
+            assert client.now() == 100.25
+
+    @pytest.mark.asyncio
+    async def test_stream(self, mock_response, client, mock_sleep, captured):
+        mock_response.get(f"{URL}/clock", status=200, payload={"time": 200.4})
+        mock_response.get(
+            f"{URL}/events",
+            status=200,
+            body=": comment\n"
+            + sse("snapshot", {"devices": {"d1": DEVICE, "d2": DEVICE}})
+            + sse("unknown", {})
+            + "event: pulse\ndata: 1794761689\n\n"
+            + sse("patch", {"devices": {"d1": {"tint": "#FFFFFF"}, "d2": None}}),
+        )
+        with patch("onyx_client.client.time") as mock_time:
+            mock_time.time.side_effect = [100.0, 100.2]
+            stream = client.stream()
+            events = [await anext(stream) for _ in range(4)]
+            await stream.aclose()
+        assert isinstance(events[0], Snapshot)
+        assert set(events[0].devices) == {"d1", "d2"}
+        assert isinstance(events[1], Pulse)
+        assert events[1].time == 1794761689
+        assert isinstance(events[2], DeviceChanged)
+        assert events[2].device.tint == "#FFFFFF"
+        assert isinstance(events[3], DeviceRemoved)
+        assert events[3].identifier == "d2"
+        assert client.clock_offset == pytest.approx(100.3)
+        mock_sleep.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_stream_reconnects_with_resync(
+        self, mock_response, client, mock_sleep
+    ):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
+        mock_response.get(
+            f"{URL}/events",
+            status=200,
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
+        )
+        mock_response.get(
+            f"{URL}/events",
+            status=200,
+            body=sse("snapshot", {"devices": {"d1": {**DEVICE, "name": "Renamed"}}}),
+        )
+        stream = client.stream()
+        events = [await anext(stream) for _ in range(4)]
+        await stream.aclose()
+        assert [type(event) for event in events] == [
+            Snapshot,
+            Resynced,
+            Snapshot,
+            DeviceChanged,
+        ]
+        assert events[1].reason == "stream closed"
+        assert events[3].device.name == "Renamed"
+        assert client.clock_offset == 0
+        mock_sleep.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_stream_backoff(self, mock_response, client, mock_sleep):
+        mock_response.get(f"{URL}/clock", status=200, payload={"time": 0}, repeat=True)
+        mock_response.get(f"{URL}/events", status=500, repeat=True)
+        mock_sleep.side_effect = [None] * 7 + [StopStream()]
+        with pytest.raises(StopStream):
+            async for _ in client.stream():
                 pass
+        assert [call.args[0] for call in mock_sleep.await_args_list] == [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            60,
+            60,
+        ]
 
     @pytest.mark.asyncio
-    async def test_read_handler_exception(self, mock_response, client):
-        client._shutdown = False
-        with (
-            patch.object(
-                client,
-                "_read_loop",
-                side_effect=[Exception("test error"), asyncio.CancelledError()],
-            ),
-            patch("asyncio.sleep", return_value=None),
-            pytest.raises(asyncio.CancelledError),
-        ):
-            await client._read_handler()
+    async def test_stream_reconnects_after_http_error(
+        self, mock_response, client, mock_sleep
+    ):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        mock_response.get(f"{URL}/events", status=500)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        events = [await anext(stream) for _ in range(3)]
+        await stream.aclose()
+        assert isinstance(events[1], Resynced)
+        assert "500" in events[1].reason
 
     @pytest.mark.asyncio
-    async def test_start_break(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: snapshot\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
-        )
-
-        def callback(device):
-            if device.identifier == "device1":
-                client.stop()
-
-        client.set_event_callback(callback)
-        client.start()
-        assert len(client._active_tasks) == 1
-        assert not client._shutdown
-        for task in client._active_tasks.copy():
-            try:
-                await asyncio.wait_for(task, timeout=1.0)
-            except asyncio.CancelledError:
+    async def test_stream_backoff_resets(self, mock_response, client, mock_sleep):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
+        mock_response.get(f"{URL}/events", status=500)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        mock_response.get(f"{URL}/events", status=500, repeat=True)
+        mock_sleep.side_effect = [None, None, StopStream()]
+        with pytest.raises(StopStream):
+            async for _ in client.stream():
                 pass
+        assert [call.args[0] for call in mock_sleep.await_args_list] == [1, 1, 2]
 
     @pytest.mark.asyncio
-    async def test_start_without_callback(self, mock_response, client):
+    @pytest.mark.parametrize(
+        "body",
+        [
+            "event: snapshot\ndata: {\n\n",
+            sse("patch", {"devices": {}}),
+            "event: pulse\ndata: now\n\n",
+            sse("snapshot", {"devices": {"d1": "broken"}}),
+        ],
+    )
+    async def test_stream_reconnects_on_invalid_data(
+        self, mock_response, client, mock_sleep, body
+    ):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
+        mock_response.get(f"{URL}/events", status=200, body=body)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        event = await anext(stream)
+        await stream.aclose()
+        assert isinstance(event, Snapshot)
+        mock_sleep.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_resync(self, mock_response, client, mock_sleep):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: snapshot\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" } } }',
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
         )
-
-        orig_events = client.events
-
-        async def events_and_shutdown(*args, **kwargs):
-            async for dev in orig_events(*args, **kwargs):
-                yield dev
-            client._shutdown = True
-
-        client._shutdown = False
-        with patch.object(client, "events", side_effect=events_and_shutdown):
-            await client._read_loop()
-        assert client._shutdown
-
-    @patch("onyx_client.client.OnyxClient.device")
-    @pytest.mark.asyncio
-    async def test_events_details(self, mock_device, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: snapshot\n"
-            'data: { "devices": { "device":'
-            '{ "name": "device", "type": "rollershutter" } } }',
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
         )
-        mock_device.return_value = Device(
-            "id",
-            "name",
-            DeviceType.AWNING,
-            DeviceMode(DeviceType.ROLLERSHUTTER),
-            list(Action),
-        )
-        index = 1
-        async for device in client.events(True):
-            assert device.identifier == "id"
-            index += 1
-        assert index == 2
-        assert mock_device.called
-        mock_device.assert_called_with("device")
+        stream = client.stream()
+        assert isinstance(await anext(stream), Snapshot)
+        client.resync()
+        resynced = await anext(stream)
+        assert isinstance(await anext(stream), Snapshot)
+        await stream.aclose()
+        assert isinstance(resynced, Resynced)
+        assert resynced.reason == "resync requested"
+        assert not client._resync_requested
+        mock_sleep.assert_not_called()
 
-    @patch("onyx_client.client.OnyxClient.device")
     @pytest.mark.asyncio
-    async def test_events_device_exception(self, mock_device, mock_response, client):
+    @pytest.mark.parametrize("status", [401, 403])
+    async def test_stream_unauthorized(self, mock_response, client, mock_sleep, status):
+        mock_response.get(f"{URL}/clock", status=401)
+        mock_response.get(f"{URL}/events", status=status)
+        with pytest.raises(aiohttp.ClientResponseError):
+            async for _ in client.stream():
+                pass
+        mock_sleep.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_stream_timeout(self, mock_response, client, mock_sleep):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
+        mock_response.get(f"{URL}/events", exception=aiohttp.ServerTimeoutError())
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        assert isinstance(await anext(stream), Snapshot)
+        await stream.aclose()
+        mock_sleep.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    async def test_stream_patch_before_snapshot_after_reconnect(
+        self, mock_response, client, mock_sleep
+    ):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            'data: { "devices": { "device":'
-            '{ "name": "device", "type": "rollershutter" } } }',
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
         )
-        mock_device.side_effect = AttributeError()
-        index = 1
-        async for device in client.events(True):
-            index += 1
-        assert index == 1
-        assert mock_device.called
-
-    @pytest.mark.asyncio
-    async def test_events_empty_data(self, mock_response, client):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/events", status=200, body=sse("patch", {"devices": {"d1": None}})
+        )
+        mock_response.get(
+            f"{URL}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            'data: { "devices": { "device1": {} } }',
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
         )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 2
+        stream = client.stream()
+        events = [await anext(stream) for _ in range(3)]
+        await stream.aclose()
+        assert [type(event) for event in events] == [Snapshot, Resynced, Snapshot]
+        assert "PATCH_BEFORE_SNAPSHOT" in events[1].reason
+        assert [call.args[0] for call in mock_sleep.await_args_list] == [1, 2]
 
     @pytest.mark.asyncio
-    async def test_events_no_devices(self, mock_response, client):
+    async def test_stream_close(self, mock_response, client, mock_sleep):
+        mock_response.get(f"{URL}/clock", status=401, repeat=True)
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            f"{URL}/events",
             status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            'data: { "devices": {  } }',
+            body=sse("snapshot", {}) + sse("snapshot", {}),
         )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 1
+        events = []
+        async for event in client.stream():
+            events.append(event)
+            await client.close()
+        assert len(events) == 1
+        mock_sleep.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_events_none(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: pulse\ndata: 1730803627\n\nevent: patch\ndata: {  }",
-        )
-        index = 1
-        async for device in client.events():
-            index += 1
-        assert index == 1
+    async def test_stream_closed_before_iteration(self, client):
+        stream = client.stream()
+        await client.close()
+        assert [event async for event in stream] == []
 
     @pytest.mark.asyncio
-    async def test_events_error(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=500,
-            body="event: pulse\ndata: 1730803627\n\nevent: patch\ndata: {  }",
-        )
-        index = 1
-        async for device in client.events():
-            index += 1
-        assert index == 1
+    async def test_stream_ignores_clock_without_time(
+        self, mock_response, client, mock_sleep
+    ):
+        mock_response.get(f"{URL}/clock", status=200, payload={})
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        await anext(stream)
+        await stream.aclose()
+        assert client.clock_offset == 0
 
     @pytest.mark.asyncio
-    async def test_events_shutter(self, mock_response, client):
+    async def test_stream_aclose_releases_connection(self, mock_response, client):
+        mock_response.get(f"{URL}/clock", status=401)
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }',
+            f"{URL}/events", status=200, body=sse("snapshot", {}) + sse("snapshot", {})
         )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
+        stream = client.stream()
+        await anext(stream)
+        response = client.url_helper._stream_response
+        await stream.aclose()
+        assert response.closed
+        assert client.url_helper._stream_response is None
 
     @pytest.mark.asyncio
-    async def test_events_multiple_pulses(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: pulse\n"
-            "data: 1732886606\n\n"
-            "event: patch\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }\n\n'
-            "event: pulse\n"
-            "data: 1730803627\n\n",
-        )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
+    async def test_resync_before_connected(self, mock_response, client, mock_sleep):
+        async def resync_during_clock(*args, **kwargs):
+            client.resync()
 
-    @pytest.mark.asyncio
-    async def test_events_invalid_orders(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: pulse\n"
-            "data: 1730803627\n\n"
-            "data: 1732886606\n\n"
-            "event: patch\n"
-            "event: pulse\n"
-            "data: 1730803627\n\n"
-            "event: patch\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter" },'
-            '"device2": { "name": "device2" },'
-            '"device3": { "type": "rollershutter" } } }\n\n'
-            "event: pulse\n"
-            "data: 1730803627\n\n",
-        )
-        index = 1
-        async for device in client.events():
-            assert device.identifier == f"device{index}"
-            index += 1
-        assert index == 4
-
-    @pytest.mark.asyncio
-    async def test_events_click_device(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: patch\n"
-            'data: { "devices": { "device1":'
-            '{ "type": "click", "offline": false } } }',
-        )
-        async for device in client.events():
-            assert device.identifier == "device1"
-            assert isinstance(device, Click)
-            assert device.device_type == DeviceType.CLICK
-            # Click always has empty actions by design
-            assert device.actions == []
-
-    @pytest.mark.asyncio
-    async def test_events_switch_device(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body='event: patch\ndata: { "devices": { "sw1":{ "type": "switch" } } }',
-        )
-        async for device in client.events():
-            assert device.identifier == "sw1"
-            assert isinstance(device, Switch)
-            assert device.device_type == DeviceType.SWITCH
-            # Switch always has empty actions by design
-            assert device.actions == []
-
-    @pytest.mark.asyncio
-    async def test_events_shutter_actions_preserved(self, mock_response, client):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: patch\n"
-            'data: { "devices": { "device1":'
-            '{ "name": "device1", "type": "rollershutter",'
-            ' "actions": ["open", "close", "stop", "wink"] } } }',
-        )
-        async for device in client.events():
-            assert device.identifier == "device1"
-            assert isinstance(device, Shutter)
-            assert Action.OPEN in device.actions
-            assert Action.CLOSE in device.actions
-            assert Action.STOP in device.actions
-            assert Action.WINK in device.actions
-
-    @pytest.mark.asyncio
-    async def test_events_shutter_properties_from_stream(self, mock_response, client):
-        """Properties from SSE data must reach the device."""
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: patch\n"
-            'data: { "devices": { "dev1":'
-            '{ "name": "dev1", "type": "rollershutter",'
-            ' "properties": { "target_position": { "value": 42, "minimum": 0, "maximum": 100 } },'
-            ' "actions": ["stop"] } } }',
-        )
-        async for device in client.events():
-            assert device.identifier == "dev1"
-            assert isinstance(device, Shutter)
-            assert device.target_position is not None
-            assert device.target_position.value == 42
-            assert device.target_position.minimum == 0
-            assert device.target_position.maximum == 100
-
-    @pytest.mark.asyncio
-    async def test_events_click_offline_from_stream(self, mock_response, client):
-        """offline=False from SSE data is propagated."""
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="event: patch\n"
-            'data: { "devices": { "clk1":'
-            '{ "type": "click", "offline": false } } }',
-        )
-        async for device in client.events():
-            assert isinstance(device, Click)
-            assert device.identifier == "clk1"
-            assert not device.offline
+        mock_response.get(f"{URL}/clock", status=401, callback=resync_during_clock)
+        mock_response.get(f"{URL}/clock", status=401)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        event = await anext(stream)
+        await stream.aclose()
+        assert isinstance(event, Snapshot)
+        assert len(mock_response.requests[("GET", URL_EVENTS)]) == 2
+        mock_sleep.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_async_context_manager(self, session):
-        config = Configuration("finger", "token")
-        async with OnyxClient(config, session) as client:
-            assert client is not None
-            assert not client._close_session
+        async with OnyxClient(Configuration("finger", "token"), session) as client:
+            assert isinstance(client, OnyxClient)
+        assert not session.closed
 
     @pytest.mark.asyncio
     async def test_close_owned_session(self):
         client = create(fingerprint="finger", access_token="token")
-        assert client._close_session
-        assert not client.client_session.closed
+        session = client.client_session
         await client.close()
-        assert client.client_session.closed
+        assert session.closed
 
     @pytest.mark.asyncio
     async def test_close_unowned_session(self, session):
-        config = Configuration("finger", "token")
-        client = OnyxClient(config, session)
-        assert not client._close_session
+        client = OnyxClient(Configuration("finger", "token"), session)
         await client.close()
         assert not session.closed
 
     @pytest.mark.asyncio
-    async def test_stop_cancels_read_loop_task(self, client):
-        async def dummy_coro():
-            await asyncio.sleep(10)
-
-        task = client._create_internal_task(dummy_coro())
-        client._read_loop_task = task
-        assert not task.done()
-        client.stop()
-        assert client._shutdown
-        assert task.cancelling() > 0 or task.cancelled()
-        assert client._read_loop_task is None
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
-
-    @pytest.mark.asyncio
-    async def test_create_internal_task_running_loop_fallback(self, session):
-        config = Configuration("finger", "token")
-        client = OnyxClient(config, session, event_loop=None)
-        client._event_loop = None
-
-        async def dummy_coro():
-            pass
-
-        task = client._create_internal_task(dummy_coro())
-        assert task is not None
-        await task
+    async def test_close_stream(self, client):
+        with patch.object(client.url_helper, "close_stream") as close_stream:
+            await client.close()
+        close_stream.assert_called_once()

@@ -1,7 +1,5 @@
 """Numeric Values of Onyx devices."""
 
-from typing import Optional
-
 from ..data.animation_value import AnimationValue
 
 
@@ -13,7 +11,7 @@ class NumericValue:
         value: int,
         minimum: int,
         maximum: int,
-        read_only: bool,
+        readonly: bool,
         animation: AnimationValue | None = None,
     ):
         """Initialize the numeric value.
@@ -21,12 +19,12 @@ class NumericValue:
         value: the value
         minimum: the minimum supported value
         maximum: the maximum supported value
-        read_only: set of the value is read only
-        animation: an optional ongoing animation"""
+        readonly: set if the value is read only
+        animation: an optional animation"""
         self.value = value
         self.minimum = minimum
         self.maximum = maximum
-        self.read_only = read_only
+        self.readonly = readonly
         self.animation = animation
 
     def __str__(self) -> str:
@@ -36,7 +34,7 @@ class NumericValue:
     def create(properties: dict):
         """Create a numeric value from properties.
 
-        properties: the properties of the device"""
+        properties: the properties of the value"""
         if properties is None:
             return None
 
@@ -44,24 +42,30 @@ class NumericValue:
             properties.get("value"),
             properties.get("minimum"),
             properties.get("maximum"),
-            properties.get("read_only", False),
+            properties.get("readonly", False),
             AnimationValue.create(properties.get("animation")),
         )
 
-    def update_with(self, other: Optional["NumericValue"]):
-        """Updates this value with the target.
+    def effective_value(self, time: float) -> float | None:
+        """Get the value at the provided time, taking the animation into account.
 
-        other: the other value"""
-        if other is not None:
-            self.value = self.value if other.value is None else other.value
-            self.minimum = self.minimum if other.minimum is None else other.minimum
-            self.maximum = self.maximum if other.maximum is None else other.maximum
-            self.read_only = (
-                self.read_only if other.read_only is None else other.read_only
-            )
-            # if other.animation is None it would mean that the animation is cancelled by Onyx.
-            # in fact, we can just overwrite it no matter the value.
-            self.animation = other.animation
+        ONYX keeps reporting the value from before an animation, even after the
+        animation finished, so the animation takes precedence over the value.
+
+        time: the UNIX timestamp (in ONYX.CENTER time)"""
+        if self.animation is None or not self.animation.keyframes:
+            return self.value
+        return self.animation.value_at(time)
+
+    def is_animating(self, time: float) -> bool:
+        """Check if an animation is pending or running at the provided time.
+
+        time: the UNIX timestamp (in ONYX.CENTER time)"""
+        return (
+            self.animation is not None
+            and len(self.animation.keyframes) > 0
+            and time < self.animation.end_time()
+        )
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
@@ -69,7 +73,7 @@ class NumericValue:
                 self.value == other.value
                 and self.minimum == other.minimum
                 and self.maximum == other.maximum
-                and self.read_only == other.read_only
+                and self.readonly == other.readonly
                 and self.animation == other.animation
             )
         return False

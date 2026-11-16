@@ -1,9 +1,14 @@
-"""Tests for mapper utils."""
+"""Tests for the mapper utils."""
 
-from onyx_client.data.boolean_value import BooleanValue
+import json
+
+import pytest
+
+from onyx_client.data.enum_value import EnumValue
 from onyx_client.data.numeric_value import NumericValue
 from onyx_client.device.click import Click
 from onyx_client.device.device import Device
+from onyx_client.device.input import Input
 from onyx_client.device.light import Light
 from onyx_client.device.shutter import Shutter
 from onyx_client.device.switch import Switch
@@ -12,410 +17,286 @@ from onyx_client.device.tag_temperature import TagTemperature
 from onyx_client.device.weather import Weather
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.utils.mapper import boolean_value, init_device, numeric_value
+from onyx_client.utils.mapper import init_device, init_group
 
 
-def test_numeric_value():
-    assert numeric_value("key", {"key": {"value": 1}}) == NumericValue(
-        value=1, minimum=None, maximum=None, read_only=False
-    )
+def numeric(value: int, maximum: int = 100) -> dict:
+    return {
+        "type": "numeric",
+        "minimum": 0,
+        "maximum": maximum,
+        "value": value,
+        "readonly": True,
+    }
 
 
-def test_numeric_value_full():
-    assert numeric_value(
-        "key", {"key": {"value": 1, "minimum": 0, "maximum": 10}}
-    ) == NumericValue(value=1, minimum=0, maximum=10, read_only=False)
+def enumeration(value: str, values: list) -> dict:
+    return {"type": "enumeration", "value": value, "values": values, "readonly": True}
 
 
-def test_numeric_value_empty_properties():
-    assert numeric_value("key", {}) is None
+class TestInitDevice:
+    def test_captured_shutter(self, captured):
+        identifier = "00000000-0000-4000-8000-000000000005"
+        data = json.loads(captured(f"details/{identifier}.json"))
+        device = init_device(identifier, data)
+        assert isinstance(device, Shutter)
+        assert device.identifier == identifier
+        assert device.name == "Shutter 5"
+        assert device.device_type == DeviceType.ROLLERSHUTTER
+        assert device.raw_type == "rollershutter"
+        assert device.tint == "#F3F3F4"
+        assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
+        assert device.actions == [Action.CLOSE, Action.OPEN, Action.STOP, Action.WINK]
+        assert device.target_position == NumericValue(100, 0, 100, False)
+        assert device.target_angle == NumericValue(0, 0, 360, False)
+        assert device.actual_position == NumericValue(100, 0, 100, True)
+        assert device.actual_angle == NumericValue(0, 0, 360, True)
+        assert device.system_state == EnumValue(
+            "ok",
+            ["collision", "collision_not_calibrated", "not_calibrated", "ok"],
+            True,
+        )
+        assert device.temperature is None
+        assert device.active_command is None
 
+    def test_summary(self, captured):
+        devices = json.loads(captured("devices-v6.json"))
+        identifier = "00000000-0000-4000-8000-000000000001"
+        device = init_device(identifier, devices[identifier])
+        assert isinstance(device, Shutter)
+        assert device.device_type == DeviceType.RAFFSTORE_90
+        assert device.actions == []
+        assert device.actual_position is None
 
-def test_numeric_value_no_properties():
-    assert numeric_value("key", None) is None
-
-
-def test_boolean_value():
-    assert boolean_value("key", {"key": {"value": "true"}}) == BooleanValue(
-        value=True, read_only=False
-    )
-
-
-def test_boolean_value_empty_properties():
-    assert boolean_value("key", {}) is None
-
-
-def test_boolean_value_no_properties():
-    assert boolean_value("key", None) is None
-
-
-def test_init_device_click():
-    device = init_device("id", "name", DeviceType.CLICK)
-    assert isinstance(device, Click)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.CLICK
-    assert device.device_mode.values is None
-    assert device.offline
-
-
-def test_init_device_click_full():
-    device = init_device(
-        "id", "name", DeviceType.CLICK, None, list(Action), {"offline": False}
-    )
-    assert isinstance(device, Click)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.CLICK
-    assert device.device_mode.values is None
-    assert not device.offline
-
-
-def test_init_device_shutter_none_type_properties_fallback():
-    """Verify shutter is detected via properties when device_type is None."""
-    device = init_device(
-        "id",
-        "name",
-        None,
-        {"target_position": {"value": 50, "minimum": 0, "maximum": 100}},
-    )
-    assert isinstance(device, Shutter)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.target_position is not None
-    assert device.target_position.value == 50
-
-
-def test_init_device_weather_none_type_properties_fallback():
-    """Verify weather is detected via properties when device_type is None."""
-    device = init_device(
-        "id",
-        "name",
-        None,
-        {"sun_brightness_sink": {"value": 100, "minimum": 0, "maximum": 150000}},
-    )
-    assert isinstance(device, Weather)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.sun_brightness_sink is not None
-    assert device.sun_brightness_sink.value == 100
-
-
-def test_init_device_light_none_type_properties_fallback():
-    """Verify light is detected via properties when device_type is None."""
-    device = init_device(
-        "id",
-        "name",
-        None,
-        {"target_brightness": {"value": 200, "minimum": 0, "maximum": 65535}},
-    )
-    assert isinstance(device, Light)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.target_brightness is not None
-    assert device.target_brightness.value == 200
-
-
-def test_init_device_click_none_type_data_fallback():
-    """Verify click is detected via data when device_type is None."""
-    device = init_device(
-        "id",
-        "name",
-        None,
-        None,
-        [],
-        {"offline": False},
-    )
-    assert isinstance(device, Click)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert not device.offline
-
-
-def test_init_device_switch():
-    device = init_device("id", "name", DeviceType.SWITCH)
-    assert isinstance(device, Switch)
-    assert device.identifier == "id"
-    assert device.device_mode.mode == DeviceType.SWITCH
-    assert device.device_mode.values is None
-
-
-def test_init_device_switch_full():
-    device = init_device("id", "name", DeviceType.SWITCH, None, list(Action))
-    assert isinstance(device, Switch)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_type == DeviceType.SWITCH
-    assert device.device_mode.mode == DeviceType.SWITCH
-    assert device.device_mode.values is None
-    assert device.actions == []
-
-
-def test_init_device_weather():
-    device = init_device("id", "name", DeviceType.WEATHER)
-    assert isinstance(device, Weather)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.WEATHER
-    assert device.device_mode.values is None
-
-
-def test_init_device_weather_minimal():
-    device = init_device("id", None, DeviceType.WEATHER)
-    assert isinstance(device, Weather)
-    assert device.identifier == "id"
-    assert device.name is None
-    assert device.device_mode.mode == DeviceType.WEATHER
-    assert device.device_mode.values is None
-
-
-def test_init_device_weather_full():
-    device = init_device(
-        "id",
-        "name",
-        DeviceType.WEATHER,
-        {
-            "device_type": {
-                "type": "weather",
-                "values": ["weather"],
-            },
-            "wind_peak": {"value": 1, "minimum": 10},
-            "sun_brightness_peak": {"value": 2, "minimum": 1},
-            "sun_brightness_sink": {"minimum": 1, "maximum": 10},
-            "air_pressure": {"value": 4, "minimum": 1, "maximum": 10},
-            "humidity": {"value": 5, "minimum": 1, "maximum": 10},
-            "temperature": {"value": 6, "minimum": 1, "maximum": 10},
-        },
-        list(Action),
-    )
-    assert isinstance(device, Weather)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.WEATHER
-    assert len(device.device_mode.values) == 1
-    assert device.wind_peak == NumericValue(1, 10, None, False)
-    assert device.sun_brightness_peak == NumericValue(2, 1, None, False)
-    assert device.sun_brightness_sink == NumericValue(None, 1, 10, False)
-    assert device.air_pressure == NumericValue(4, 1, 10, False)
-    assert device.humidity == NumericValue(5, 1, 10, False)
-    assert device.temperature == NumericValue(6, 1, 10, False)
-    assert device.actions == list(Action)
-
-
-def test_init_device_weather_no_device_type():
-    device = init_device(
-        "id",
-        "name",
-        DeviceType.WEATHER,
-        {
-            "device_type": {},
-        },
-        list(Action),
-    )
-    assert isinstance(device, Weather)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode is None
-    assert len(device.device_mode.values) == 0
-
-
-def test_init_device_light():
-    device = init_device("id", "name", DeviceType.BASIC_LIGHT)
-    assert isinstance(device, Light)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-    assert device.device_mode.values is None
-
-
-def test_init_device_light_minimal():
-    device = init_device("id", None, DeviceType.BASIC_LIGHT)
-    assert isinstance(device, Light)
-    assert device.identifier == "id"
-    assert device.name is None
-    assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-    assert device.device_mode.values is None
-
-
-def test_init_device_light_full():
-    device = init_device(
-        "id",
-        "name",
-        DeviceType.BASIC_LIGHT,
-        {
-            "device_type": {
-                "type": "basic_light",
-                "values": ["basic_light"],
-            },
-            "target_brightness": {"value": 1, "minimum": 10},
-            "actual_brightness": {"value": 2, "maximum": 10},
-            "dim_duration": {"minimum": 1, "maximum": 10},
-        },
-        list(Action),
-    )
-    assert isinstance(device, Light)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.BASIC_LIGHT
-    assert len(device.device_mode.values) == 1
-    assert device.target_brightness == NumericValue(1, 10, None, False)
-    assert device.actual_brightness == NumericValue(2, None, 10, False)
-    assert device.dim_duration == NumericValue(None, 1, 10, False)
-    assert device.actions == list(Action)
-
-
-def test_init_device_shutter():
-    device = init_device("id", "name", DeviceType.AWNING)
-    assert isinstance(device, Shutter)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.AWNING
-    assert device.device_mode.values is None
-
-
-def test_init_device_shutter_minimal():
-    device = init_device("id", None, DeviceType.AWNING)
-    assert isinstance(device, Shutter)
-    assert device.identifier == "id"
-    assert device.name is None
-    assert device.device_mode.mode == DeviceType.AWNING
-    assert device.device_mode.values is None
-
-
-def test_init_device_shutter_full():
-    device = init_device(
-        "id",
-        "name",
-        DeviceType.AWNING,
-        {
-            "device_type": {
+    def test_active_command(self):
+        device = init_device(
+            "id",
+            {
                 "type": "rollershutter",
-                "values": ["awning", "rollershutter"],
+                "active_command": {"source": {"name": "App User"}, "action": "open"},
             },
-            "target_position": {"value": 10, "minimum": 10},
-            "target_angle": {"value": 1, "maximum": 10},
-            "actual_position": {"minimum": 0, "maximum": 10},
-            "actual_angle": {"value": 1, "minimum": 1, "maximum": 10},
-        },
-        list(Action),
+        )
+        assert device.active_command.source.name == "App User"
+        assert device.active_command.action == Action.OPEN
+
+    def test_device_mode(self):
+        device = init_device(
+            "id",
+            {
+                "type": "rollershutter",
+                "properties": {
+                    "device_type": enumeration(
+                        "awning", ["awning", "raffstore_90", "rollershutter"]
+                    )
+                },
+            },
+        )
+        assert device.device_type == DeviceType.ROLLERSHUTTER
+        assert device.device_mode.mode == DeviceType.AWNING
+        assert device.device_mode.values == [
+            DeviceType.AWNING,
+            DeviceType.RAFFSTORE_90,
+            DeviceType.ROLLERSHUTTER,
+        ]
+
+    def test_pergola(self):
+        device = init_device(
+            "id",
+            {
+                "type": "screen",
+                "properties": {
+                    "temperature": numeric(215, 850),
+                    "humidity": numeric(40),
+                },
+            },
+        )
+        assert isinstance(device, Shutter)
+        assert device.temperature.value == 215
+        assert device.humidity.value == 40
+
+    def test_rgbw_light(self):
+        device = init_device(
+            "id",
+            {
+                "type": "rgbw_light",
+                "actions": ["light_on", "light_off"],
+                "properties": {
+                    "target_brightness": numeric(100, 65535),
+                    "actual_brightness": numeric(50, 65535),
+                    "dim_duration": numeric(5000, 3600000),
+                    "target_hue": numeric(120, 359),
+                    "actual_hue": numeric(110, 359),
+                    "target_saturation": numeric(80),
+                    "actual_saturation": numeric(70),
+                    "target_color_temperature": numeric(4000, 10500),
+                    "actual_color_temperature": numeric(3000, 10500),
+                    "color_mode": enumeration("hsv", ["hsv", "temperature"]),
+                },
+            },
+        )
+        assert isinstance(device, Light)
+        assert device.actions == [Action.LIGHT_ON, Action.LIGHT_OFF]
+        assert device.target_brightness.value == 100
+        assert device.actual_brightness.value == 50
+        assert device.dim_duration.value == 5000
+        assert device.target_hue.value == 120
+        assert device.actual_hue.value == 110
+        assert device.target_saturation.value == 80
+        assert device.actual_saturation.value == 70
+        assert device.target_color_temperature.value == 4000
+        assert device.actual_color_temperature.value == 3000
+        assert device.color_mode.value == "hsv"
+
+    def test_weather(self):
+        keys = [
+            "wind_peak",
+            "sun_brightness_peak",
+            "sun_brightness_sink",
+            "air_pressure",
+            "humidity",
+            "temperature",
+            "wind_speed",
+            "sun_brightness",
+        ]
+        device = init_device(
+            "id",
+            {
+                "type": "weather",
+                "properties": {key: numeric(i) for i, key in enumerate(keys)},
+            },
+        )
+        assert isinstance(device, Weather)
+        assert [getattr(device, key).value for key in keys] == list(range(len(keys)))
+
+    def test_tag_sun(self):
+        keys = ["sun_brightness", "sun_brightness_peak", "sun_brightness_sink"]
+        device = init_device(
+            "id",
+            {
+                "type": "tag_sun",
+                "properties": {key: numeric(i) for i, key in enumerate(keys)},
+            },
+        )
+        assert isinstance(device, TagSun)
+        assert [getattr(device, key).value for key in keys] == [0, 1, 2]
+
+    def test_tag_temperature(self):
+        device = init_device(
+            "id",
+            {
+                "type": "tag_temperature",
+                "properties": {"temperature": numeric(215), "humidity": numeric(40)},
+            },
+        )
+        assert isinstance(device, TagTemperature)
+        assert device.temperature.value == 215
+        assert device.humidity.value == 40
+
+    def test_input(self):
+        device = init_device(
+            "id",
+            {
+                "type": "input",
+                "properties": {
+                    "input_type": enumeration("rain_sensor", ["rain_sensor"]),
+                    "input_active": enumeration("true", ["true", "false"]),
+                },
+            },
+        )
+        assert isinstance(device, Input)
+        assert device.input_type.value == "rain_sensor"
+        assert device.input_active.as_bool()
+
+    @pytest.mark.parametrize(
+        ("offline", "expected"), [({}, True), ({"offline": False}, False)]
     )
-    assert isinstance(device, Shutter)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_mode.mode == DeviceType.ROLLERSHUTTER
-    assert len(device.device_mode.values) == 2
-    assert device.target_position == NumericValue(10, 10, None, False)
-    assert device.target_angle == NumericValue(1, None, 10, False)
-    assert device.actual_position == NumericValue(None, 0, 10, False)
-    assert device.actual_angle == NumericValue(1, 1, 10, False)
-    assert device.actions == list(Action)
+    def test_click(self, offline, expected):
+        device = init_device("id", {"type": "click", **offline})
+        assert isinstance(device, Click)
+        assert device.offline == expected
 
+    def test_switch(self):
+        assert isinstance(init_device("id", {"type": "switch"}), Switch)
 
-def test_init_device_unknown():
-    device = init_device(
-        "id",
-        "name",
-        DeviceType.UNKNOWN,
+    def test_unknown_type(self):
+        device = init_device(
+            "id",
+            {"name": "name", "type": "future_device", "properties": {"x": numeric(1)}},
+        )
+        assert type(device) is Device
+        assert device.device_type == DeviceType.UNKNOWN
+        assert device.raw_type == "future_device"
+        assert device.device_mode.mode == DeviceType.UNKNOWN
+
+    @pytest.mark.parametrize(
+        "raw_type",
+        [
+            "rollershutter",
+            "rgbw_light",
+            "weather",
+            "tag_sun",
+            "tag_temperature",
+            "input",
+            "click",
+            "switch",
+            "future_device",
+        ],
     )
-    assert isinstance(device, Device)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_type == DeviceType.UNKNOWN
-    assert device.device_mode.mode == DeviceType.UNKNOWN
+    def test_common_attributes(self, raw_type):
+        device = init_device(
+            "id",
+            {
+                "type": raw_type,
+                "tint": "#FFFFFF",
+                "actions": ["wink"],
+                "active_command": {"action": "wink"},
+            },
+        )
+        assert device.raw_type == raw_type
+        assert device.tint == "#FFFFFF"
+        assert device.actions == [Action.WINK]
+        assert device.device_mode.mode == device.device_type
+        assert device.active_command.action == Action.WINK
+
+    def test_nulls(self):
+        device = init_device(
+            "id",
+            {
+                "type": "rollershutter",
+                "actions": None,
+                "properties": {
+                    "device_type": {"value": "awning", "values": None},
+                    "system_state": {"value": "ok", "values": None},
+                },
+                "active_command": {"attributes": None, "active_indicators": None},
+            },
+        )
+        assert device.actions == []
+        assert device.device_mode.values == []
+        assert device.system_state.values == []
+        assert device.active_command.attributes == []
+        assert device.active_command.active_indicators == []
+        assert init_group("id", {"devices": None}).devices == []
+
+    def test_no_type(self):
+        device = init_device("id", {})
+        assert type(device) is Device
+        assert device.device_type == DeviceType.UNKNOWN
+        assert device.raw_type is None
+        assert device.name is None
+        assert device.actions == []
 
 
-def test_init_device_no_type():
-    device = init_device(
-        "id",
-        "name",
-    )
-    assert isinstance(device, Device)
-    assert device.identifier == "id"
-    assert device.name == "name"
-    assert device.device_type == DeviceType.UNKNOWN
-    assert device.device_mode.mode is None
+class TestInitGroup:
+    def test_init_group(self, captured):
+        groups = json.loads(captured("groups-v6.json"))
+        identifier = "00000000-0000-4000-9000-000000000003"
+        group = init_group(identifier, groups[identifier])
+        assert group.identifier == identifier
+        assert group.name == "Group 3"
+        assert len(group.devices) == 3
 
-
-def test_init_device_no_data():
-    device = init_device(
-        "id",
-    )
-    assert isinstance(device, Device)
-    assert device.identifier == "id"
-    assert device.name is None
-    assert device.device_type == DeviceType.UNKNOWN
-    assert device.device_mode.mode is None
-
-
-def test_init_device_tag_sun():
-    device = init_device(
-        "id",
-        "TAG sun",
-        DeviceType.TAG_SUN,
-        {
-            "sun_brightness": {"value": 1000, "minimum": 0, "maximum": 150000},
-            "sun_brightness_peak": {"value": 2000, "minimum": 0, "maximum": 150000},
-            "sun_brightness_sink": {"value": 500, "minimum": 0, "maximum": 150000},
-        },
-        [],
-    )
-    assert isinstance(device, TagSun)
-    assert device.identifier == "id"
-    assert device.name == "TAG sun"
-    assert device.device_type == DeviceType.TAG_SUN
-    assert device.sun_brightness == NumericValue(1000, 0, 150000, False)
-    assert device.sun_brightness_peak == NumericValue(2000, 0, 150000, False)
-    assert device.sun_brightness_sink == NumericValue(500, 0, 150000, False)
-
-
-def test_init_device_tag_sun_minimal():
-    device = init_device("id", None, DeviceType.TAG_SUN)
-    assert isinstance(device, TagSun)
-    assert device.sun_brightness is None
-
-
-def test_init_device_tag_sun_none_type_properties_fallback():
-    """A patch with only the current brightness is detected as sun tag."""
-    device = init_device("id", None, None, {"sun_brightness": {"value": 1234}})
-    assert isinstance(device, TagSun)
-    assert device.sun_brightness.value == 1234
-
-
-def test_init_device_weather_with_brightness_none_type():
-    """A weather patch with brightness and wind stays a weather station."""
-    device = init_device(
-        "id", None, None, {"sun_brightness": {"value": 1}, "wind_peak": {"value": 2}}
-    )
-    assert isinstance(device, Weather)
-    assert device.wind_peak.value == 2
-
-
-def test_init_device_tag_temperature():
-    device = init_device(
-        "id",
-        "TAG temperature",
-        DeviceType.TAG_TEMPERATURE,
-        {
-            "temperature": {"value": 214, "minimum": -400, "maximum": 1000},
-            "humidity": {"value": 53, "minimum": 0, "maximum": 100},
-        },
-        [],
-    )
-    assert isinstance(device, TagTemperature)
-    assert device.device_type == DeviceType.TAG_TEMPERATURE
-    assert device.temperature == NumericValue(214, -400, 1000, False)
-    assert device.humidity == NumericValue(53, 0, 100, False)
-
-
-def test_init_device_tag_temperature_none_type_patch_updates_tag():
-    """Untyped temperature patches map to a weather station, which updates a tag."""
-    tag = init_device(
-        "id", "TAG", DeviceType.TAG_TEMPERATURE, {"temperature": {"value": 200}}
-    )
-    patch = init_device(
-        "id", None, None, {"temperature": {"value": 214}, "humidity": {"value": 53}}
-    )
-    assert isinstance(patch, Weather)
-    tag.update_with(patch)
-    assert tag.temperature.value == 214
-    assert tag.humidity.value == 53
+    def test_init_group_empty(self):
+        group = init_group("id", {})
+        assert group.name is None
+        assert group.devices == []

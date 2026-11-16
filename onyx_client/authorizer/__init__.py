@@ -6,7 +6,8 @@ import aiohttp
 
 from ..client import OnyxClient
 from ..configuration.configuration import Configuration
-from ..utils.const import API_HEADERS, API_URL, API_VERSION
+from ..enum.verify_result import VerifyResult
+from ..utils.const import API_HEADERS, API_URL, AUTHORIZE_API_VERSION
 from ..utils.response import check
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,7 +25,10 @@ async def exchange_code(
     local_address: local address to use for the request (default: None)"""
     session = client_session if client_session is not None else aiohttp.ClientSession()
     config = await authorize(code, session, local_address=local_address)
-    if config is not None and await OnyxClient(config, session).verify():
+    if (
+        config is not None
+        and await OnyxClient(config, session).verify() == VerifyResult.OK
+    ):
         return config
     return None
 
@@ -60,4 +64,8 @@ def _api_url(local_address: str | None = None) -> str:
     """Get the base API URL.
 
     local_address: local address to use for the request (default: None)"""
-    return f"https://{local_address}/api/{API_VERSION}" if local_address else API_URL
+    return (
+        f"https://{local_address}/api/{AUTHORIZE_API_VERSION}"
+        if local_address
+        else API_URL
+    )

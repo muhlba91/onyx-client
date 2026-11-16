@@ -7,150 +7,77 @@ from onyx_client.data.numeric_value import NumericValue
 
 class TestNumericValue:
     def test_create(self):
-        expected = NumericValue(
-            10,
-            10,
-            100,
-            True,
-            AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
-        )
-        assert (
-            NumericValue.create(
-                {
-                    "value": 10,
-                    "minimum": 10,
-                    "maximum": 100,
-                    "read_only": True,
-                    "animation": {
-                        "start": 10,
-                        "current_value": 10,
-                        "keyframes": [
-                            {
-                                "interpolation": "linear",
-                                "delay": 10,
-                                "duration": 10,
-                                "value": 10,
-                            }
-                        ],
-                    },
-                }
-            )
-            == expected
+        assert NumericValue.create(
+            {
+                "type": "numeric",
+                "value": 10,
+                "minimum": 0,
+                "maximum": 100,
+                "readonly": True,
+                "animation": {
+                    "start": 10,
+                    "current_value": 10,
+                    "keyframes": [{"value": 20, "duration": 1}],
+                },
+            }
+        ) == NumericValue(
+            10, 0, 100, True, AnimationValue(10, 10, [AnimationKeyframe(20, 1)])
         )
 
     def test_create_value_only(self):
-        expected = NumericValue(10, None, None, False)
-        assert (
-            NumericValue.create(
-                {
-                    "value": 10,
-                }
-            )
-            == expected
-        )
-
-    def test_create_no_value(self):
-        expected = NumericValue(None, None, None, False)
-        assert NumericValue.create({}) == expected
+        assert NumericValue.create({"value": 10}) == NumericValue(10, None, None, False)
 
     def test_create_none(self):
         assert NumericValue.create(None) is None
 
     def test_str(self):
         assert (
-            str(
-                NumericValue.create(
-                    {
-                        "value": 10,
-                        "minimum": 10,
-                        "maximum": 100,
-                        "read_only": True,
-                        "animation": {
-                            "start": 10,
-                            "current_value": 10,
-                            "keyframes": [
-                                {
-                                    "interpolation": "linear",
-                                    "delay": 10,
-                                    "duration": 10,
-                                    "value": 10,
-                                }
-                            ],
-                        },
-                    }
-                )
-            )
-            == "NumericValue(value=10, minimum=10, maximum=100, animation=AnimationValue(start=10, current_value=10, #keyframes=1))"
+            str(NumericValue(10, 0, 100, True))
+            == "NumericValue(value=10, minimum=0, maximum=100, animation=None)"
         )
 
-    def test_update_with(self):
-        value = NumericValue(
-            1,
-            1,
-            10,
-            False,
-            AnimationValue(1, 1, [AnimationKeyframe("linear", 1, 1, 1)]),
-        )
-        expected = NumericValue(
-            10,
-            10,
-            100,
-            True,
-            AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
-        )
-        value.update_with(expected)
-        assert value == expected
-
-    def test_update_with_only_existing(self):
-        value = NumericValue(
-            10,
-            10,
-            100,
-            True,
-        )
-        expected = NumericValue(
-            10,
-            10,
-            100,
-            True,
-            AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
-        )
-        value.update_with(
-            NumericValue(
-                None,
-                None,
-                None,
-                None,
-                AnimationValue(10, 10, [AnimationKeyframe("linear", 10, 10, 10)]),
-            )
-        )
-        assert value == expected
-
-    def test_update_with_none_animation(self):
-        value = NumericValue(
-            10,
-            10,
-            100,
-            True,
-        )
-        expected = NumericValue(20, 20, 200, True, None)
-        value.update_with(
-            NumericValue(
-                20,
-                20,
-                200,
-                None,
-                None,
-            )
-        )
-        assert value == expected
+    def test_eq(self):
+        assert NumericValue(10, 0, 100, True) == NumericValue(10, 0, 100, True)
 
     def test_not_eq(self):
-        val = NumericValue(10, 10, 100, True, AnimationValue(1, 1, []))
-        assert val != 10
-        assert val != NumericValue(99, 10, 100, True, AnimationValue(1, 1, []))
-        assert val != NumericValue(10, 99, 100, True, AnimationValue(1, 1, []))
-        assert val != NumericValue(10, 10, 999, True, AnimationValue(1, 1, []))
-        assert val != NumericValue(10, 10, 100, False, AnimationValue(1, 1, []))
-        assert val != NumericValue(10, 10, 100, True, AnimationValue(2, 1, []))
-        assert val != NumericValue(10, 10, 100, True, None)
+        value = NumericValue(10, 0, 100, True, AnimationValue(0, 0, []))
+        assert value != NumericValue(11, 0, 100, True, AnimationValue(0, 0, []))
+        assert value != NumericValue(10, 1, 100, True, AnimationValue(0, 0, []))
+        assert value != NumericValue(10, 0, 99, True, AnimationValue(0, 0, []))
+        assert value != NumericValue(10, 0, 100, False, AnimationValue(0, 0, []))
+        assert value != NumericValue(10, 0, 100, True)
+        assert value != 10
+
+    def test_effective_value_without_animation(self):
+        assert NumericValue(52, 0, 100, True).effective_value(100) == 52
+
+    def test_effective_value_without_keyframes(self):
+        value = NumericValue(52, 0, 100, True, AnimationValue(0, 0, []))
+        assert value.effective_value(100) == 52
+
+    def test_effective_value_animating(self):
+        value = NumericValue(
+            52, 0, 100, True, AnimationValue(100, 52, [AnimationKeyframe(100, 10)])
+        )
+        assert value.effective_value(105) == 76
+
+    def test_effective_value_after_natural_end(self):
+        # ONYX keeps the stale value and the finished animation (see fixtures)
+        value = NumericValue(
+            52, 0, 100, True, AnimationValue(100, 52, [AnimationKeyframe(100, 10)])
+        )
+        assert value.effective_value(300) == 100
+
+    def test_is_animating(self):
+        value = NumericValue(
+            52, 0, 100, True, AnimationValue(100, 52, [AnimationKeyframe(100, 10)])
+        )
+        assert value.is_animating(99)
+        assert value.is_animating(109.9)
+        assert not value.is_animating(110)
+
+    def test_is_animating_without_animation(self):
+        assert not NumericValue(52, 0, 100, True).is_animating(0)
+        assert not NumericValue(
+            52, 0, 100, True, AnimationValue(100, 52, [])
+        ).is_animating(0)

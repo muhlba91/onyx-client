@@ -3,23 +3,29 @@
 import asyncio
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
-from random import uniform
+from contextlib import aclosing
+from urllib.parse import quote
 
 import aiohttp
 
 from .configuration.configuration import Configuration
+from .data.automation import Automation
 from .data.date_information import DateInformation
 from .data.device_command import DeviceCommand
 from .data.supported_versions import SupportedVersions
+from .data.update_status import UpdateStatus
 from .device.device import Device
-from .enum.action import Action
-from .enum.device_type import DeviceType
+from .enum.verify_result import VerifyResult
+from .exception.invalid_stream_data import InvalidStreamDataException
 from .group.group import Group
 from .helpers.url import UrlHelper
-from .utils.const import API_VERSION
-from .utils.filter import present
-from .utils.mapper import init_device
+from .stream.events import Event, Pulse, Resynced, Snapshot
+from .stream.sse import parse
+from .stream.state import State
+from .utils.const import API_VERSION, DEPRECATED_API_VERSION, STREAM_MAX_BACKOFF
+from .utils.mapper import init_device, init_group
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,34 +35,30 @@ class OnyxClient:
 
     After initializing, call ::verify to check if:
       - the provided connection parameters are correct
-      - the ONYX.CENTER supports the client's API version"""
+      - the ONYX.CENTER supports the client's API version
 
-    def __init__(
-        self,
-        config: Configuration,
-        client_session: aiohttp.ClientSession,
-        event_loop: asyncio.AbstractEventLoop | None = None,
-    ):
+    The client never runs background tasks: ::stream only runs while iterated."""
+
+    def __init__(self, config: Configuration, client_session: aiohttp.ClientSession):
         """Initialize the API client.
 
         config: the access configuration of the client
-        client_session: the aiohttp session to use
-        event_loop: the event loop to use for background events"""
+        client_session: the aiohttp session to use"""
         self.config = config
         self.client_session = client_session
         self.url_helper = UrlHelper(config, client_session)
-        self._shutdown = True
-        self._read_loop_task = None
+        self.clock_offset = 0.0
         self._close_session = False
-        if event_loop is not None:
-            self._event_loop = event_loop
-        else:
-            try:
-                self._event_loop = asyncio.get_running_loop()
-            except RuntimeError:
-                self._event_loop = None
-        self._active_tasks = set()
-        self._event_callback = None
+        self._resync_requested = False
+        self._closed = False
+        if config.api_version == DEPRECATED_API_VERSION:
+            # pragma: no mutate start
+            _LOGGER.warning(
+                "ONYX API %s is deprecated and will be removed in onyx-client 13.0.0, use %s.",
+                DEPRECATED_API_VERSION,
+                API_VERSION,
+            )
+            # pragma: no mutate end
 
     async def __aenter__(self):
         """Enter async context manager."""
@@ -67,8 +69,9 @@ class OnyxClient:
         await self.close()
 
     async def close(self):
-        """Close client connections and cancel any background tasks."""
-        self.stop()
+        """Stop the stream and close the client session if the client created it."""
+        self._closed = True
+        self.url_helper.close_stream()
         if (
             self._close_session
             and self.client_session is not None
@@ -92,11 +95,21 @@ class OnyxClient:
 
         return SupportedVersions(data.get("versions", []))
 
-    async def verify(self) -> bool:
-        """Check if the ONYX.CENTER supports the version
+    async def verify(self) -> VerifyResult:
+        """Check if the ONYX.CENTER supports the configured API version
         and the connection parameters are working."""
-        versions = await self.supported_versions()
-        return versions.supports(API_VERSION) if versions is not None else False
+        try:
+            versions = await self.supported_versions()
+            if versions is None:
+                return VerifyResult.UNREACHABLE
+            if not versions.supports(self.config.api_version):
+                return VerifyResult.VERSION_UNSUPPORTED
+            status = await self.url_helper.perform_status_request("GET", "/clock")
+        except (aiohttp.ClientError, TimeoutError):
+            return VerifyResult.UNREACHABLE
+        if status in (401, 403):
+            return VerifyResult.UNAUTHORIZED
+        return VerifyResult.OK if status == 200 else VerifyResult.UNREACHABLE
 
     async def date_information(self) -> DateInformation | None:
         """Get all date related information of the ONYX.CENTER."""
@@ -116,11 +129,11 @@ class OnyxClient:
             int(data.get("zone_offset", "0")),
         )
 
-    async def devices(self, include_details: bool = False) -> list | None:
+    async def devices(self) -> list | None:
         """Get all devices controlled by the ONYX.CENTER.
 
-        include_details: ensures all device details are queried
-                         before returning the device"""
+        The devices only contain the summary data; use ::device for the
+        properties."""
         data = await self.url_helper.perform_get_request("/devices")
         if data is None:
             # pragma: no mutate start
@@ -131,21 +144,7 @@ class OnyxClient:
             # pragma: no mutate end
             return None
 
-        if include_details:
-            return [
-                device
-                for device in [await self.device(key) for key, _ in data.items()]
-                if present(device)
-            ]
-        else:
-            return [
-                init_device(
-                    key,
-                    value.get("name"),
-                    DeviceType.convert(value.get("type")),
-                )
-                for key, value in data.items()
-            ]
+        return [init_device(key, value) for key, value in data.items()]
 
     async def device(self, identifier: str) -> Device | None:
         """Get the device properties for a provided ID.
@@ -162,15 +161,7 @@ class OnyxClient:
             # pragma: no mutate end
             return None
 
-        actions = [Action.convert(action) for action in data.get("actions", [])]
-        return init_device(
-            identifier,
-            data.get("name"),
-            DeviceType.convert(data.get("type")),
-            data.get("properties"),
-            actions,
-            data,
-        )
+        return init_device(identifier, data)
 
     async def send_command(self, identifier: str, command: DeviceCommand) -> bool:
         """Send a command to the device with the provided ID.
@@ -219,10 +210,7 @@ class OnyxClient:
             # pragma: no mutate end
             return None
 
-        return [
-            Group(key, value.get("name"), value.get("devices", []))
-            for key, value in data.items()
-        ]
+        return [init_group(key, value) for key, value in data.items()]
 
     async def group(self, identifier: str) -> Group | None:
         """Get the group properties for a provided ID.
@@ -239,7 +227,7 @@ class OnyxClient:
             # pragma: no mutate end
             return None
 
-        return Group(identifier, data.get("name"), data.get("devices", []))
+        return init_group(identifier, data)
 
     async def send_group_command(self, identifier: str, command: DeviceCommand) -> bool:
         """Send a command to the group with the provided ID.
@@ -291,139 +279,216 @@ class OnyxClient:
         # pragma: no mutate end
         return data is not None
 
-    async def events(
-        self, include_details: bool = False
-    ) -> AsyncGenerator[Device | None, None]:
-        """Stream events continuously.
+    async def automations(self) -> list | None:
+        """Get all automations configured on the ONYX.CENTER (API v6)."""
+        data = await self.url_helper.perform_get_request("/automations")
+        if data is None:
+            # pragma: no mutate start
+            _LOGGER.error(
+                "Could not call ONYX API for device %s: /automations.",
+                self.config.identifier,
+            )
+            # pragma: no mutate end
+            return None
 
-        include_details: ensures all device details are queried
-                         before emiting the device"""
-        # pragma: no mutate start
-        event = ""
-        # pragma: no mutate end
-        async for message in self.url_helper.start_stream("/events"):
-            if message is not None and len(message) > 0:  # pragma: no mutate
-                if message.startswith("event:"):
-                    event = message[len("event:") :].strip()
-                elif message.startswith("data:") and event in ["snapshot", "patch"]:
-                    data = json.loads(message[len("data:") :].strip())
-                    for key, value in data.get("devices", {}).items():
-                        try:
-                            if value is not None:
-                                device = (
-                                    await self.device(key)
-                                    if include_details
-                                    else init_device(
-                                        key,
-                                        value.get("name"),
-                                        DeviceType.convert(value.get("type")),
-                                        value.get("properties"),
-                                        [
-                                            Action.convert(action)
-                                            for action in value.get("actions", [])
-                                        ],
-                                        value,
-                                    )
-                                )
-                                yield device
-                        except AttributeError:
-                            # pragma: no mutate start
-                            _LOGGER.error(
-                                "Received unknown device data. Dropping device %s",
-                                key,
-                            )
-                            # pragma: no mutate end
+        return [Automation.create(value) for value in data]
 
-    # pragma: no mutate start
-    def start(self, include_details: bool = False, backoff_time: int = 1):
-        """Start the event stream via callback.
+    async def enable_automation(self, identifier: str) -> Automation | None:
+        """Enable the automation with the provided ID (API v6).
 
-        include_details: ensures all device details are queried
-                         before emiting the device
-        backoff_time: the maximum time in minutes for a connection retry"""
-        self._shutdown = False
-        self._read_loop_task = self._create_internal_task(
-            self._read_handler(include_details, backoff_time), name="read_loop"
-        )
+        identifier: the automation identifier"""
+        return await self._switch_automation(identifier, "enable")
 
-    def stop(self):
-        """Stop the event stream via callback."""
-        self._shutdown = True
-        if self._read_loop_task is not None and not self._read_loop_task.done():
-            self._read_loop_task.cancel()
-            self._read_loop_task = None
+    async def disable_automation(self, identifier: str) -> Automation | None:
+        """Disable the automation with the provided ID (API v6).
 
-    # pragma: no mutate end
+        Disabling also cancels the commands the automation issued.
 
-    def set_event_callback(self, callback):
-        """Set the event stream callback.
+        identifier: the automation identifier"""
+        return await self._switch_automation(identifier, "disable")
 
-        callback: the callback function taking the device as the only parameter"""
-        self._event_callback = callback
+    async def _switch_automation(
+        self, identifier: str, action: str
+    ) -> Automation | None:
+        """Enable or disable the automation with the provided ID.
 
-    # pragma: no mutate start
-    def _create_internal_task(self, coro, name=None):
-        """Create an internal task running in the background.
+        identifier: the automation identifier
+        action: enable or disable"""
+        path = f"/automations/{quote(identifier, safe='')}/{action}"
+        data = await self.url_helper.perform_post_request(path)
+        if data is None:
+            # pragma: no mutate start
+            _LOGGER.error(
+                "Could not call ONYX API for device %s: %s.",
+                self.config.identifier,
+                path,
+            )
+            # pragma: no mutate end
+            return None
 
-        coro: the coroutine to run
-        name: the event loop name"""
-        loop = self._event_loop or asyncio.get_running_loop()
-        task = loop.create_task(coro, name=name)
-        task.add_done_callback(self._complete_internal_task)
-        self._active_tasks.add(task)
-        return task
+        return Automation.create(data)
 
-    async def _read_handler(self, include_details: bool = False, backoff_time: int = 1):
-        """Handle rerunning the task in the background.
+    async def update_status(self) -> UpdateStatus | None:
+        """Get the installed and available software version (API v6)."""
+        data = await self.url_helper.perform_get_request("/update")
+        if data is None:
+            # pragma: no mutate start
+            _LOGGER.error(
+                "Could not call ONYX API for device %s: /update.",
+                self.config.identifier,
+            )
+            # pragma: no mutate end
+            return None
 
-        include_details: ensures all device details are queried
-                         before emiting the device
-        backoff_time: the maximum time in minutes for a connection retry"""
-        while not self._shutdown:
+        return UpdateStatus.create(data)
+
+    async def check_for_update(self) -> UpdateStatus | None:
+        """Check for a new software version and return the status (API v6).
+
+        Blocks until the check is complete; fails if the ONYX.CENTER is offline."""
+        return await self._post_update("/update/check")
+
+    async def install_update(self) -> UpdateStatus | None:
+        """Install the available software update (API v6).
+
+        The ONYX.CENTER restarts, which closes the stream until it is back."""
+        return await self._post_update("/update/install")
+
+    async def _post_update(self, path: str) -> UpdateStatus | None:
+        """Perform an update request.
+
+        path: the URL path"""
+        data = await self.url_helper.perform_post_request(path)
+        if data is None:
+            # pragma: no mutate start
+            _LOGGER.error(
+                "Could not call ONYX API for device %s: %s.",
+                self.config.identifier,
+                path,
+            )
+            # pragma: no mutate end
+            return None
+
+        return UpdateStatus.create(data)
+
+    async def logout(self) -> bool:
+        """Revoke the access token (API v6).
+
+        Returns True if the token is invalid afterwards and False if the
+        ONYX.CENTER could not revoke it."""
+        status = await self.url_helper.perform_status_request("POST", "/logout")
+        return status in (204, 401)
+
+    def now(self) -> float:
+        """Get the ONYX.CENTER time as UNIX timestamp.
+
+        ::clock_offset is measured on every (re)connect of ::stream (0 before).
+        Use it to evaluate animations, e.g. NumericValue.effective_value."""
+        return time.time() + self.clock_offset
+
+    async def stream(self) -> AsyncGenerator[Event, None]:
+        """Stream the state of the ONYX.CENTER as events.
+
+        Every (re)connect yields a Snapshot with the complete state. After a
+        reconnect, Resynced precedes it and the differences to the previous
+        state follow it. Patches yield DeviceAdded, DeviceChanged,
+        DeviceRemoved, GroupsChanged, AutomationsChanged and UpdateChanged with
+        complete objects; heartbeats yield Pulse.
+
+        Errors, including a silent stream, reconnect with an exponential
+        backoff. Rejected credentials (HTTP 401/403) raise
+        aiohttp.ClientResponseError. Runs until the caller stops iterating or
+        ::close was called (effective at the next message or reconnect); close
+        the generator (e.g. contextlib.aclosing) to release the connection
+        immediately."""
+        state = State()
+        attempt = 0
+        reason = None
+        while not self._closed:
+            self._resync_requested = False
             try:
-                await self._read_loop(include_details)
-            except asyncio.CancelledError:
-                raise
-            except Exception as ex:  # noqa: BLE001
-                backoff = int(uniform(0, backoff_time) * 60)
-                _LOGGER.error(
-                    "Unexpected exception: %r. Retrying with backoff %ds.", ex, backoff
-                )
-                await asyncio.sleep(backoff)
+                await self._update_clock_offset()
+                async with aclosing(self._connect(state, reason)) as events:
+                    async for event in events:
+                        if isinstance(event, Snapshot):
+                            attempt = 0
+                        yield event
+                reason = "stream closed"
+            except aiohttp.ClientResponseError as ex:
+                if ex.status in (401, 403):
+                    raise
+                reason = repr(ex)
+            except (
+                aiohttp.ClientError,
+                TimeoutError,
+                InvalidStreamDataException,
+            ) as ex:
+                reason = repr(ex)
+            if self._closed:
+                return
+            if self._resync_requested:
+                reason = "resync requested"
+                continue
+            delay = min(2**attempt, STREAM_MAX_BACKOFF)
+            attempt += 1
+            # pragma: no mutate start
+            _LOGGER.warning(
+                "ONYX event stream of %s ended (%s), reconnecting in %ds.",
+                self.config.identifier,
+                reason,
+                delay,
+            )
+            # pragma: no mutate end
+            await asyncio.sleep(delay)
 
-    def _complete_internal_task(self, task):
-        """Remove an internal task that was running in the background.
+    def resync(self):
+        """Reconnect a running ::stream; its new snapshot replaces the state."""
+        self._resync_requested = True
+        self.url_helper.close_stream()
 
-        task: the task to remove"""
-        self._active_tasks.discard(task)
-        if not task.cancelled():
-            ex = task.exception()
-            if ex is not None:
-                _LOGGER.error("Unexpected exception: %r. Completing task.", ex)
-                raise ex
-            else:
-                _LOGGER.debug("Internal task completed without exception: %s", task)
+    async def _connect(
+        self, state: State, reason: str | None
+    ) -> AsyncGenerator[Event, None]:
+        """Connect to the event stream and yield its events.
 
-    # pragma: no mutate end
+        Raises InvalidStreamDataException if the data cannot be processed.
 
-    # pragma: no mutate start
-    async def _read_loop(self, include_details: bool = False):
-        """Streams data from the ONYX API endpoint and emits device updates.
-        Updates are emitted as events through the event_callback.
+        state: the state store
+        reason: why the stream reconnects"""
+        snapshot_received = False
+        async with (
+            aclosing(self.url_helper.start_stream("/events")) as lines,
+            aclosing(parse(lines)) as messages,
+        ):
+            async for event, data in messages:
+                if self._resync_requested or self._closed:
+                    return
+                try:
+                    if event == "snapshot":
+                        resynced = not snapshot_received and state.data is not None
+                        items = state.replace(json.loads(data))
+                        if resynced:
+                            items.insert(0, Resynced(reason))
+                        snapshot_received = True
+                    elif event == "patch" and snapshot_received:
+                        items = state.apply(json.loads(data))
+                    elif event == "patch":
+                        raise ValueError("PATCH_BEFORE_SNAPSHOT")
+                    elif event == "pulse":
+                        items = [Pulse(float(data))]
+                    else:
+                        continue
+                except (ValueError, TypeError, AttributeError) as ex:
+                    raise InvalidStreamDataException(repr(ex)) from ex
+                for item in items:
+                    yield item
 
-        include_details: ensures all device details are queried
-                         before emiting the device"""
-        while not self._shutdown:
-            async for device in self.events(include_details):
-                if self._shutdown:
-                    break
-                if self._event_callback is not None:
-                    _LOGGER.debug("Received device: %s", device)
-                    self._event_callback(device)
-                else:
-                    _LOGGER.warning("Received data but no callback is defined.")
-
-    # pragma: no mutate end
+    async def _update_clock_offset(self):
+        """Update ::clock_offset from the ONYX.CENTER clock."""
+        before = time.time()
+        info = await self.date_information()
+        if info is not None and info.time > 0:
+            self.clock_offset = info.time - (before + time.time()) / 2
 
 
 def create(
@@ -432,7 +497,7 @@ def create(
     access_token: str | None = None,
     local_address: str | None = None,
     client_session: aiohttp.ClientSession = None,
-    event_loop=None,
+    api_version: str = API_VERSION,
 ) -> OnyxClient:
     """Create the client.
 
@@ -443,10 +508,15 @@ def create(
     access_token: the access token to use (optional)
     local_address: the local address to use (optional)
     client_session: the aiohttp session to use
-    event_loop: the event loop to use for background events"""
+    api_version: the API version to use without config (default: v6, deprecated: v3)"""
     if config is None:
-        config = Configuration(fingerprint, access_token, local_address=local_address)
+        config = Configuration(
+            fingerprint,
+            access_token,
+            local_address=local_address,
+            api_version=api_version,
+        )
     session = client_session if client_session is not None else aiohttp.ClientSession()
-    client = OnyxClient(config, session, event_loop)
+    client = OnyxClient(config, session)
     client._close_session = client_session is None
     return client

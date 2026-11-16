@@ -1,6 +1,7 @@
 """Device Command for an Onyx device."""
 
 from ..enum.action import Action
+from ..enum.command_attribute import CommandAttribute
 from ..exception.invalid_command import InvalidCommandException
 
 
@@ -13,13 +14,15 @@ class DeviceCommand:
         action: Action = None,
         valid_from: int | None = None,
         best_before: int | None = None,
+        attributes: list[CommandAttribute] | None = None,
     ):
         """Initialize the command.
 
         properties: the properties to send
         action: the action to perform
         valid_from: the start date of when the action can be triggered
-        bedt_before: deadline of the action validity"""
+        best_before: deadline of the action validity
+        attributes: how the device should execute the command"""
         if (properties is None and action is None) or (
             properties is not None and action is not None
         ):
@@ -29,6 +32,7 @@ class DeviceCommand:
         self.action = action
         self.valid_from = valid_from
         self.best_before = best_before
+        self.attributes = attributes
 
     def __str__(self) -> str:
         return f"DeviceCommand(data={self.data()})"
@@ -44,4 +48,9 @@ class DeviceCommand:
             data = {**data, "valid_from": self.valid_from}
         if self.best_before is not None:
             data = {**data, "best_before": self.best_before}
+        if self.attributes is not None:
+            data = {
+                **data,
+                "attributes": [attribute.string() for attribute in self.attributes],
+            }
         return data
