@@ -1,18 +1,22 @@
 """Animation Values of Onyx devices."""
 
-from typing import Optional
-
 from ..data.animation_keyframe import AnimationKeyframe
 
 
 class AnimationValue:
-    """The representation of an animation value."""
+    """The representation of an animation value.
+
+    Keyframes run one after another: each waits for its delay, then changes the
+    value linearly to its own value within its duration (instantly if the
+    duration is not positive; negative delays count as 0). A keyframe without
+    a value keeps the previous value. Unknown interpolations fall back to
+    linear."""
 
     def __init__(self, start: float, current_value: int, keyframes: list):
         """Initialize the animation value.
 
-        start: the start value
-        current_value: the current value in the animation
+        start: the start time as UNIX timestamp
+        current_value: the value at the start of the animation
         keyframes: the list of keyframes until the end of the animation"""
         self.start = start
         self.current_value = current_value
@@ -25,37 +29,51 @@ class AnimationValue:
     def create(properties: dict):
         """Create an animation value from properties.
 
-        properties: the properties of the device"""
+        properties: the properties of the animation"""
         if properties is None:
             return None
 
         return AnimationValue(
-            properties.get("start"),
-            properties.get("current_value"),
+            properties.get("start") or 0,
+            properties.get("current_value") or 0,
             [
                 AnimationKeyframe.create(keyframe)
-                for keyframe in properties.get("keyframes", [])
+                for keyframe in properties.get("keyframes") or []
+                if keyframe is not None
             ],
         )
 
-    def update_with(self, other: Optional["AnimationValue"]):
-        """Updates this value with the target.
+    def end_time(self) -> float:
+        """Get the end time of the animation as UNIX timestamp."""
+        return self.start + sum(
+            max(keyframe.delay, 0) + max(keyframe.duration, 0)
+            for keyframe in self.keyframes
+        )
 
-        other: the other value"""
-        if other is not None:
-            self.start = self.start if other.start is None else other.start
-            self.current_value = (
-                self.current_value
-                if other.current_value is None
-                else other.current_value
-            )
-            self.keyframes = (
-                self.keyframes if other.keyframes is None else other.keyframes
-            )
+    def value_at(self, time: float) -> float:
+        """Get the value of the animation at the provided time.
+
+        time: the UNIX timestamp (in ONYX.CENTER time)"""
+        value = self.current_value
+        segment_start = self.start
+        for keyframe in self.keyframes:
+            target = value if keyframe.value is None else keyframe.value
+            segment_start += max(keyframe.delay, 0)
+            if time < segment_start:
+                return value
+            if keyframe.duration > 0:
+                if time < segment_start + keyframe.duration:
+                    progress = (time - segment_start) / keyframe.duration
+                    return value + (target - value) * progress
+                segment_start += keyframe.duration
+            value = target
+        return value
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
             return (
-                self.start == other.start and self.current_value == other.current_value
+                self.start == other.start
+                and self.current_value == other.current_value
+                and self.keyframes == other.keyframes
             )
         return False

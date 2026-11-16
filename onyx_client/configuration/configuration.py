@@ -1,20 +1,32 @@
 """Onyx Client API configuration."""
 
+from ..exception.invalid_configuration import InvalidConfigurationException
+from ..utils.const import API_VERSION, DEPRECATED_API_VERSION
+
 
 class Configuration:
     """The API connection configuration."""
 
     def __init__(
-        self, fingerprint: str, access_token: str, local_address: str | None = None
+        self,
+        fingerprint: str,
+        access_token: str,
+        local_address: str | None = None,
+        api_version: str = API_VERSION,
     ):
         """Initialize the configuration.
 
         fingerprint: the ONYX.CENTER device fingerprint
         access_token: the access token to use
-        local_address: the local address to use (default: None)"""
+        local_address: the local address to use (default: None)
+        api_version: the API version to use (default: v6, deprecated: v3)"""
+        if api_version not in (API_VERSION, DEPRECATED_API_VERSION):
+            raise InvalidConfigurationException("UNSUPPORTED_API_VERSION")
+
         self.fingerprint = fingerprint
         self.access_token = access_token
         self.local_address = local_address
+        self.api_version = api_version
 
     @property
     def identifier(self) -> str:

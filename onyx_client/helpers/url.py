@@ -5,7 +5,12 @@ from typing import Any
 import aiohttp
 
 from ..configuration.configuration import Configuration
-from ..utils.const import API_HEADERS, API_URL, API_VERSION
+from ..utils.const import (
+    API_HEADERS,
+    API_URL,
+    STREAM_CONNECT_TIMEOUT,
+    STREAM_READ_TIMEOUT,
+)
 from ..utils.response import check
 
 
@@ -19,6 +24,7 @@ class UrlHelper:
         client_session: the aiohttp client session to use"""
         self.config = config
         self.client_session = client_session
+        self._stream_response = None
 
     @property
     def _headers(self) -> dict:
@@ -33,7 +39,7 @@ class UrlHelper:
         if self.config.local_address:
             api = f"https://{self.config.local_address}/api"
         if with_api:
-            api = f"{api}/{API_VERSION}"
+            api = f"{api}/{self.config.api_version}"
         return api
 
     def _url(self, path: str = "", with_api: bool = True) -> str:
@@ -68,11 +74,13 @@ class UrlHelper:
                 return None
             return await response.json()
 
-    async def perform_post_request(self, path: str, data: dict) -> Any | None:
+    async def perform_post_request(
+        self, path: str, data: dict | None = None
+    ) -> Any | None:
         """Perform a POST request.
 
         path: the URL path
-        data: the data to POST to the API"""
+        data: the data to POST to the API (default: no body)"""
         async with self.client_session.post(
             self._url(path),
             json=data,
@@ -83,27 +91,55 @@ class UrlHelper:
                 return None
             return await response.json()
 
-    # pragma: no mutate start
+    async def perform_status_request(self, method: str, path: str) -> int:
+        """Perform a request and return only its HTTP status code.
+
+        method: the HTTP method
+        path: the URL path"""
+        async with self.client_session.request(
+            method, self._url(path), headers=self._headers, ssl=not self.config.is_local
+        ) as response:
+            return response.status
+
     async def start_stream(self, path: str):
-        """Start a stream and returns the value if it's not empty.
+        """Start a stream and yield its lines without line endings.
+
+        Lines are split without a length limit (a snapshot is a single line).
+        Raises aiohttp.ClientResponseError on an erroneous HTTP response and
+        aiohttp.ServerTimeoutError if no data arrives within the read timeout.
 
         path: the URL path"""
         async with self.client_session.get(
             self._url(path),
             headers=self._headers,
             timeout=aiohttp.ClientTimeout(
-                total=0, connect=0, sock_connect=0, sock_read=0
+                total=None,
+                sock_connect=STREAM_CONNECT_TIMEOUT,
+                sock_read=STREAM_READ_TIMEOUT,
             ),
             ssl=not self.config.is_local,
         ) as response:
-            if not check(response):
-                yield None
-                return
-            async for message in response.content:
-                cleaned_message = (
-                    message.strip().decode("utf-8", errors="replace").strip()
-                )
-                if len(cleaned_message) > 0:
-                    yield cleaned_message
+            response.raise_for_status()
+            self._stream_response = response
+            buffer = b""
+            try:
+                async for chunk in response.content.iter_any():
+                    *lines, buffer = (buffer + chunk).split(b"\n")
+                    for line in lines:
+                        yield _decode(line)
+                if buffer:
+                    yield _decode(buffer)
+            finally:
+                self._stream_response = None
 
-    # pragma: no mutate end
+    def close_stream(self):
+        """Close the running stream, if any."""
+        if self._stream_response is not None:
+            self._stream_response.close()
+
+
+def _decode(line: bytes) -> str:
+    """Decode a stream line without its line ending.
+
+    line: the raw line"""
+    return line.decode("utf-8", errors="replace").rstrip("\r")

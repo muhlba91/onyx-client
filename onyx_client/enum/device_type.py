@@ -21,6 +21,9 @@ class DeviceType(Enum):
     DIMMABLE_LIGHT = auto()
     TAG_SUN = auto()
     TAG_TEMPERATURE = auto()
+    RGBW_LIGHT = auto()
+    SCREEN = auto()
+    INPUT = auto()
     UNKNOWN = 9999
 
     def string(self) -> str:
@@ -38,6 +41,7 @@ class DeviceType(Enum):
             self.PERGOLA_AWNING_ROOF,
             self.PERGOLA_SIDE,
             self.PERGOLA_SLAT_ROOF,
+            self.SCREEN,
         ]
 
     def is_light(self) -> bool:
@@ -45,6 +49,7 @@ class DeviceType(Enum):
         return self in [
             self.BASIC_LIGHT,
             self.DIMMABLE_LIGHT,
+            self.RGBW_LIGHT,
         ]
 
     def is_tag(self) -> bool:
@@ -54,12 +59,16 @@ class DeviceType(Enum):
             self.TAG_TEMPERATURE,
         ]
 
+    def is_input(self) -> bool:
+        """Check if the type corresponds to any kind of input."""
+        return self == self.INPUT
+
     @staticmethod
-    def convert(lower: str):
+    def convert(lower: str | None) -> "DeviceType":
         """Get the device type from the Onyx API's type information.
 
         lower: the lower case device type identifier"""
         try:
             return DeviceType[lower.upper()]
         except (KeyError, AttributeError):
-            return None
+            return DeviceType.UNKNOWN

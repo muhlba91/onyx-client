@@ -8,6 +8,7 @@ from aioresponses import aioresponses
 
 from onyx_client.authorizer import _api_url, authorize, exchange_code
 from onyx_client.configuration.configuration import Configuration
+from onyx_client.enum.verify_result import VerifyResult
 from onyx_client.utils.const import API_URL
 
 
@@ -19,7 +20,7 @@ from onyx_client.utils.const import API_URL
 async def test_exchange_code(mock_verify, mock_init, mock_authorize, mock_session):
     mock_conf = Configuration("finger", "token")
     mock_authorize.return_value = mock_conf
-    mock_verify.return_value = True
+    mock_verify.return_value = VerifyResult.OK
 
     config = await exchange_code("code", mock_session, local_address="1.2.3.4")
     assert config == mock_conf
@@ -37,7 +38,7 @@ async def test_exchange_code(mock_verify, mock_init, mock_authorize, mock_sessio
 async def test_exchange_code_creates_session_if_none(mock_verify, mock_authorize):
     mock_conf = Configuration("finger", "token")
     mock_authorize.return_value = mock_conf
-    mock_verify.return_value = True
+    mock_verify.return_value = VerifyResult.OK
 
     with patch("aiohttp.ClientSession") as mock_cls:
         session_instance = mock_cls.return_value
@@ -53,7 +54,7 @@ async def test_exchange_code_creates_session_if_none(mock_verify, mock_authorize
 @patch("onyx_client.client.OnyxClient.verify")
 @pytest.mark.asyncio
 async def test_exchange_code_failed(mock_verify, mock_authorize, mock_session):
-    mock_verify.return_value = False
+    mock_verify.return_value = VerifyResult.UNAUTHORIZED
     config = await exchange_code("code", mock_session)
     assert config is None
     assert mock_authorize.called

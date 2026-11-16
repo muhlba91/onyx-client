@@ -5,6 +5,8 @@ from unittest.mock import patch
 import aiohttp
 import pytest
 import pytest_asyncio
+from aiohttp import web
+from aiohttp.test_utils import TestServer
 from aioresponses import aioresponses
 
 from onyx_client.configuration.configuration import Configuration
@@ -190,6 +192,40 @@ class TestUrlHelper:
         assert response is None
 
     @pytest.mark.asyncio
+    async def test_perform_post_request_without_data(self, mock_response, helper):
+        mock_response.post(
+            f"{API_URL}/box/finger/api/{API_VERSION}/path", status=200, payload={}
+        )
+        assert await helper.perform_post_request("/path") == {}
+
+    @pytest.mark.asyncio
+    async def test_perform_status_request(self, mock_response, helper):
+        mock_response.post(f"{API_URL}/box/finger/api/{API_VERSION}/logout", status=204)
+        assert await helper.perform_status_request("POST", "/logout") == 204
+
+    @pytest.mark.asyncio
+    async def test_perform_status_request_with_local_address(
+        self, mock_response, helper_local
+    ):
+        with patch.object(
+            helper_local.client_session,
+            "request",
+            wraps=helper_local.client_session.request,
+        ) as mock_request:
+            mock_response.get(f"https://localhost/api/{API_VERSION}/clock", status=401)
+            assert await helper_local.perform_status_request("GET", "/clock") == 401
+            mock_request.assert_called_once_with(
+                "GET",
+                f"https://localhost/api/{API_VERSION}/clock",
+                headers=helper_local._headers,
+                ssl=False,
+            )
+
+    def test_url_deprecated_api_version(self, session):
+        helper = UrlHelper(Configuration("finger", "token", api_version="v3"), session)
+        assert helper._url("/path") == f"{API_URL}/box/finger/api/v3/path"
+
+    @pytest.mark.asyncio
     async def test_start_stream(self, mock_response, helper):
         with patch.object(
             helper.client_session, "get", wraps=helper.client_session.get
@@ -197,18 +233,16 @@ class TestUrlHelper:
             mock_response.get(
                 f"{API_URL}/box/finger/api/{API_VERSION}/events",
                 status=200,
-                body="data: {  }",
+                body="event: pulse\r\ndata: 1 \n\n",
             )
-            index = 1
-            async for data in helper.start_stream("/events"):
-                assert len(data) > 0
-                index += 1
-            assert index == 2
+            lines = [line async for line in helper.start_stream("/events")]
+            assert lines == ["event: pulse", "data: 1 ", ""]
+            assert helper._stream_response is None
             mock_get.assert_called_once_with(
                 f"{API_URL}/box/finger/api/{API_VERSION}/events",
                 headers=helper._headers,
                 timeout=aiohttp.ClientTimeout(
-                    total=0, connect=0, sock_connect=0, sock_read=0
+                    total=None, sock_connect=10, sock_read=90
                 ),
                 ssl=True,
             )
@@ -221,58 +255,76 @@ class TestUrlHelper:
             mock_response.get(
                 f"https://localhost/api/{API_VERSION}/events",
                 status=200,
-                body="data: {  }",
+                body="data: {}",
             )
-            index = 1
-            async for data in helper_local.start_stream("/events"):
-                assert len(data) > 0
-                index += 1
-            assert index == 2
+            lines = [line async for line in helper_local.start_stream("/events")]
+            assert lines == ["data: {}"]
             mock_get.assert_called_once_with(
                 f"https://localhost/api/{API_VERSION}/events",
                 headers=helper_local._headers,
                 timeout=aiohttp.ClientTimeout(
-                    total=0, connect=0, sock_connect=0, sock_read=0
+                    total=None, sock_connect=10, sock_read=90
                 ),
                 ssl=False,
             )
 
     @pytest.mark.asyncio
-    async def test_start_stream_none(self, mock_response, helper):
+    async def test_start_stream_empty(self, mock_response, helper):
         mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=200,
-            body="",
+            f"{API_URL}/box/finger/api/{API_VERSION}/events", status=200, body=""
         )
-        index = 1
-        async for data in helper.start_stream("/events"):
-            index += 1
-        assert index == 1
+        assert [line async for line in helper.start_stream("/events")] == []
 
     @pytest.mark.asyncio
     async def test_start_stream_error(self, mock_response, helper):
-        mock_response.get(
-            f"{API_URL}/box/finger/api/{API_VERSION}/events",
-            status=500,
-            body="",
-        )
-        index = 1
-        async for data in helper.start_stream("/events"):
-            assert data is None
-            index += 1
-        assert index == 2
+        mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/events", status=401)
+        with pytest.raises(aiohttp.ClientResponseError):
+            async for _ in helper.start_stream("/events"):
+                pass
 
     @pytest.mark.asyncio
     async def test_start_stream_fallback_decoding(self, mock_response, helper):
-        # Using invalid UTF-8 bytes to verify decoding with replacement characters
-        invalid_utf8 = b"\xff\n"
         mock_response.get(
             f"{API_URL}/box/finger/api/{API_VERSION}/events",
             status=200,
-            body=invalid_utf8,
+            body=b"\xff\n",
         )
-        index = 1
-        async for data in helper.start_stream("/events"):
-            assert data == "\ufffd"
-            index += 1
-        assert index == 2
+        assert [line async for line in helper.start_stream("/events")] == ["\ufffd"]
+
+    @pytest.mark.asyncio
+    async def test_close_stream(self, mock_response, helper):
+        mock_response.get(
+            f"{API_URL}/box/finger/api/{API_VERSION}/events",
+            status=200,
+            body="data: 1\n\ndata: 2\n\n",
+        )
+        async for _ in helper.start_stream("/events"):
+            response = helper._stream_response
+            helper.close_stream()
+            assert response.closed
+            break
+
+    def test_close_stream_without_stream(self, helper):
+        helper.close_stream()
+        assert helper._stream_response is None
+
+    @pytest.mark.asyncio
+    async def test_start_stream_long_lines(self, session):
+        snapshot = "data: " + "x" * 300_000
+
+        async def handler(request):
+            response = web.StreamResponse()
+            await response.prepare(request)
+            await response.write(snapshot[:1000].encode())
+            await response.write(f"{snapshot[1000:]}\r\n\nevent: pulse".encode())
+            return response
+
+        app = web.Application()
+        app.router.add_get("/events", handler)
+        async with TestServer(app) as server:
+            helper = UrlHelper(Configuration("finger", "token"), session)
+            with patch.object(
+                helper, "_url", return_value=str(server.make_url("/events"))
+            ):
+                lines = [line async for line in helper.start_stream("/events")]
+        assert lines == [snapshot, "", "event: pulse"]

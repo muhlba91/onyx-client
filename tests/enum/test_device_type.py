@@ -1,4 +1,4 @@
-"""Tests for the Action enum."""
+"""Tests for the DeviceType enum."""
 
 import pytest
 
@@ -10,7 +10,7 @@ class TestDeviceType:
         assert DeviceType.convert(DeviceType.AWNING.name.lower()) == DeviceType.AWNING
 
     def test_convert_invalid(self):
-        assert not DeviceType.convert("foo")
+        assert DeviceType.convert("foo") == DeviceType.UNKNOWN
 
     @pytest.mark.parametrize("device_type", list(DeviceType))
     def test_string(self, device_type: DeviceType):
@@ -25,10 +25,17 @@ class TestDeviceType:
         assert DeviceType.PERGOLA_AWNING_ROOF.is_shutter()
         assert DeviceType.PERGOLA_SIDE.is_shutter()
         assert DeviceType.PERGOLA_SLAT_ROOF.is_shutter()
+        assert DeviceType.SCREEN.is_shutter()
 
     def test_is_light(self):
         assert DeviceType.BASIC_LIGHT.is_light()
         assert DeviceType.DIMMABLE_LIGHT.is_light()
+        assert DeviceType.RGBW_LIGHT.is_light()
+
+    def test_is_input(self):
+        assert DeviceType.INPUT.is_input()
+        assert not DeviceType.INPUT.is_shutter()
+        assert not DeviceType.WEATHER.is_input()
 
     def test_is_tag(self):
         assert DeviceType.TAG_SUN.is_tag()
@@ -41,8 +48,13 @@ class TestDeviceType:
         assert DeviceType.convert("tag_sun") == DeviceType.TAG_SUN
         assert DeviceType.convert("tag_temperature") == DeviceType.TAG_TEMPERATURE
 
-    def test_convert_none_returns_none(self):
-        assert DeviceType.convert(None) is None
+    def test_convert_v6_types(self):
+        assert DeviceType.convert("rgbw_light") == DeviceType.RGBW_LIGHT
+        assert DeviceType.convert("screen") == DeviceType.SCREEN
+        assert DeviceType.convert("input") == DeviceType.INPUT
+
+    def test_convert_none(self):
+        assert DeviceType.convert(None) == DeviceType.UNKNOWN
 
     def test_is_shutter_false_for_non_shutter(self):
         assert not DeviceType.BASIC_LIGHT.is_shutter()

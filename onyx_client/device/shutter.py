@@ -1,27 +1,12 @@
 """Shutter class."""
 
-from typing import Optional
-
 from ..data.device_mode import DeviceMode
+from ..data.enum_value import EnumValue
 from ..data.numeric_value import NumericValue
 from ..device.device import Device
 from ..enum.device_type import DeviceType
 
 
-# not mapped properties:
-# - auto_calibration
-# - heart_beat_enabled
-# - sun_guard_lower_action
-# - sun_guard_lower_angle
-# - sun_guard_lower_position
-# - sun_guard_lower_threshold
-# - sun_guard_upper_action
-# - sun_guard_upper_angle
-# - sun_guard_upper_position
-# - sun_guard_upper_threshold
-# - system_state
-# - wind_guard_enabled
-# - wind_peak_threshold
 class Shutter(Device):
     """A ONYX controlled shutter device."""
 
@@ -36,6 +21,10 @@ class Shutter(Device):
         target_angle: NumericValue = None,
         actual_angle: NumericValue = None,
         actual_position: NumericValue = None,
+        system_state: EnumValue = None,
+        temperature: NumericValue = None,
+        humidity: NumericValue = None,
+        **kwargs,
     ):
         """Initialize the shutter device.
 
@@ -47,52 +36,19 @@ class Shutter(Device):
         target_position: the target position of the shutter
         target_angle: the target angle of the shutter
         actual_position: the actual position of the shutter
-        actual_angle: the actual angle of the shutter"""
-        super().__init__(identifier, name, device_type, device_mode, actions)
+        actual_angle: the actual angle of the shutter
+        system_state: the calibration and collision state
+        temperature: the temperature (in 1/10 degrees Celsius, pergola unit only)
+        humidity: the relative humidity (pergola unit only)
+        kwargs: the optional attributes of Device"""
+        super().__init__(identifier, name, device_type, device_mode, actions, **kwargs)
         self.target_position = target_position
         self.target_angle = target_angle
         self.actual_angle = actual_angle
         self.actual_position = actual_position
+        self.system_state = system_state
+        self.temperature = temperature
+        self.humidity = humidity
 
     def __str__(self):
-        return f"Shutter({super().__str__()}, actual_position={self.actual_position}, actual_angle={self.actual_angle}, target_position={self.target_position}, target_angle={self.target_angle})"
-
-    def update_with(self, update: Optional["Shutter"]):
-        """Update the device with an update patch.
-
-        update: the update patch"""
-        super().update_with(update)
-
-        target_position = getattr(update, "target_position", None)
-        if self.target_position is not None:
-            self.target_position.update_with(target_position)
-        else:
-            self.target_position = target_position
-
-        target_angle = getattr(update, "target_angle", None)
-        if self.target_angle is not None:
-            self.target_angle.update_with(target_angle)
-        else:
-            self.target_angle = target_angle
-
-        actual_position = getattr(update, "actual_position", None)
-        if self.actual_position is not None:
-            self.actual_position.update_with(actual_position)
-        else:
-            self.actual_position = actual_position
-
-        actual_angle = getattr(update, "actual_angle", None)
-        if self.actual_angle is not None:
-            self.actual_angle.update_with(actual_angle)
-        else:
-            self.actual_angle = actual_angle
-
-    @staticmethod
-    def keys() -> list:
-        """Get the list of keys specific to the device type."""
-        return [
-            "target_position",
-            "target_angle",
-            "actual_angle",
-            "actual_position",
-        ]
+        return f"Shutter({super().__str__()}, actual_position={self.actual_position}, actual_angle={self.actual_angle}, target_position={self.target_position}, target_angle={self.target_angle}, system_state={self.system_state})"

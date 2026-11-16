@@ -1,307 +1,68 @@
 """Tests for the Light Device class."""
 
-import pytest
-import pytest_asyncio
-
 from onyx_client.data.device_mode import DeviceMode
+from onyx_client.data.enum_value import EnumValue
 from onyx_client.data.numeric_value import NumericValue
-from onyx_client.device.device import Device
 from onyx_client.device.light import Light
 from onyx_client.enum.action import Action
 from onyx_client.enum.device_type import DeviceType
-from onyx_client.exception.update_exception import UpdateException
 
 
 class TestLight:
-    @pytest_asyncio.fixture
-    def device_mode(self):
-        yield DeviceMode(DeviceType.BASIC_LIGHT)
-
-    def test_init(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
+    def test_init(self):
+        brightness = NumericValue(100, 0, 65535, False)
+        duration = NumericValue(5000, 0, 3600000, False)
+        hue = NumericValue(120, 0, 359, False)
+        saturation = NumericValue(50, 0, 100, False)
+        temperature = NumericValue(4000, 2700, 10500, False)
+        mode = EnumValue("hsv", ["hsv", "temperature"], True)
         light = Light(
             "id",
             "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
+            DeviceType.RGBW_LIGHT,
+            DeviceMode(DeviceType.RGBW_LIGHT),
             list(Action),
-            value1,
-            value2,
-            value3,
+            brightness,
+            brightness,
+            duration,
+            hue,
+            hue,
+            saturation,
+            saturation,
+            temperature,
+            temperature,
+            mode,
         )
         assert light.identifier == "id"
         assert light.name == "name"
-        assert light.device_type == DeviceType.BASIC_LIGHT
-        assert light.device_mode.mode == DeviceType.BASIC_LIGHT
+        assert light.device_type == DeviceType.RGBW_LIGHT
+        assert light.device_mode.mode == DeviceType.RGBW_LIGHT
         assert light.actions == list(Action)
-        assert light.target_brightness == value1
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value3
+        assert light.target_brightness == brightness
+        assert light.actual_brightness == brightness
+        assert light.dim_duration == duration
+        assert light.target_hue == hue
+        assert light.actual_hue == hue
+        assert light.target_saturation == saturation
+        assert light.actual_saturation == saturation
+        assert light.target_color_temperature == temperature
+        assert light.actual_color_temperature == temperature
+        assert light.color_mode == mode
+
+    def test_init_defaults(self):
+        light = Light("id", "name", DeviceType.BASIC_LIGHT, None, [])
+        assert light.target_brightness is None
+        assert light.target_hue is None
+        assert light.color_mode is None
 
     def test_str(self):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            None,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
+        value = NumericValue(10, 0, 100, False)
+        light = Light("id", "name", DeviceType.DIMMABLE_LIGHT, None, [], value, value)
         assert (
             str(light)
-            == "Light(Device(id=id, name=name, type=DeviceType.BASIC_LIGHT), actual_brightness=NumericValue(value=2, minimum=0, maximum=10, animation=None), target_brightness=NumericValue(value=1, minimum=0, maximum=10, animation=None), dim_duration=NumericValue(value=3, minimum=0, maximum=10, animation=None))"
+            == "Light(Device(id=id, name=name, type=DeviceType.DIMMABLE_LIGHT), actual_brightness=NumericValue(value=10, minimum=0, maximum=100, animation=None), target_brightness=NumericValue(value=10, minimum=0, maximum=100, animation=None), dim_duration=None, color_mode=None)"
         )
 
-    def test_init_no_additional_values(self, device_mode):
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-        )
-        assert light.identifier == "id"
-        assert light.device_type == DeviceType.BASIC_LIGHT
-        assert light.device_mode.mode == DeviceType.BASIC_LIGHT
-        assert light.target_brightness is None
-        assert light.actual_brightness is None
-        assert light.dim_duration is None
-
-    def test_update_with(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
-        update = Light(
-            "id",
-            "name1",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value3,
-            value2,
-            value1,
-        )
-        light.update_with(update)
-        assert light.name == "name1"
-        assert light.target_brightness == value3
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value1
-
-    def test_update_with_no_data_update_none(self, device_mode):
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            None,
-            None,
-            None,
-        )
-        update = Light(
-            "id",
-            None,
-            None,
-            None,
-            None,
-        )
-        light.update_with(update)
-        assert light.name == "name"
-        assert light.target_brightness is None
-        assert light.actual_brightness is None
-        assert light.dim_duration is None
-
-    def test_update_with_no_data_update_data(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            None,
-            None,
-            None,
-        )
-        update = Light(
-            "id",
-            None,
-            None,
-            None,
-            None,
-            value1,
-            value2,
-            value3,
-        )
-        light.update_with(update)
-        assert light.name == "name"
-        assert light.target_brightness == value1
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value3
-
-    def test_update_with_none(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
-        update = Light(
-            "id",
-            None,
-            None,
-            None,
-            None,
-        )
-        light.update_with(update)
-        assert light.name == "name"
-        assert light.target_brightness == value1
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value3
-
-    def test_update_with_exception(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
-        update = Light(
-            "other",
-            None,
-            None,
-            None,
-            None,
-        )
-        with pytest.raises(UpdateException):
-            light.update_with(update)
-
-    def test_update_with_partials(self, device_mode):
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        value4 = NumericValue(None, 10, None, False)
-        value5 = NumericValue(20, None, None, False)
-        value6 = NumericValue(None, None, 100, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
-        update = Light(
-            "id",
-            "name1",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value4,
-            value5,
-            value6,
-        )
-        light.update_with(update)
-        assert light.name == "name1"
-        assert light.target_brightness == NumericValue(1, 10, 10, False)
-        assert light.actual_brightness == NumericValue(20, 0, 10, False)
-        assert light.dim_duration == NumericValue(3, 0, 100, False)
-
-        value1 = NumericValue(1, 0, 10, False)
-        value2 = NumericValue(2, 0, 10, False)
-        value3 = NumericValue(3, 0, 10, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            None,
-            value2,
-            value3,
-        )
-        update = Light(
-            "id",
-            "name1",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            None,
-            None,
-        )
-        light.update_with(update)
-        assert light.name == "name1"
-        assert light.target_brightness == value1
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value3
-
-    def test_keys(self):
-        assert Light.keys() == [
-            "target_brightness",
-            "actual_brightness",
-            "dim_duration",
-        ]
-
-    def test_update_with_base_device_patch(self, device_mode):
-        value1 = NumericValue(100, 0, 255, False)
-        value2 = NumericValue(80, 0, 255, False)
-        value3 = NumericValue(5, 0, 60, False)
-        light = Light(
-            "id",
-            "name",
-            DeviceType.BASIC_LIGHT,
-            device_mode,
-            list(Action),
-            value1,
-            value2,
-            value3,
-        )
-        update = Device(
-            "id",
-            "patched_name",
-            DeviceType.UNKNOWN,
-            DeviceMode(DeviceType.UNKNOWN),
-            [],
-        )
-        light.update_with(update)
-        assert light.name == "patched_name"
-        assert light.device_type == DeviceType.BASIC_LIGHT
-        assert light.target_brightness == value1
-        assert light.actual_brightness == value2
-        assert light.dim_duration == value3
+    def test_init_common_attributes(self):
+        light = Light("id", "name", DeviceType.BASIC_LIGHT, None, [], tint="#000000")
+        assert light.tint == "#000000"

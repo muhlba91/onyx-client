@@ -4,6 +4,7 @@ import pytest
 
 from onyx_client.data.device_command import DeviceCommand
 from onyx_client.enum.action import Action
+from onyx_client.enum.command_attribute import CommandAttribute
 from onyx_client.exception.invalid_command import InvalidCommandException
 
 
@@ -35,6 +36,16 @@ class TestDeviceCommand:
     def test_data_best_before(self):
         command = DeviceCommand(action=Action.STOP, best_before=10)
         assert command.data() == {"action": "stop", "best_before": 10}
+
+    def test_data_attributes(self):
+        command = DeviceCommand(
+            properties={"target_position": 20},
+            attributes=[CommandAttribute.SILENT, CommandAttribute.SLOW],
+        )
+        assert command.data() == {
+            "properties": {"target_position": 20},
+            "attributes": ["silent", "slow"],
+        }
 
     def test_str(self):
         command = DeviceCommand(properties={"property": 10})

@@ -1,93 +1,46 @@
 import asyncio
 import getopt
+from contextlib import aclosing
 from sys import argv, exit
 
-import aiohttp
-
 from onyx_client.client import create
-from onyx_client.data.device_command import DeviceCommand
+from onyx_client.device.shutter import Shutter
+from onyx_client.enum.verify_result import VerifyResult
+from onyx_client.stream.events import DeviceChanged, Pulse, Snapshot
 
 
-class LoggingClientSession(aiohttp.ClientSession):
-    """Used to intercept requests and to be logged."""
-
-    def __init__(self, enable_logging: bool = True):
-        """Initialize the custom logging session."""
-        self.enable_logging = enable_logging
-        super().__init__()
-
-    async def _request(self, method, url, **kwargs):
-        if self.enable_logging:
-            print(f"Starting request {method} {url} {kwargs}\n")
-        return await super()._request(method, url, **kwargs)
-
-
-async def shutter_worker(queue, client, device_id):
-    """Worker processing our position commands."""
-    while True:
-        position = await queue.get()
-        print(
-            await client.send_command(
-                device_id, DeviceCommand(properties={"target_position": position})
-            )
-        )
-        await asyncio.sleep(15)
-        queue.task_done()
+def print_shutter(client, device):
+    """Print the position of a shutter, taking its animation into account."""
+    if isinstance(device, Shutter) and device.actual_position is not None:
+        position = device.actual_position.effective_value(client.now())
+        print(f"{device.name}: {position:.0f}%")
 
 
 async def perform(fingerprint: str, access_token: str, local_address: str):
     """Performs your actions."""
 
-    # open session and create client
-    session = LoggingClientSession()
-    client = create(
-        fingerprint=fingerprint,
-        access_token=access_token,
-        client_session=session,
-        local_address=local_address,
-    )
+    async with create(
+        fingerprint=fingerprint, access_token=access_token, local_address=local_address
+    ) as client:
+        # verify API
+        result = await client.verify()
+        print(result)
+        if result != VerifyResult.OK:
+            return
 
-    # verify API
-    print(await client.verify())
-    print()
-
-    # get all devices
-    devices = await client.devices(include_details=True)
-    print(devices)
-    print()
-
-    # get first device in list
-    device_id = devices[0].identifier
-    device_id = "5e2912f7-f25e-4f16-bf1a-6cb967a08261"
-    device = await client.device(device_id)
-    print(device)
-    print()
-
-    # assumption: shutter!
-    # move shutter to 10%,
-    # wait a few seconds,
-    # move shutter back to where it was
-    queue = asyncio.Queue()
-    queue.put_nowait(10)
-    queue.put_nowait(90)
-    task = asyncio.create_task(shutter_worker(queue, client, device_id))
-    print()
-
-    # call the streaming API for 11 devices
-    index = 1
-    async for device in client.events():
-        print(device)
-        print(device.actual_position)
-        print(device.actual_position.animation)
-        index += 1
-        if index == 11:
-            break
-    print()
-
-    # cleanup
-    await queue.join()
-    task.cancel()
-    await session.close()
+        # stream the state until five heartbeats were received
+        pulses = 0
+        async with aclosing(client.stream()) as events:
+            async for event in events:
+                if isinstance(event, Snapshot):
+                    for device in event.devices.values():
+                        print_shutter(client, device)
+                elif isinstance(event, DeviceChanged):
+                    print_shutter(client, event.device)
+                elif isinstance(event, Pulse):
+                    pulses += 1
+                    if pulses == 5:
+                        break
 
 
 if __name__ == "__main__":
@@ -112,5 +65,4 @@ if __name__ == "__main__":
         exit(1)
 
     # we are async, so wait until everything completed
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(perform(finger, token, address))
+    asyncio.run(perform(finger, token, address))
