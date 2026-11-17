@@ -44,7 +44,6 @@ testpaths = ["tests"]
 norecursedirs = [".git"]
 
 [tool.coverage.run]
-relative_files = true
 source = ["onyx_client"]
 
 [tool.coverage.report]
@@ -55,6 +54,8 @@ exclude_lines = [
     "main()",
     "parser\\..",
     "argparse\\..",
+    # log statements (see [tool.mutmut])
+    "_LOGGER\\.",
 ]
 fail_under = 95
 show_missing = true
@@ -62,6 +63,9 @@ show_missing = true
 [tool.mutmut]
 source_paths = ["onyx_client/"]
 pytest_add_cli_args = ["-o", "addopts="]
+# log statements are not behaviour: the coverage exclusion in [tool.coverage.report] makes mutmut skip
+# each whole (multi-line) _LOGGER call (needs absolute paths: no relative_files in [tool.coverage.run])
+mutate_only_covered_lines = true
 do_not_mutate_patterns = [
-    '_LOGGER\\.',
+    '_LOGGER\.',
 ]
