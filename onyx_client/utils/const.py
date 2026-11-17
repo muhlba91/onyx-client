@@ -10,3 +10,4 @@ AUTHORIZE_API_VERSION = "v3"
 STREAM_CONNECT_TIMEOUT = 10
 STREAM_READ_TIMEOUT = 90  # seconds, three missed pulses
 STREAM_MAX_BACKOFF = 60
+CLOCK_TIMEOUT = 10  # seconds, the clock must not delay a stream reconnect

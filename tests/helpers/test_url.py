@@ -328,3 +328,31 @@ class TestUrlHelper:
             ):
                 lines = [line async for line in helper.start_stream("/events")]
         assert lines == [snapshot, "", "event: pulse"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["get", "delete", "post"])
+    async def test_non_json_response_carries_no_token(
+        self, mock_response, session, method
+    ):
+        helper = UrlHelper(Configuration("finger", "t0k3n-dummy"), session)
+        getattr(mock_response, method)(
+            f"{API_URL}/box/finger/api/{API_VERSION}/path",
+            status=200,
+            body="<html>",
+            content_type="text/html",
+        )
+        with pytest.raises(aiohttp.ContentTypeError) as info:
+            await getattr(helper, f"perform_{method}_request")("/path")
+        assert "t0k3n-dummy" not in repr(info.value)
+        assert "t0k3n-dummy" not in repr(info.value.args)
+        assert "t0k3n-dummy" not in str(info.value)
+
+    @pytest.mark.asyncio
+    async def test_start_stream_error_carries_no_token(self, mock_response, session):
+        helper = UrlHelper(Configuration("finger", "t0k3n-dummy"), session)
+        mock_response.get(f"{API_URL}/box/finger/api/{API_VERSION}/events", status=401)
+        with pytest.raises(aiohttp.ClientResponseError) as info:
+            async for _ in helper.start_stream("/events"):
+                pass
+        assert "t0k3n-dummy" not in repr(info.value)
+        assert "t0k3n-dummy" not in repr(info.value.args)

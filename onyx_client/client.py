@@ -24,10 +24,16 @@ from .helpers.url import UrlHelper
 from .stream.events import Event, Pulse, Resynced, Snapshot
 from .stream.sse import parse
 from .stream.state import State
-from .utils.const import API_VERSION, DEPRECATED_API_VERSION, STREAM_MAX_BACKOFF
+from .utils.const import (
+    API_VERSION,
+    CLOCK_TIMEOUT,
+    DEPRECATED_API_VERSION,
+    STREAM_MAX_BACKOFF,
+)
 from .utils.mapper import init_device, init_group
+from .utils.sanitize import describe_exception, protect
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = protect(logging.getLogger(__name__))
 
 
 class OnyxClient:
@@ -397,7 +403,10 @@ class OnyxClient:
 
         Errors, including a silent stream, reconnect with an exponential
         backoff. Rejected credentials (HTTP 401/403) raise
-        aiohttp.ClientResponseError. Runs until the caller stops iterating or
+        aiohttp.ClientResponseError without the request headers, so it never
+        carries the access token. Before every connect the clock offset is
+        refreshed (for at most CLOCK_TIMEOUT seconds; the previous offset is
+        kept on failure). Resynced.reason never contains credentials. Runs until the caller stops iterating or
         ::close was called (effective at the next message or reconnect); close
         the generator (e.g. contextlib.aclosing) to release the connection
         immediately."""
@@ -417,13 +426,13 @@ class OnyxClient:
             except aiohttp.ClientResponseError as ex:
                 if ex.status in (401, 403):
                     raise
-                reason = repr(ex)
+                reason = describe_exception(ex)
             except (
                 aiohttp.ClientError,
                 TimeoutError,
                 InvalidStreamDataException,
             ) as ex:
-                reason = repr(ex)
+                reason = describe_exception(ex)
             if self._closed:
                 return
             if self._resync_requested:
@@ -479,14 +488,50 @@ class OnyxClient:
                     else:
                         continue
                 except (ValueError, TypeError, AttributeError) as ex:
-                    raise InvalidStreamDataException(repr(ex)) from ex
+                    raise InvalidStreamDataException(repr(ex)[:200]) from ex
                 for item in items:
                     yield item
 
     async def _update_clock_offset(self):
-        """Update ::clock_offset from the ONYX.CENTER clock."""
+        """Update ::clock_offset from the ONYX.CENTER clock.
+
+        The clock is best-effort and never blocks or aborts a connect: it is
+        given CLOCK_TIMEOUT seconds only; when it does not answer, is not
+        reachable or sends invalid data, the previous offset is kept. Only
+        rejected credentials (HTTP 401/403) are raised."""
         before = time.time()
-        info = await self.date_information()
+        try:
+            async with asyncio.timeout(CLOCK_TIMEOUT):
+                info = await self.date_information()
+        except TimeoutError as ex:
+            # pragma: no mutate start
+            _LOGGER.warning(
+                "ONYX clock of %s timed out (%s), keeping the offset.",
+                self.config.identifier,
+                describe_exception(ex),
+            )
+            # pragma: no mutate end
+            return
+        except aiohttp.ClientError as ex:
+            if isinstance(ex, aiohttp.ClientResponseError) and ex.status in (401, 403):
+                raise
+            # pragma: no mutate start
+            _LOGGER.warning(
+                "ONYX clock of %s failed (%s), keeping the offset.",
+                self.config.identifier,
+                describe_exception(ex),
+            )
+            # pragma: no mutate end
+            return
+        except (ValueError, TypeError, AttributeError) as ex:
+            # pragma: no mutate start
+            _LOGGER.warning(
+                "ONYX clock of %s sent invalid data (%s), keeping the offset.",
+                self.config.identifier,
+                describe_exception(ex),
+            )
+            # pragma: no mutate end
+            return
         if info is not None and info.time > 0:
             self.clock_offset = info.time - (before + time.time()) / 2
 

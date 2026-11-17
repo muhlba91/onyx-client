@@ -57,6 +57,10 @@ fingerprint and access token**!
 
 The local address can be used to access the ONYX.CENTER API from within the local network. If set, the client will use this address for all API requests.
 
+### Logging
+
+The client logs to the `onyx_client.*` loggers. Log messages and `Resynced.reason` never contain the access token; the fingerprint (or local address) identifies the ONYX.CENTER. `repr(Configuration)` masks the access token.
+
 ### Access Control Helper
 
 The method `onyx_client.authorizer.exchange_code` takes the **API code** and an optional **local API address**, and performs the exchange to a **fingerprint and access token**. Please follow the **aforementioned documentation** to retrieve the code.
@@ -125,13 +129,13 @@ async for event in client.stream():
 | `AutomationsChanged` | any automation changed; carries all `automations`.                                                          |
 | `UpdateChanged`      | the update status changed; carries the `update` status.                                                     |
 | `Pulse`              | the ONYX.CENTER sends its heartbeat (every 30 seconds on current firmware); carries its `time`.             |
-| `Resynced`           | the stream reconnected; the following `Snapshot` replaces the state and is followed by the differences.     |
+| `Resynced`           | the stream reconnected; carries the `reason` (error class, HTTP status and path, never credentials). The following `Snapshot` replaces the state and is followed by the differences. |
 
-The client applies the patches of the stream to its own copy of the state, so every event carries complete objects. On errors, or if no data arrives for 90 seconds, it reconnects with an exponential backoff (1 to 60 seconds); rejected credentials (HTTP 401/403) raise `aiohttp.ClientResponseError`. `resync()` forces a reconnect, e.g. to periodically replace the state with a fresh snapshot. `close()` ends the stream at its next message or reconnect; break out of the loop inside `contextlib.aclosing(client.stream())` to release the connection immediately.
+The client applies the patches of the stream to its own copy of the state, so every event carries complete objects. On errors, or if no data arrives for 90 seconds, it reconnects with an exponential backoff (1 to 60 seconds). Before every (re)connect the clock offset is measured; if the ONYX.CENTER's clock does not answer within 10 seconds or sends invalid data, the previous offset is kept and the connect continues. Rejected credentials (HTTP 401/403) raise `aiohttp.ClientResponseError` without the request headers (it never carries the access token). `resync()` forces a reconnect, e.g. to periodically replace the state with a fresh snapshot. `close()` ends the stream at its next message or reconnect; break out of the loop inside `contextlib.aclosing(client.stream())` to release the connection immediately.
 
 ### Animations
 
-ONYX reports movements as animations and keeps reporting the value from before a movement, even after it finished. Use `effective_value(client.now())` to get the current value of animated properties (e.g. `actual_position`, `actual_angle`, `actual_brightness`); `is_animating(client.now())` tells whether the property is still animated. `client.now()` is the ONYX.CENTER time, corrected by the clock offset measured on every (re)connect.
+ONYX reports movements as animations and keeps reporting the value from before a movement, even after it finished. Use `effective_value(client.now())` to get the current value of animated properties (e.g. `actual_position`, `actual_angle`, `actual_brightness`); `is_animating(client.now())` tells whether the property is still animated. `client.now()` is the ONYX.CENTER time, corrected by the clock offset measured on every (re)connect (kept from the previous connect if the clock does not answer).
 
 ### Automations, Updates and Logout
 

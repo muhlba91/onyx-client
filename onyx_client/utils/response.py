@@ -4,7 +4,9 @@ import logging
 
 import aiohttp
 
-_LOGGER = logging.getLogger(__name__)
+from .sanitize import protect
+
+_LOGGER = protect(logging.getLogger(__name__))
 
 
 def check(response: aiohttp.ClientResponse) -> bool:

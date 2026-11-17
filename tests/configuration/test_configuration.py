@@ -43,3 +43,15 @@ class TestConfiguration:
     def test_is_local(self):
         config = Configuration("finger", "token", local_address="localhost")
         assert config.is_local
+
+    def test_repr_masks_token(self):
+        config = Configuration("finger", "s3cr3t", local_address="1.2.3.4")
+        assert "s3cr3t" not in repr(config)
+        assert "s3cr3t" not in str(config)
+        assert repr(config) == (
+            "Configuration(fingerprint='finger', access_token='***', "
+            "local_address='1.2.3.4', api_version='v6')"
+        )
+
+    def test_repr_without_token(self):
+        assert "access_token=None" in repr(Configuration("finger", None))

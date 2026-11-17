@@ -12,6 +12,7 @@ from ..utils.const import (
     STREAM_READ_TIMEOUT,
 )
 from ..utils.response import check
+from ..utils.sanitize import strip_credentials
 
 
 class UrlHelper:
@@ -54,25 +55,33 @@ class UrlHelper:
 
         path: the URL path
         with_api: append the API version to the URL"""
-        async with self.client_session.get(
-            self._url(path, with_api=with_api),
-            headers=self._headers,
-            ssl=not self.config.is_local,
-        ) as response:
-            if not check(response):
-                return None
-            return await response.json()
+        try:
+            async with self.client_session.get(
+                self._url(path, with_api=with_api),
+                headers=self._headers,
+                ssl=not self.config.is_local,
+            ) as response:
+                if not check(response):
+                    return None
+                return await response.json()
+        except aiohttp.ClientResponseError as ex:
+            strip_credentials(ex)
+            raise
 
     async def perform_delete_request(self, path: str) -> Any | None:
         """Perform a DELETE request.
 
         path: the URL path"""
-        async with self.client_session.delete(
-            self._url(path), headers=self._headers, ssl=not self.config.is_local
-        ) as response:
-            if not check(response):
-                return None
-            return await response.json()
+        try:
+            async with self.client_session.delete(
+                self._url(path), headers=self._headers, ssl=not self.config.is_local
+            ) as response:
+                if not check(response):
+                    return None
+                return await response.json()
+        except aiohttp.ClientResponseError as ex:
+            strip_credentials(ex)
+            raise
 
     async def perform_post_request(
         self, path: str, data: dict | None = None
@@ -81,15 +90,19 @@ class UrlHelper:
 
         path: the URL path
         data: the data to POST to the API (default: no body)"""
-        async with self.client_session.post(
-            self._url(path),
-            json=data,
-            headers=self._headers,
-            ssl=not self.config.is_local,
-        ) as response:
-            if not check(response):
-                return None
-            return await response.json()
+        try:
+            async with self.client_session.post(
+                self._url(path),
+                json=data,
+                headers=self._headers,
+                ssl=not self.config.is_local,
+            ) as response:
+                if not check(response):
+                    return None
+                return await response.json()
+        except aiohttp.ClientResponseError as ex:
+            strip_credentials(ex)
+            raise
 
     async def perform_status_request(self, method: str, path: str) -> int:
         """Perform a request and return only its HTTP status code.
@@ -109,28 +122,32 @@ class UrlHelper:
         aiohttp.ServerTimeoutError if no data arrives within the read timeout.
 
         path: the URL path"""
-        async with self.client_session.get(
-            self._url(path),
-            headers=self._headers,
-            timeout=aiohttp.ClientTimeout(
-                total=None,
-                sock_connect=STREAM_CONNECT_TIMEOUT,
-                sock_read=STREAM_READ_TIMEOUT,
-            ),
-            ssl=not self.config.is_local,
-        ) as response:
-            response.raise_for_status()
-            self._stream_response = response
-            buffer = b""
-            try:
-                async for chunk in response.content.iter_any():
-                    *lines, buffer = (buffer + chunk).split(b"\n")
-                    for line in lines:
-                        yield _decode(line)
-                if buffer:
-                    yield _decode(buffer)
-            finally:
-                self._stream_response = None
+        try:
+            async with self.client_session.get(
+                self._url(path),
+                headers=self._headers,
+                timeout=aiohttp.ClientTimeout(
+                    total=None,
+                    sock_connect=STREAM_CONNECT_TIMEOUT,
+                    sock_read=STREAM_READ_TIMEOUT,
+                ),
+                ssl=not self.config.is_local,
+            ) as response:
+                response.raise_for_status()
+                self._stream_response = response
+                buffer = b""
+                try:
+                    async for chunk in response.content.iter_any():
+                        *lines, buffer = (buffer + chunk).split(b"\n")
+                        for line in lines:
+                            yield _decode(line)
+                    if buffer:
+                        yield _decode(buffer)
+                finally:
+                    self._stream_response = None
+        except aiohttp.ClientResponseError as ex:
+            strip_credentials(ex)
+            raise
 
     def close_stream(self):
         """Close the running stream, if any."""

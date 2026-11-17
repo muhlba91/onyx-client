@@ -1,6 +1,8 @@
 """Tests for the Onyx Client."""
 
+import asyncio
 import json
+import logging
 from unittest.mock import AsyncMock, patch
 
 import aiohttp
@@ -708,6 +710,129 @@ class TestOnyxClient:
         assert events[3].device.name == "Renamed"
         assert client.clock_offset == 0
         mock_sleep.assert_awaited_once_with(1)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "hang", [False, True], ids=["request-timeout", "clock-stall"]
+    )
+    async def test_stream_clock_timeout(self, mock_response, client, hang, caplog):
+        """A clock that does not answer must not delay or break the stream."""
+        client.clock_offset = 1.5
+        if hang:
+
+            async def never():
+                await asyncio.Event().wait()
+
+            client.date_information = never
+        else:
+            mock_response.get(f"{URL}/clock", exception=TimeoutError())
+        mock_response.get(
+            f"{URL}/events",
+            status=200,
+            body=sse("snapshot", {"devices": {"d1": DEVICE}}),
+        )
+        with patch("onyx_client.client.CLOCK_TIMEOUT", 0.01):
+            stream = client.stream()
+            event = await asyncio.wait_for(anext(stream), 5)
+            await stream.aclose()
+        assert isinstance(event, Snapshot)
+        assert client.clock_offset == 1.5
+        warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+        assert len(warnings) == 1
+        assert "timed out (TimeoutError), keeping the offset" in warnings[0].message
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"body": "not json", "content_type": "application/json"},
+            {"payload": ["a"]},
+            {"payload": "text"},
+            {"payload": {"time": "abc"}},
+            {"payload": {"time": [1]}},
+        ],
+        ids=["json", "list", "string", "bad-time", "list-time"],
+    )
+    async def test_stream_clock_invalid_data(
+        self, mock_response, client, kwargs, caplog
+    ):
+        """A clock sending invalid data keeps the offset and connects."""
+        client.clock_offset = 1.5
+        mock_response.get(f"{URL}/clock", status=200, **kwargs)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        event = await anext(stream)
+        await stream.aclose()
+        assert isinstance(event, Snapshot)
+        assert client.clock_offset == 1.5
+        assert "sent invalid data" in caplog.text
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "exception",
+        [
+            aiohttp.ClientConnectionError("down"),
+            aiohttp.ServerDisconnectedError(),
+            aiohttp.ConnectionTimeoutError(),
+        ],
+        ids=["connection", "disconnected", "connect-timeout"],
+    )
+    async def test_stream_clock_client_error(
+        self, mock_response, client, exception, caplog
+    ):
+        client.clock_offset = 1.5
+        mock_response.get(f"{URL}/clock", exception=exception)
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        event = await anext(stream)
+        await stream.aclose()
+        assert isinstance(event, Snapshot)
+        assert client.clock_offset == 1.5
+        assert "keeping the offset" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_stream_clock_response_error_is_best_effort(
+        self, mock_response, client, caplog
+    ):
+        mock_response.get(
+            f"{URL}/clock",
+            exception=aiohttp.ClientResponseError(None, (), status=500, message="x"),
+        )
+        mock_response.get(f"{URL}/events", status=200, body=sse("snapshot", {}))
+        stream = client.stream()
+        event = await anext(stream)
+        await stream.aclose()
+        assert isinstance(event, Snapshot)
+        assert "ClientResponseError status=500" in caplog.text
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("status", [401, 403])
+    async def test_stream_clock_rejected_credentials_raise(
+        self, mock_response, client, status
+    ):
+        mock_response.get(
+            f"{URL}/clock",
+            exception=aiohttp.ClientResponseError(None, (), status=status),
+        )
+        with pytest.raises(aiohttp.ClientResponseError) as info:
+            await anext(client.stream())
+        assert info.value.status == status
+
+    @pytest.mark.asyncio
+    async def test_stream_cancel_during_clock(self, client, caplog):
+        started = asyncio.Event()
+
+        async def never():
+            started.set()
+            await asyncio.Event().wait()
+
+        client.date_information = never
+        task = asyncio.create_task(anext(client.stream()))
+        await started.wait()
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        assert "ONYX clock" not in caplog.text
 
     @pytest.mark.asyncio
     async def test_stream_backoff(self, mock_response, client, mock_sleep):

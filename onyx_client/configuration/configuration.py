@@ -2,10 +2,11 @@
 
 from ..exception.invalid_configuration import InvalidConfigurationException
 from ..utils.const import API_VERSION, DEPRECATED_API_VERSION
+from ..utils.sanitize import MASK
 
 
 class Configuration:
-    """The API connection configuration."""
+    """The API connection configuration. Its repr masks the access token."""
 
     def __init__(
         self,
@@ -37,3 +38,12 @@ class Configuration:
     def is_local(self) -> bool:
         """Return True if the configuration is set to use a local address."""
         return self.local_address is not None
+
+    def __repr__(self) -> str:
+        """Describe the configuration without the access token."""
+        token = MASK if self.access_token else None
+        return (
+            f"Configuration(fingerprint={self.fingerprint!r}, "
+            f"access_token={token!r}, local_address={self.local_address!r}, "
+            f"api_version={self.api_version!r})"
+        )

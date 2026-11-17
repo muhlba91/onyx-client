@@ -9,8 +9,9 @@ from ..configuration.configuration import Configuration
 from ..enum.verify_result import VerifyResult
 from ..utils.const import API_HEADERS, API_URL, AUTHORIZE_API_VERSION
 from ..utils.response import check
+from ..utils.sanitize import protect
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = protect(logging.getLogger(__name__))
 
 
 async def exchange_code(
