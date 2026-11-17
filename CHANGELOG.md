@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [12.0.1](https://github.com/muhlba91/onyx-client/compare/v12.0.0...v12.0.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* fix logging and exception content and minor issues ([0e67e67](https://github.com/muhlba91/onyx-client/commit/0e67e679f3694706cd8ba3cea33a8c3693daaef8))
+
 ## [12.0.0](https://github.com/muhlba91/onyx-client/compare/v11.2.1...v12.0.0) (2026-11-16)
 
 
