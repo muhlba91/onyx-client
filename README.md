@@ -1,14 +1,14 @@
 # Onyx Client
 
-[![](https://img.shields.io/github/license/muhlba91/onyx-client?style=for-the-badge)](LICENSE)
-[![](https://img.shields.io/github/actions/workflow/status/muhlba91/onyx-client/release.yml?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions/workflows/release.yml)
-[![](https://img.shields.io/coveralls/github/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/)
-[![](https://api.scorecard.dev/projects/github.com/muhlba91/onyx-client/badge?style=for-the-badge)](https://scorecard.dev/viewer/?uri=github.com/muhlba91/onyx-client)
-[![](https://img.shields.io/pypi/pyversions/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
-[![](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
-[![](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
-[![](https://img.shields.io/pypi/dm/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
-[![](https://img.shields.io/github/all-contributors/muhlba91/onyx-client?color=ee8449&style=for-the-badge)](#contributors)
+[![License](https://img.shields.io/github/license/muhlba91/onyx-client?style=for-the-badge)](LICENSE)
+[![Release workflow status](https://img.shields.io/github/actions/workflow/status/muhlba91/onyx-client/release.yml?style=for-the-badge)](https://github.com/muhlba91/onyx-client/actions/workflows/release.yml)
+[![Coverage](https://img.shields.io/coveralls/github/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/muhlba91/onyx-client/badge?style=for-the-badge)](https://scorecard.dev/viewer/?uri=github.com/muhlba91/onyx-client)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
+[![PyPI version](https://img.shields.io/pypi/v/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
+[![Release date](https://img.shields.io/github/release-date/muhlba91/onyx-client?style=for-the-badge)](https://github.com/muhlba91/onyx-client/releases)
+[![PyPI downloads](https://img.shields.io/pypi/dm/onyx-client?style=for-the-badge)](https://pypi.org/project/onyx-client/)
+[![Contributors](https://img.shields.io/github/all-contributors/muhlba91/onyx-client?color=ee8449&style=for-the-badge)](#contributors)
 <a href="https://www.buymeacoffee.com/muhlba91" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="28" width="150"></a>
 
 This repository contains a **Python HTTP client** for [Hella](https://www.hella.info)'
@@ -119,16 +119,16 @@ async for event in client.stream():
         print(event.device)
 ```
 
-| Event                | Emitted when                                                                                                |
-|----------------------|-------------------------------------------------------------------------------------------------------------|
-| `Snapshot`           | the stream (re)connects; carries all `devices`, `groups`, `automations` and the `update` status.            |
-| `DeviceAdded`        | a device was added; carries the complete `device`.                                                          |
-| `DeviceChanged`      | a device changed; carries the complete `device`.                                                            |
-| `DeviceRemoved`      | a device was removed; carries its `identifier`.                                                             |
-| `GroupsChanged`      | any group changed; carries all `groups`.                                                                    |
-| `AutomationsChanged` | any automation changed; carries all `automations`.                                                          |
-| `UpdateChanged`      | the update status changed; carries the `update` status.                                                     |
-| `Pulse`              | the ONYX.CENTER sends its heartbeat (every 30 seconds on current firmware); carries its `time`.             |
+| Event                | Emitted when                                                                                                                                                                         |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Snapshot`           | the stream (re)connects; carries all `devices`, `groups`, `automations` and the `update` status.                                                                                     |
+| `DeviceAdded`        | a device was added; carries the complete `device`.                                                                                                                                   |
+| `DeviceChanged`      | a device changed; carries the complete `device`.                                                                                                                                     |
+| `DeviceRemoved`      | a device was removed; carries its `identifier`.                                                                                                                                      |
+| `GroupsChanged`      | any group changed; carries all `groups`.                                                                                                                                             |
+| `AutomationsChanged` | any automation changed; carries all `automations`.                                                                                                                                   |
+| `UpdateChanged`      | the update status changed; carries the `update` status.                                                                                                                              |
+| `Pulse`              | the ONYX.CENTER sends its heartbeat (every 30 seconds on current firmware); carries its `time`.                                                                                      |
 | `Resynced`           | the stream reconnected; carries the `reason` (error class, HTTP status and path, never credentials). The following `Snapshot` replaces the state and is followed by the differences. |
 
 The client applies the patches of the stream to its own copy of the state, so every event carries complete objects. On errors, or if no data arrives for 90 seconds, it reconnects with an exponential backoff (1 to 60 seconds). Before every (re)connect the clock offset is measured; if the ONYX.CENTER's clock does not answer within 10 seconds or sends invalid data, the previous offset is kept and the connect continues. Rejected credentials (HTTP 401/403) raise `aiohttp.ClientResponseError` without the request headers (it never carries the access token). `resync()` forces a reconnect, e.g. to periodically replace the state with a fresh snapshot. `close()` ends the stream at its next message or reconnect; break out of the loop inside `contextlib.aclosing(client.stream())` to release the connection immediately.
@@ -197,16 +197,16 @@ The project uses [ruff](https://github.com/astral-sh/ruff) for automated code li
 1) Install all dependencies as shown above.
 2) (Optional) Install pre-commit hooks:
 
-```bash
-poetry run pre-commit install
-```
+   ```bash
+   poetry run pre-commit install
+   ```
 
 3) Run ruff:
 
-```bash
-poetry run ruff check .
-# poetry run ruff format .
-```
+   ```bash
+   poetry run ruff check .
+   # poetry run ruff format .
+   ```
 
 ### Building
 

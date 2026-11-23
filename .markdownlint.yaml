@@ -1,0 +1,6 @@
+---
+# Markdown rules (`pre-commit`, markdownlint-cli2).
+default: true
+MD013: false # prose and tables are not wrapped
+MD033:
+  allowed_elements: [a, br, img] # README badges and the support button

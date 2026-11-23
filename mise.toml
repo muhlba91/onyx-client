@@ -7,4 +7,7 @@ lockfile_platforms = ["macos-arm64", "linux-x64", "linux-arm64"]
 [tools]
 python = "3.14.10"
 uv = "0.13.5"
+node = "26.13.1"
+actionlint = "1.7.12"
+"npm:markdownlint-cli2" = "0.24.2"
 "pipx:poetry" = { version = "2.4.1", python = "3.14" }
