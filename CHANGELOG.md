@@ -1,6 +1,32 @@
 # Changelog
 
 
+## [12.0.2](https://github.com/muhlba91/onyx-client/compare/v12.0.1...v12.0.2) (2026-11-26)
+
+
+### Bug Fixes
+
+* fix mutmut config ([b709560](https://github.com/muhlba91/onyx-client/commit/b7095603454274b452580d0cff399bb2146df76d))
+
+
+### Miscellaneous Chores
+
+* **ci:** add actionlint job ([b956b3c](https://github.com/muhlba91/onyx-client/commit/b956b3c462b308001e42e068256a806d2a3375f7))
+* **deps:** update actions/dependency-review-action action to v5.0.1 ([5bce7e1](https://github.com/muhlba91/onyx-client/commit/5bce7e1854736c8a8062aad99daab5db2eecf884))
+* **deps:** update dependency all-contributors-cli to v7.0.4 ([891b9d0](https://github.com/muhlba91/onyx-client/commit/891b9d082b40ebfc1a47e7fb12bb3afb58480bdf))
+* **deps:** update dependency coverage to v7.17.4 ([8654e00](https://github.com/muhlba91/onyx-client/commit/8654e00c9495be6ac636effcf74b06654526a77d))
+* **deps:** update dependency coverage to v7.17.5 ([5c57a31](https://github.com/muhlba91/onyx-client/commit/5c57a31cf5678cefe51228097b94fbfd569ddccf))
+* **deps:** update dependency ruff to v0.17.6 ([c80141e](https://github.com/muhlba91/onyx-client/commit/c80141e53c1013e65addf37ff9e7cf66fecd1153))
+* **deps:** update github/codeql-action action to v4.39.4 ([cdbea3f](https://github.com/muhlba91/onyx-client/commit/cdbea3f1974359215203ca13c6a2400f964681b9))
+* **deps:** update github/codeql-action action to v4.39.5 ([e72f728](https://github.com/muhlba91/onyx-client/commit/e72f7285defca55e3e108458e04d182ac884568d))
+* **deps:** update jdx/mise-action action to v5.2.10 ([bcd98f7](https://github.com/muhlba91/onyx-client/commit/bcd98f7b4c10e6e1efe4e61beb7567e7ebbd95ec))
+* **deps:** update jdx/mise-action action to v5.3.0 ([b709e83](https://github.com/muhlba91/onyx-client/commit/b709e833eeb0c214d77fb16e329e51e7db595cb7))
+* **deps:** update ossf/scorecard-action action to v2.6.0 ([88a6a15](https://github.com/muhlba91/onyx-client/commit/88a6a1599b085f6fd44857a14acacdceb32797fc))
+* **deps:** update pre-commit hook astral-sh/ruff-pre-commit to v0.17.6 ([1e35efc](https://github.com/muhlba91/onyx-client/commit/1e35efc09a48aece050349d9a7ded7b7e4e38bf2))
+* **deps:** update pre-commit hook gitleaks/gitleaks to v8.30.1 ([b74d8a8](https://github.com/muhlba91/onyx-client/commit/b74d8a83111e49bf4cce123e06b1be62acddc60b))
+* **deps:** update step-security/harden-runner action to v2.23.0 ([10595a2](https://github.com/muhlba91/onyx-client/commit/10595a2768cde85a84b004d88ff34db16cc7d81c))
+* update pre-commit config ([28873fc](https://github.com/muhlba91/onyx-client/commit/28873fc404fb2f9c7ed9a7985e21d53d4fe259d5))
+
 ## [12.0.1](https://github.com/muhlba91/onyx-client/compare/v12.0.0...v12.0.1) (2026-11-17)
 
 
